@@ -12,7 +12,6 @@ export module Bnc {
     var app = angular.module("app", ["ngSanitize", "ngRoute"])
         .controller("home.controller", HomeController)
         .controller("room.controller", RoomController)
-        .controller("home.controller", HomeController)
         .factory("socket.service", SocketService);
 
     // Configure routes
