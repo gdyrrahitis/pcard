@@ -2,22 +2,21 @@
 <html lang="en" ng-app="app">
 
 <head>
+    <base href="/" />
     <title>BNC: Real time poker planning</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="node_modules/font-awesome/font-awesome.css">
-    <link href="src/styles/main.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="node_modules/font-awesome/css/font-awesome.css">
+    <!--<link href="src/styles/main.css" rel="stylesheet">-->
 
-    <script src="node_modules/angular/angular.js"></script>
-    <script scr="node_modules/angular-route/angular-route.js"></script>
-    <script scr="node_modules/angular-sanitize/angular-sanitize.js"></script>
-    <script scr="src/main.js"></script>
-    <script scr="src/routes.js"></script>
-    <script scr="src/home.controller.js"></script>
-    <script scr="src/room.controller.js"></script>
-    <script scr="src/socket.service.js"></script>
+    <!--Module loader-->
+    <script src="node_modules/systemjs/dist/system.src.js"></script>
+    <script src="systemjs-config.js"></script>
+    <script>
+        System.import("bnc").catch(function(err) { console.log(err); });
+    </script>
 </head>
 
 <body>
