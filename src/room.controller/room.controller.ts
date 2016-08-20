@@ -1,8 +1,10 @@
 export class RoomController {
     "use strict";
-    private mountainGoat = ["0", "1/2", "1", "2", "3", "5", "8", "13", "20", "40", "100", "cup", "?"];
+    
+    private mountainGoat = ["zero", "half", "one", "two", "three", "five", "eight", "thirteen", "twenty", "forty", "one-hundred", "coffee", "question"];
 
-    constructor(private $scope: any, private $log: any) {
+    constructor(private $scope: any, private $log: any, $routeParams) {
+        $scope.room = $routeParams.id;
         $scope.list = this.mountainGoat;
         $scope.selectedItem;
         $scope.selectedList = [];
