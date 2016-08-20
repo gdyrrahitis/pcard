@@ -1,4 +1,4 @@
-<h1>Room #Number</h1>
+<h1>Room #{{room}}</h1>
 <div class="row">
     <div class="col-md-12">
         <h4>Mountain Goat estimation</h4>
@@ -7,7 +7,7 @@
                 <ul class="list-inline deck">
                     <li class="card mountain-goat" ng-repeat="card in list">
                         <div class="card-container" ng-click="selectCard(this)">
-                            <span class="card-content">{{card}}</span>
+                            <i class="fa fa-{{card}}"></i>
                         </div>
                     </li>
                 </ul>
@@ -20,7 +20,7 @@
                 <ul class="list-inline">
                     <li class="card mountain-goat" ng-repeat="card in selectedList track by $index">
                         <div class="card-container" ng-click="selectCard(this)">
-                            <span class="card-content">{{card}}</span>
+                            <i class="fa fa-{{card}}"></i>
                         </div>
                     </li>
                 </ul>
