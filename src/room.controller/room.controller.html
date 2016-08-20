@@ -1,0 +1,30 @@
+<h1>Room #Number</h1>
+<div class="row">
+    <div class="col-md-12">
+        <h4>Mountain Goat estimation</h4>
+        <div class="row">
+            <div class="-col-md-12">
+                <ul class="list-inline deck">
+                    <li class="card mountain-goat" ng-repeat="card in list">
+                        <div class="card-container" ng-click="selectCard(this)">
+                            <span class="card-content">{{card}}</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <hr ng-if="selectedList.length > 0" />
+        <div class="row" ng-if="selectedList.length > 0">
+            <div class="-col-md-12">
+                <h4>Selections</h4>
+                <ul class="list-inline">
+                    <li class="card mountain-goat" ng-repeat="card in selectedList track by $index">
+                        <div class="card-container" ng-click="selectCard(this)">
+                            <span class="card-content">{{card}}</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
