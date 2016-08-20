@@ -5,7 +5,10 @@
   "main": "gulpfile.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "concurrently \"npm run tsc:w\" \"npm run server\" ",
+    "server": "node server.js",
+    "tsc": "npm run tsc:w",
+    "tsc:w": "tsc -w"
   },
   "repository": {
     "type": "git",
@@ -22,12 +25,16 @@
     "angular": "^1.5.8",
     "angular-route": "^1.5.8",
     "angular-sanitize": "^1.5.8",
-    "font-awesome": "^4.6.3"
+    "font-awesome": "^4.6.3",
+    "systemjs": "^0.19.36"
   },
   "devDependencies": {
-    "socket.io": "^1.4.8",
+    "concurrently": "^2.2.0",
     "express": "^4.14.0",
+    "gulp": "^3.9.1",
     "path": "^0.12.7",
-    "gulp": "^3.9.1"
+    "sass": "^0.5.0",
+    "socket.io": "^1.4.8",
+    "typescript": "^1.8.10"
   }
 }
