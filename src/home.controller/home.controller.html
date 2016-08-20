@@ -5,12 +5,12 @@
         <div class="row">
             <div class="col-md-12">
                 <h3>Join a room</h3>
-                <form class="form-inline">
+                <form class="form-inline" name="RoomForm" ng-submit="submitRoom(RoomForm)">
                     <div class="input-group input-group-lg">
                         <div class="input-group-addon">#</div>
-                        <input class="form-control" type="text" name="room" placeholder="Room number" />
+                        <input class="form-control" type="number" min="1" ng-required name="room" ng-model="room" placeholder="Room number" />
                     </div>
-                    <button type="button" class="btn btn-primary btn-lg">Go</button>
+                    <button type="submit" class="btn btn-primary btn-lg">Go</button>
                 </form>
             </div>
         </div>
