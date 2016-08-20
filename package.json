@@ -1,0 +1,20 @@
+{
+  "name": "bits-n-chips",
+  "version": "1.0.0",
+  "description": "A scrum poker planning real-time application",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/gdyrrahitis/bitsnchips.git"
+  },
+  "author": "gdyrrahitis",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/gdyrrahitis/bitsnchips/issues"
+  },
+  "homepage": "https://github.com/gdyrrahitis/bitsnchips#readme"
+}
