@@ -1,5 +1,3 @@
-/// <reference path="../typings/globals/jquery/index.d.ts" />
-/// <reference path="../typings/globals/angular/index.d.ts" />
 import angular = require("angular");
 import { HomeController } from "./home.controller/home.controller";
 import { RoomController } from "./room.controller/room.controller";
