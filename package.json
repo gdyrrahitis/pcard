@@ -21,17 +21,22 @@
   },
   "homepage": "https://github.com/gdyrrahitis/bitsnchips#readme",
   "dependencies": {
-    "bootstrap": "^3.3.7",
     "angular": "^1.5.8",
     "angular-route": "^1.5.8",
     "angular-sanitize": "^1.5.8",
+    "bootstrap": "^3.3.7",
+    "bootstrap-sass": "^3.3.7",
     "font-awesome": "^4.6.3",
     "systemjs": "^0.19.36"
   },
   "devDependencies": {
+    "browser-sync": "^2.14.0",
     "concurrently": "^2.2.0",
+    "del": "^2.2.2",
     "express": "^4.14.0",
     "gulp": "^3.9.1",
+    "gulp-sass": "^2.3.2",
+    "merge-stream": "^1.0.0",
     "path": "^0.12.7",
     "sass": "^0.5.0",
     "socket.io": "^1.4.8",
