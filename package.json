@@ -5,7 +5,8 @@
   "main": "gulpfile.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "concurrently \"npm run tsc:w\" \"npm run server\" ",
+    "start": "concurrently \"npm run tsc:w\" \"npm run gulp-server\" ",
+    "gulp-server": "gulp server",
     "server": "node server.js",
     "tsc": "npm run tsc:w",
     "tsc:w": "tsc -w"
@@ -35,9 +36,13 @@
     "del": "^2.2.2",
     "express": "^4.14.0",
     "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-express": "^0.3.5",
     "gulp-sass": "^2.3.2",
+    "gulp-uglify": "^2.0.0",
     "merge-stream": "^1.0.0",
     "path": "^0.12.7",
+    "run-sequence": "^1.2.2",
     "sass": "^0.5.0",
     "socket.io": "^1.4.8",
     "typescript": "^1.8.10"
