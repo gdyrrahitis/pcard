@@ -7,9 +7,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" type="text/css" href="node_modules/bootstrap/dist/css/bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="node_modules/font-awesome/css/font-awesome.css">
-    <!--<link href="src/styles/main.css" rel="stylesheet">-->
+    <link rel="stylesheet" type="text/css" href="dist/css/libs/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="dist/css/libs/font-awesome.css">
+    <link href="dist/css/styles/main.css" rel="stylesheet">
 
     <!--Module loader-->
     <script src="node_modules/systemjs/dist/system.src.js"></script>
@@ -20,7 +20,23 @@
 </head>
 
 <body>
-    <ng-view></ng-view>
+    <div class="container">
+        <ng-view></ng-view>
+
+        <hr />
+        <footer>
+            <div class="row">
+                <div class="col-sm-6">George Dyrrahitis</div>
+                <div class="col-sm-6">
+                    <ul class="list-inline">
+                        <li><span>Follow me on:</span></li>
+                        <li> <a href="https://github.com/gdyrrahitis" target="_blank"><i class="fa fa-github"></i></a></li>
+                        <li> <a href="https://twitter.com/gdyrra" target="_blank"><i class="fa fa-twitter"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+        </footer>
+    </div>
 </body>
 
 </html>
