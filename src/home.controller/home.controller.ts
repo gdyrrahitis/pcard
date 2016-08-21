@@ -1,7 +1,11 @@
+import { SocketService } from "../socket.service/socket.service";
+
 export class HomeController {
     "use strict";
 
-    constructor(private $scope, private $log: any, private $location: any) {
+    constructor(private $scope, private $log: any, 
+                private $location: any,
+                private socketService: SocketService) {
         $scope.room;
         $scope.createRoom = this.createRoom;
         $scope.submitRoom = this.submitRoom;
