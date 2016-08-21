@@ -7,6 +7,7 @@
         merge = require("merge-stream"),
         sequence = require("run-sequence"),
         del = require("del"),
+        nodemon = require("gulp-nodemon"),
         browserSync = require("browser-sync"),
         reload = browserSync.reload;
 
@@ -85,7 +86,7 @@
     });
 
     // Browsersync
-    gulp.task("browser:sync", function () {
+    gulp.task("browser:sync", ["nodemon"], function () {
         browserSync.init(null, {
             proxy: "http://localhost:54879"
         })
@@ -98,7 +99,27 @@
     });
 
     // Start server
-    gulp.task("server", ["build:w"], function () {
-        express.run(["server.js"], { cwd: undefined }, false);
+    // gulp.task("server", ["build:w"], function () {
+    //     express.run(["server.js"], { cwd: undefined }, false);
+    // });
+
+    gulp.task("server", function () {
+        express.run(["server.js"]);
+    });
+
+
+    gulp.task('nodemon', function (cb) {
+        var started = false;
+
+        return nodemon({
+            script: 'server.js'
+        }).on('start', function () {
+            // to avoid nodemon being started multiple times
+            // thanks @matthisk
+            if (!started) {
+                cb();
+                started = true;
+            }
+        });
     });
 })();
