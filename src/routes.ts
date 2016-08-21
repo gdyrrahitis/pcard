@@ -7,11 +7,11 @@ export module Routes {
 
             $routeProvider.when("/", {
                 templateUrl: "home.controller/home.controller.html",
-                controller: "home.controller"
+                controller: "homeController"
             })
             .when("/room/:id", {
                 templateUrl: "room.controller/room.controller.html",
-                controller: "room.controller"
+                controller: "roomController"
             })
             .otherwise({
                 redirectTo: "/"
