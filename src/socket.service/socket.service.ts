@@ -2,7 +2,7 @@ import io = require('socket.io-client');
 
 export class SocketService {
     "use strict";
-    
+
     private socket: any;
     private data: any;
 
@@ -10,21 +10,27 @@ export class SocketService {
         this.socket = io.connect("http://localhost:54879");
     }
 
+    getId () {
+        return this.socket.id;
+    }
+
     on(eventName, callback) {
-        this.socket.on(eventName, () => {
+        var that = this;
+        that.socket.on(eventName, function () {
             var args = arguments;
-            this.$rootScope.$apply(() => {
-                callback.apply(this.socket, args);
+            that .$rootScope.$apply(function () {
+                callback.apply(that .socket, args);
             });
         });
     }
 
-    emit(eventName, data, callback) {
-        this.socket.emit(eventName, data, () => {
+    emit(eventName, data, callback?) {
+        var that = this;
+        that.socket.emit(eventName, data, function () {
             var args = arguments;
-            this.$rootScope.$apply(() => {
+            that.$rootScope.$apply(function () {
                 if (callback) {
-                    callback.apply(this.socket, args);
+                    callback.apply(that.socket, args);
                 }
             });
         });
