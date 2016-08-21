@@ -5,8 +5,9 @@
   "main": "gulpfile.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "concurrently \"npm run tsc:w\" \"npm run gulp-server\" ",
-    "gulp-server": "gulp server",
+    "start": "concurrently \"npm run tsc:w\" \"npm run gulp-nodemon\" ",
+    "gulp-server": "gulp build:w",
+    "gulp-nodemon": "gulp nodemon",
     "server": "node server.js",
     "tsc": "npm run tsc:w",
     "tsc:w": "tsc -w"
@@ -28,6 +29,7 @@
     "bootstrap": "^3.3.7",
     "bootstrap-sass": "^3.3.7",
     "font-awesome": "^4.6.3",
+    "ngstorage": "^0.3.11",
     "systemjs": "^0.19.36"
   },
   "devDependencies": {
@@ -38,6 +40,7 @@
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",
     "gulp-express": "^0.3.5",
+    "gulp-nodemon": "^2.1.0",
     "gulp-sass": "^2.3.2",
     "gulp-uglify": "^2.0.0",
     "merge-stream": "^1.0.0",
