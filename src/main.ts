@@ -10,9 +10,9 @@ export module Bnc {
     "use strict";
 
     var app = angular.module("app", ["ngSanitize", "ngRoute"])
-        .controller("home.controller", HomeController)
-        .controller("room.controller", RoomController)
-        .factory("socket.service", SocketService);
+        .controller("homeController", HomeController)
+        .controller("roomController", RoomController)
+        .factory("socketService", [SocketService]);
 
     // Configure routes
     Routes.RouteConfig(app);
