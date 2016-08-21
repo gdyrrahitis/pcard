@@ -1,4 +1,3 @@
-{{message}}
 <h1>BNC Agile poker planning</h1>
 <div class="row">
     <div class="col-md-12">
@@ -8,7 +7,7 @@
                 <form class="form-inline" name="RoomForm" ng-submit="submitRoom(RoomForm)">
                     <div class="input-group input-group-lg">
                         <div class="input-group-addon">#</div>
-                        <input class="form-control" type="number" min="1" ng-required name="room" ng-model="room" placeholder="Room number" />
+                        <input class="form-control" type="number" min="0" max="99" required name="room" ng-model="room" placeholder="Room number" />
                     </div>
                     <button type="submit" class="btn btn-primary btn-lg">Go</button>
                 </form>
@@ -18,7 +17,10 @@
         <div class="row">
             <div class="col-md-12">
                 <h3>Create a room and start planning!</h3>
-                <button type="button" class="btn btn-primary btn-lg" ng-click="createRoom()">Create room</button>
+                <button type="button" class="btn btn-lg" ng-click="createRoom()" ng-disabled="clickedCreate" ng-class="errorAll ? 'btn-danger': 'btn-primary'">Create room</button>
+                <div class="form-group has-error" ng-if="errorAll && errorAll.allRooms">
+                    <span class="help-block">{{error.allRooms.msg}}</span>
+                </div>
             </div>
         </div>
     </div>
