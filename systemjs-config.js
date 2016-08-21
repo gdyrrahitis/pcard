@@ -1,6 +1,7 @@
 (function () {
     var map = {
         "bnc": "src",
+        "socket.io-client": "/socket.io/socket.io.js",
         "angular": "node_modules/angular",
         "ngSanitize": "node_modules/angular-sanitize",
         "ngRoute": "node_modules/angular-route"
