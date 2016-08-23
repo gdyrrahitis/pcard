@@ -24,7 +24,7 @@ export class SocketService {
         });
     }
 
-    emit(eventName, data, callback?) {
+    emit(eventName, data?, callback?) {
         var that = this;
         that.socket.emit(eventName, data, function () {
             var args = arguments;
