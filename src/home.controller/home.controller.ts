@@ -17,6 +17,11 @@ export class HomeController {
         this.socketService.on("room-access-granted", this.accessGranted);
         this.socketService.on("room-occupied", this.accessDenied);
         this.socketService.on("all-rooms-occupied", this.allRoomsOccupied);
+
+        var id = this.socketService.getId();
+        if(id) {
+            this.socketService.emit("disconnect", id);
+        }
     }
 
     createRoom = () => {
