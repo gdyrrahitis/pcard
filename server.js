@@ -12,18 +12,25 @@ app.use(express.static("node_modules"));
 app.use(express.static("dist"));
 app.use(express.static(__dirname));
 
-app.all('/*', function(req, res, next) {
+app.all('/*', function (req, res, next) {
     // Just send the index.html for other files to support HTML5Mode
     res.sendFile('index.html', { root: __dirname });
 });
 
 // Socket.io configuration
-io.on("connection", function(socket) {
+io.on("connection", function (socket) {
     console.log("New connection made to server." + socket.id);
 
     // Disconnect socket
-    socket.on("disconnect", function() {
-
+    socket.on("disconnect", function () {
+        var room = rooms.filter(function (r) {
+            return r.id === socket.id;
+        })[0];
+        rooms = rooms.filter(function (r) {
+            return r.id !== socket.id;
+        });
+        
+        io.to("private-" + room.room).emit("show-attendees", rooms);
     });
 
     // // Join room
@@ -54,7 +61,7 @@ io.on("connection", function(socket) {
     //     // io.to(socket.id).emit("room-occupied");
     // });
 
-    socket.on("join-private", function(data) {
+    socket.on("join-private", function (data) {
 
         socket.room = "room-" + data.room;
         rooms[socket.room] = socket;
@@ -71,20 +78,22 @@ io.on("connection", function(socket) {
         io.to("private-" + data.room).emit("show-attendees", rooms);
     });
 
-    socket.on("private-leave", function(data) {
-        console.log(data);
-        var room = rooms.filter(function(r) {
+    socket.on("private-leave", function (data) {
+        var room = rooms.filter(function (r) {
             return r.userId === data.id;
-        });
-        console.log(room);
-        rooms = rooms.filter(function(r) {
+        })[0];
+        rooms = rooms.filter(function (r) {
             return r.userId !== data.id;
         });
-
+        console.log("Leaving room: " + JSON.stringify(room));
         io.to("private-" + room.room).emit("show-attendees", rooms);
+    });
+
+    socket.on("get-all-attendees", function (room) {
+        io.to("private-" + room).emit("show-attendees", rooms);
     });
 });
 
-server.listen(port, function() {
+server.listen(port, function () {
     console.log("Server is up and running, listening on port: " + port);
 });
