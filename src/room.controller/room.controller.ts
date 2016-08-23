@@ -18,6 +18,7 @@ export class RoomController {
 
         this.$localStorage.id = this.socketService.getId();
         this.socketService.on("show-attendees", this.showAttendees);
+        this.socketService.emit("get-all-attendees", $routeParams.id);
     }
 
     selectCard = (element) => {
@@ -26,8 +27,12 @@ export class RoomController {
         this.$scope.selectedList.push(this.$scope.selectedItem);
     };
 
-    private showAttendees(data) {
-        console.log("Showing attendees");
-        console.log(data);
+    private showAttendees = (data) => {
+        var that = this;
+        var attendees = data.filter((x) => {
+            return x.userId !== that.$localStorage.id;
+        });
+        console.log(JSON.stringify(attendees));
+        this.$scope.attendees = attendees;
     }
 }
