@@ -27,7 +27,9 @@ This application solves the team frustration on agile poker planning by having a
 Clone or download project to desktop.
 You need to have nodeJS installed as well as NPM package manager.
 Check for them with the following commands:
+
 `node -v`
+
 `npm -v`
 
 Go to the root directory of the application and run the following command on a CMD window:
