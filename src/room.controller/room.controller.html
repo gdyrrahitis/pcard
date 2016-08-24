@@ -28,12 +28,29 @@
         </div>
         <div class="row" ng-if="attendees && attendees.length > 0">
             <div class="col-md-12">
-                <h4>Connected users</h4>
-                <ul>
-                    <li ng-repeat="user in attendees track by $index">
-                        <span class="label label-primary">{{user.userId}}</span>
-                    </li>
-                </ul>
+                <div class="panel panel-success">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">Connected users</div>
+                    <div class="panel-body">
+                        <p>All connected users in room.</p>
+                    </div>
+
+                    <!-- Table -->
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="user in attendees track by $index">
+                                <td>{{user.userId}}</td>
+                                <td><button type="button" class="btn btn-sm btn-danger" ng-click="banUser(user)"><i class="fa fa-ban"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
