@@ -20,5 +20,11 @@ export module Bnc {
     // Configure routes
     Routes.RouteConfig(app);
 
+    app.run(["$rootScope", "$location", "socketService", ($rootScope: any, $location: any, socketService: SocketService) => {
+        socketService.on("user-banned", () => {
+            $location.path("/");
+        });
+    }]);
+
     export var Application = app;
 }
