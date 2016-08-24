@@ -15,6 +15,7 @@ export class RoomController {
         $scope.selectedItem;
         $scope.selectedList = [];
         $scope.selectCard = this.selectCard;
+        $scope.banUser = this.banUser;
 
         this.$localStorage.id = this.socketService.getId();
         this.socketService.on("show-attendees", this.showAttendees);
@@ -25,6 +26,11 @@ export class RoomController {
         this.$log.info(element);
         this.$scope.selectedItem = element.card;
         this.$scope.selectedList.push(this.$scope.selectedItem);
+    };
+
+    banUser = (user: {id: any, userId: any, room: any}) => {
+        console.log("Banning user: " + JSON.stringify(user));
+        this.socketService.emit("ban", user);
     };
 
     private showAttendees = (data) => {
