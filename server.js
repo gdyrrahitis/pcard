@@ -29,8 +29,10 @@ io.on("connection", function (socket) {
         rooms = rooms.filter(function (r) {
             return r.id !== socket.id;
         });
-        
-        io.to("private-" + room.room).emit("show-attendees", rooms);
+
+        if (room) {
+            io.to("private-" + room.room).emit("show-attendees", rooms);
+        }
     });
 
     // // Join room
@@ -86,7 +88,24 @@ io.on("connection", function (socket) {
             return r.userId !== data.id;
         });
         console.log("Leaving room: " + JSON.stringify(room));
-        io.to("private-" + room.room).emit("show-attendees", rooms);
+
+        if (room) {
+            io.to("private-" + room.room).emit("show-attendees", rooms);
+        }
+    });
+
+    socket.on("ban", function (data) {  
+        var room = rooms.filter(function (r) {
+            return r.userId === data.userId;
+        })[0];
+        rooms = rooms.filter(function (r) {
+            return r.userId !== data.userId;
+        });
+
+        if(room) {
+            console.log("Banning user on socket: " + room.id);
+            io.to(room.id).emit("user-banned");
+        }
     });
 
     socket.on("get-all-attendees", function (room) {
