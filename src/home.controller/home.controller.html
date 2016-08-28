@@ -7,7 +7,8 @@
                 <form class="form-inline" name="RoomForm" ng-submit="submitRoom(RoomForm)">
                     <div class="input-group input-group-lg form-group">
                         <div class="input-group-addon">#</div>
-                        <input class="form-control input-lg" type="number" min="0" required name="room" ng-model="room" placeholder="Room number" />
+                        <input class="form-control input-lg" type="number" min="0" required name="room" ng-model="room" placeholder="Room number"
+                        />
                     </div>
                     <button type="submit" class="btn btn-primary btn-lg">Go</button>
                 </form>
@@ -18,8 +19,12 @@
             <div class="col-md-12">
                 <h3>Create a room and start planning!</h3>
                 <button type="button" class="btn btn-lg" ng-click="createRoom()" ng-disabled="clickedCreate" ng-class="errorAll ? 'btn-danger': 'btn-primary'">Create room</button>
-                <div class="form-group has-error" ng-if="errorAll && errorAll.allRooms">
-                    <span class="help-block">{{error.allRooms.msg}}</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group has-error" ng-if="error">
+                    <span class="help-block">{{error}}</span>
                 </div>
             </div>
         </div>
