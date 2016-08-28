@@ -63,7 +63,18 @@ io.on("connection", function (socket) {
     //     // io.to(socket.id).emit("room-occupied");
     // });
 
-    socket.on("join-private", function (data) {
+    socket.on("create-private", function (data, callback) {
+        // Is there any other user connected to this room?
+        // If not, then this user is the moderator
+        // Also block this room from creation by other users
+        var roomExistsAlreadyForOtherUser = rooms.filter(function (r) {
+            return r.room === data.room;
+        }).length > 0;
+        if (roomExistsAlreadyForOtherUser) {
+            callback({ access: false });
+            socket.emit("room-occupied");
+            return;
+        }
 
         socket.room = "room-" + data.room;
         rooms[socket.room] = socket;
@@ -71,12 +82,41 @@ io.on("connection", function (socket) {
         var roomObj = {
             id: socket.id,
             userId: data.userId,
-            room: data.room
+            room: data.room,
+            moderator: true
+        };
+        rooms.push(roomObj);
+        socket.join("private-" + data.room);
+
+        console.log("Created private room: " + data.room);
+        callback({ access: true });
+        io.to("private-" + data.room).emit("show-attendees", rooms);
+    });
+
+    socket.on("join-private", function (data, callback) {
+        var doesRoomExist = rooms.filter(function (r) {
+            return r.room === data.room;
+        }).length > 0;
+        if (!doesRoomExist) {
+            callback({ access: false });
+            socket.emit("room-not-found");
+            return;
+        }
+
+        socket.room = "room-" + data.room;
+        rooms[socket.room] = socket;
+        // No room found, book it
+        var roomObj = {
+            id: socket.id,
+            userId: data.userId,
+            room: data.room,
+            moderator: false
         };
         rooms.push(roomObj);
         socket.join("private-" + data.room);
 
         console.log("Joined private room: " + data.room);
+        callback({ access: true });
         io.to("private-" + data.room).emit("show-attendees", rooms);
     });
 
@@ -94,7 +134,7 @@ io.on("connection", function (socket) {
         }
     });
 
-    socket.on("ban", function (data) {  
+    socket.on("ban", function (data) {
         var room = rooms.filter(function (r) {
             return r.userId === data.userId;
         })[0];
@@ -102,9 +142,10 @@ io.on("connection", function (socket) {
             return r.userId !== data.userId;
         });
 
-        if(room) {
+        if (room) {
             console.log("Banning user on socket: " + room.id);
             io.to(room.id).emit("user-banned");
+            io.to("private-" + room.room).emit("show-attendees", rooms);
         }
     });
 
