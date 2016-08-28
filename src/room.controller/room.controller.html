@@ -1,4 +1,7 @@
 <h1>Room #{{room}}</h1>
+<p class="lead">
+    Connected user: {{currentUser.userId}}
+</p>
 <div class="row">
     <div class="col-md-12">
         <h4>Mountain Goat estimation</h4>
@@ -40,13 +43,13 @@
                         <thead>
                             <tr>
                                 <th>User</th>
-                                <th>Action</th>
+                                <th ng-if="currentUser.moderator">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr ng-repeat="user in attendees track by $index">
                                 <td>{{user.userId}}</td>
-                                <td><button type="button" class="btn btn-sm btn-danger" ng-click="banUser(user)"><i class="fa fa-ban"></i></button></td>
+                                <td ng-if="currentUser.moderator"><button type="button" class="btn btn-sm btn-danger" ng-click="banUser(user)"><i class="fa fa-ban"></i></button></td>
                             </tr>
                         </tbody>
                     </table>
