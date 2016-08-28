@@ -16,6 +16,7 @@ export class RoomController {
         $scope.selectedList = [];
         $scope.selectCard = this.selectCard;
         $scope.banUser = this.banUser;
+        $scope.currentUser;
 
         this.$localStorage.id = this.socketService.getId();
         this.socketService.on("show-attendees", this.showAttendees);
@@ -35,6 +36,15 @@ export class RoomController {
 
     private showAttendees = (data) => {
         var that = this;
+
+        var currentUser = data.filter((x) => {
+            return x.userId === that.$localStorage.id;
+        });
+
+        if(currentUser.length > 0) {
+            that.$scope.currentUser = currentUser[0];
+        }
+
         var attendees = data.filter((x) => {
             return x.userId !== that.$localStorage.id;
         });
