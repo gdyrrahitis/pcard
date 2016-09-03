@@ -1,8 +1,9 @@
 {
   "globalDependencies": {
+    "angular": "registry:dt/angular#1.5.0+20160819155010",
+    "appconfig": "file:typings/custom/app.config/appconfig.d.ts",
     "core-js": "registry:dt/core-js#0.0.0+20160317120654",
     "jquery": "registry:dt/jquery#1.10.0+20160704162008",
-    "angular": "registry:dt/angular#1.5.0+20160819155010",
     "node": "registry:dt/node#4.0.0+20160509154515"
   }
 }
