@@ -107,7 +107,7 @@
     // });
 
     gulp.task("server", function () {
-        express.run(["server.js"]);
+        express.run(["server/server.js"]);
     });
 
 
@@ -115,7 +115,7 @@
         var started = false;
 
         return nodemon({
-            script: 'server.js'
+            script: 'server/server.js'
         }).on('start', function () {
             // to avoid nodemon being started multiple times
             // thanks @matthisk
