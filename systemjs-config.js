@@ -5,7 +5,8 @@
         "angular": "node_modules/angular",
         "ngSanitize": "node_modules/angular-sanitize",
         "ngRoute": "node_modules/angular-route",
-        "ngStorage": "node_modules/ngstorage/"
+        "ngStorage": "node_modules/ngstorage/",
+        "appConfig": "app.config.json"
     };
 
     var packages = {
@@ -13,7 +14,8 @@
         "angular": { main: "index.js", defaultExtension: "js" },
         "ngSanitize": { main: "index.js", defaultExtension: "js" },
         "ngRoute": { main: "index.js", defaultExtension: "js" },
-        "ngStorage": { main: "ngStorage.min.js", defaultExtension: "js" }
+        "ngStorage": { main: "ngStorage.min.js", defaultExtension: "js" },
+        "appConfig": { defaultExtension: "json" }
     };
 
     var config = {
