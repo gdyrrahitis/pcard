@@ -4,5 +4,11 @@ typings
 dist
 src/**/*.js
 src/**/*.js.map
+server/**/*.js
+server/**/*.js.map
 npm-debug.log
 /**/*.d.ts
+*.js
+*.js.map
+!gulpfile.js
+!systemjs-config.js
