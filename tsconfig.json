@@ -6,6 +6,20 @@
         "sourceMap": true,
         "target": "es6"
     },
+    "files": [
+        "./typings/index.d.ts",
+        "./app.ts",
+        "./server/server.ts",
+        "./server/common/Types.ts",
+        "./server/socket.io/socket.configuration.ts",
+        "./server/express.middlewares.ts",
+        "./src/home.controller/home.controller.ts",
+        "./src/menu.controller/menu.controller.ts",
+        "./src/room.controller/room.controller.ts",
+        "./src/socket.service/socket.service.ts",
+        "./src/main.ts",
+        "./src/routes.ts"
+    ],
     "exclude": [
         "node_modules",
         "src/typings",
