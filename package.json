@@ -30,7 +30,9 @@
     "bootstrap-sass": "^3.3.7",
     "font-awesome": "^4.6.3",
     "ngstorage": "^0.3.11",
-    "systemjs": "^0.19.36"
+    "system-json": "^0.1.0",
+    "systemjs": "^0.19.36",
+    "systemjs-plugin-json": "^0.1.0"
   },
   "devDependencies": {
     "browser-sync": "^2.14.0",
