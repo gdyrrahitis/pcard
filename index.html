@@ -15,7 +15,11 @@
     <script src="node_modules/systemjs/dist/system.src.js"></script>
     <script src="systemjs-config.js"></script>
     <script>
-        System.import("bnc").catch(function(err) { console.log(err); });
+        System.import("json").then(function() {
+            return System.import("bnc").catch(function(err) { console.log(err); });
+        }).then(null, function(err){
+			console.error("Oh no, error!", err);
+		});
     </script>
 </head>
 
