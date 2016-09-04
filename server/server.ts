@@ -1,3 +1,5 @@
+var config: AppConfig.Configuration = require("../app.config.json");
+
 import * as app from "../app";
 
 import http = require("http");
