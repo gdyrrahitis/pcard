@@ -1,9 +1,18 @@
 {
   "globalDependencies": {
     "angular": "registry:dt/angular#1.5.0+20160819155010",
-    "appconfig": "file:typings/custom/app.config/appconfig.d.ts",
+    "angular-route": "registry:dt/angular-route#1.3.0+20160317120654",
+    "angularlocalstorage": "registry:dt/angularlocalstorage#0.1.7+20160317120654",
+    "appconfig": "file:typings/custom/app.config/index.d.ts",
     "core-js": "registry:dt/core-js#0.0.0+20160317120654",
     "jquery": "registry:dt/jquery#1.10.0+20160704162008",
-    "node": "registry:dt/node#4.0.0+20160509154515"
+    "localstorage": "file:typings/custom/localstorage/index.d.ts",
+    "node": "registry:dt/node#4.0.0+20160509154515",
+    "roomControllerScope": "file:typings/custom/room.controller.scope/index.d.ts",
+    "homeControllerScope": "file:typings/custom/home.controller.scope/index.d.ts",
+    "menuControllerScope": "file:typings/custom/menu.controller.scope/index.d.ts",
+    "roomRoute": "file:typings/custom/room.route/index.d.ts",
+    "socket": "file:typings/custom/socket/index.d.ts",
+    "user": "file:typings/custom/user/index.d.ts"
   }
 }
