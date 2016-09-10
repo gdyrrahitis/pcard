@@ -1,6 +1,6 @@
 export function registerRoutes(app: ng.IModule) {
     "use strict";
-    var config: AppConfig.Configuration = require("../app.config.json!json");
+    var config: ClientAppConfig.ClientConfiguration = require("../app.config.json!json");
 
     app.config(($routeProvider: ng.route.IRouteProvider, $locationProvider: ng.ILocationProvider) => {
         $locationProvider.html5Mode(config.client.html5Mode);
