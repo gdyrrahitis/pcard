@@ -1,0 +1,25 @@
+{
+    "staticResources": {
+        "directories": [
+            {
+                "path": "src",
+                "order": 1
+            },
+            {
+                "path": "node_modules",
+                "order": 2
+            },
+            {
+                "path": "dir",
+                "order": 3
+            }
+        ],
+        "entry": "index.html"
+    },
+    "server": {
+        "port": 54879
+    },
+    "socketio": {
+        "maxRoomsAllowed": 1
+    }
+}
