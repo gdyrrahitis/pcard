@@ -1,4 +1,4 @@
-var config: AppConfig.Configuration = require("../app.config.json");
+var config: ServerAppConfig.ServerConfiguration = require("../app.config.json");
 
 import * as app from "../app";
 
