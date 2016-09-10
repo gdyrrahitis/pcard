@@ -1,7 +1,8 @@
 import { Action } from "./common/Types";
+import { Application } from "express";
 
-export function registerMiddlewares(target: any, actions: Action<void>[]) {
+export function registerMiddlewares(target: Application, actions: Action<any>[]) {
     actions.forEach(e => {
-        target.use(e());
+        target.use(<any>e());
     });
 };

@@ -3,10 +3,10 @@ import io = require('socket.io-client');
 export class SocketService {
     "use strict";
 
-    private socket: any;
+    private socket: SocketIOClient.Socket;
     private data: any;
 
-    constructor(private $rootScope: any) {
+    constructor(private $rootScope: ng.IScope) {
         this.socket = io.connect("http://localhost:54879");
     }
 

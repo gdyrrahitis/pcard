@@ -5,10 +5,10 @@ export class RoomController {
 
     private mountainGoat = ["zero", "half", "one", "two", "three", "five", "eight", "thirteen", "twenty", "forty", "one-hundred", "coffee", "question"];
 
-    constructor(private $scope: any,
-        private $log: any,
-        private $routeParams: any,
-        private $localStorage: any,
+    constructor(private $scope: IRoomControllerScope,
+        private $log: ng.ILogService,
+        private $routeParams: IRoomRoute,
+        private $localStorage: ILocalStorage,
         private socketService: SocketService) {
         $scope.room = $routeParams.id;
         $scope.list = this.mountainGoat;
@@ -24,17 +24,15 @@ export class RoomController {
     }
 
     selectCard = (element) => {
-        this.$log.info(element);
         this.$scope.selectedItem = element.card;
         this.$scope.selectedList.push(this.$scope.selectedItem);
     };
 
-    banUser = (user: {id: any, userId: any, room: any}) => {
-        console.log("Banning user: " + JSON.stringify(user));
+    banUser = (user: IUser) => {
         this.socketService.emit("ban", user);
     };
 
-    private showAttendees = (data) => {
+    private showAttendees = (data: any[]) => {
         var that = this;
 
         var currentUser = data.filter((x) => {
@@ -48,7 +46,6 @@ export class RoomController {
         var attendees = data.filter((x) => {
             return x.userId !== that.$localStorage.id;
         });
-        console.log(JSON.stringify(attendees));
         this.$scope.attendees = attendees;
     }
 }

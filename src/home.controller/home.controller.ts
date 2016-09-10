@@ -3,10 +3,10 @@ import { SocketService } from "../socket.service/socket.service";
 export class HomeController {
     "use strict";
 
-    constructor(private $scope,
-        private $log: any,
-        private $location: any,
-        private $localStorage: any,
+    constructor(private $scope: IHomeControllerScope,
+        private $log: ng.ILogService,
+        private $location: ng.ILocationService,
+        private $localStorage: ILocalStorage,
         private socketService: SocketService) {
         $scope.clickedCreate = false;
         $scope.error;
@@ -34,7 +34,7 @@ export class HomeController {
         });
     };
 
-    submitRoom = (form) => {
+    submitRoom = (form: ng.IFormController) => {
         let that = this;
         if (form.$valid) {
             this.join("join-private", this.$scope.room, (data) => {
@@ -58,7 +58,7 @@ export class HomeController {
         }, callback);
     };
 
-    private accessGranted = (data) => {
+    private accessGranted = (data: any) => {
         this.$location.path(`/room/${data.room}`);
     }
 

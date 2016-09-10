@@ -4,7 +4,7 @@ import * as app from "../app";
 
 import http = require("http");
 import { Socket } from "./socket.io/socket.configuration";
-import socketIo = require("socket.io");
+import * as socketIo from "socket.io";
 
 let server = http.createServer(<any>app);
 let port: number = 54879;

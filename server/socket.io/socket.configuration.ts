@@ -1,13 +1,13 @@
 export class Socket {
     private rooms = [];
-    private maxRoomsAllowed = 1;
+    private maxRoomsAllowed: number = 1;
     
-    constructor(private io: any) { }
+    constructor(private io: SocketIO.Server) { }
 
     connect() {
         let that = this;
         // Socket.io configuration
-        that.io.on("connection", function (socket) {
+        that.io.on("connection", function (socket: ISocket) {
             console.log("New connection made to server." + socket.id);
 
             // Disconnect socket
@@ -23,34 +23,6 @@ export class Socket {
                     that.io.to("private-" + room.room).emit("show-attendees", that.rooms);
                 }
             });
-
-            // // Join room
-            // socket.on("join", function(data) {
-            //     var filtered = rooms.filter(function(r) {
-            //         return r.room == data.room;
-            //     });
-
-            //     // if (filtered.length == 0) {
-            //     // if(rooms.length >= maxRoomsAllowed) {
-            //     //     io.to(socket.id).emit("all-rooms-occupied");
-            //     //     return;
-            //     // }
-            //     console.log(rooms);
-            //     rooms[data.room] = socket;
-            //     console.log(socket);
-            //     // No room found, book it
-            //     var roomObj = {
-            //         id: socket.id,
-            //         room: data.room
-            //     };
-            //     rooms.push(roomObj);
-            //     // io.to(socket.id).emit("room-access-granted", roomObj);
-            //     // return;
-            //     // }
-
-            //     // // Room found, do nothing
-            //     // io.to(socket.id).emit("room-occupied");
-            // });
 
             socket.on("create-private", function (data, callback) {
                 // Is there any other user connected to this room?
