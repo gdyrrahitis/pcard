@@ -10,6 +10,7 @@ import { registerRoutes } from "./routes";
 
 export module Bnc {
     "use strict";
+    var config: ClientAppConfig.ClientConfiguration = require("../client.config.json!json");
 
     var app = ng.module("app", ["ngSanitize", "ngRoute", "ngStorage"])
         .controller("homeController", HomeController)
@@ -18,7 +19,9 @@ export module Bnc {
         .factory("socketService", ["$rootScope", SocketService]);
 
     // Configure routes
-    registerRoutes(app);
+    registerRoutes(app, 
+        [(v) => v.controller === "homeController", (v) => v.controller === "roomController"], 
+        config.client.basePath);
 
     app.run(["$rootScope", "$location", "socketService", ($rootScope: ng.IScope, $location: ng.ILocationService, socketService: SocketService) => {
         socketService.on("user-banned", () => {
