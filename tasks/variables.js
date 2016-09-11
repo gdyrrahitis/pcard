@@ -13,6 +13,8 @@ var basePaths = {
 
 var libPaths = {
     src: {
+        allCssInSrc: "dist/css/**/*.css",
+        allSassInSrc: "src/**/*.scss",
         systemJs: `${basePaths.src.nodeModules}/systemjs/dist/system.src.js`,
         customFontAwesome: `${basePaths.src.srcRoot}/styles/custom-font-awesome.scss`,
         bootstrap: `${basePaths.src.srcRoot}/styles/bootstrap.scss`,
@@ -24,7 +26,8 @@ var libPaths = {
     dest: {
         js: `${basePaths.dest.root}/js/libs`,
         css: `${basePaths.dest.root}/css/libs`,
-        fonts: `${basePaths.dest.root}/css/fonts`
+        fonts: `${basePaths.dest.root}/css/fonts`,
+        fontsBootstrap: `${basePaths.dest.root}/css/fonts/bootstrap`
     }
 };
 

@@ -1,9 +1,10 @@
-var gulp = require("gulp");
+var gulp = require("gulp"),
+    variables = require("./variables");
 
 // JavaScript tasks
 gulp.task("js:copy", function () {
-    gulp.src("node_modules/systemjs/dist/system.src.js")
-        .pipe(gulp.dest("dist/js/libs"));
+    gulp.src(variables.libPaths.src.systemJs)
+        .pipe(gulp.dest(variables.libPaths.dest.js));
 });
 
 gulp.task("js", ["js:copy"]);

@@ -1,13 +1,14 @@
 var gulp = require("gulp"),
-    merge = require("merge-stream");
+    merge = require("merge-stream"),
+    variables = require("./variables");
 
 // Fonts
 gulp.task("fonts", function () {
-    var bootstrap = gulp.src("node_modules/bootstrap-sass/assets/fonts/bootstrap/*.*")
-        .pipe(gulp.dest("dist/css/fonts/bootstrap"));
+    var bootstrap = gulp.src(variables.libPaths.src.bootstrapFonts)
+        .pipe(gulp.dest(variables.libPaths.dest.fontsBootstrap));
 
-    var fontAwesome = gulp.src("node_modules/font-awesome/fonts/*.*")
-        .pipe(gulp.dest("dist/css/fonts"));
+    var fontAwesome = gulp.src(variables.libPaths.src.fontAwesomeFonts)
+        .pipe(gulp.dest(variables.libPaths.dest.fonts));
 
     return merge(bootstrap, fontAwesome);
 });

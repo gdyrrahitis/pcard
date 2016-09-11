@@ -1,6 +1,7 @@
 var gulp = require("gulp"),
     browserSync = require("browser-sync"),
-    reload = browserSync.reload;
+    reload = browserSync.reload,
+    variables = require("./variables");
 
 // Watching
 gulp.task("watch", ["build"], function () {
@@ -13,6 +14,6 @@ gulp.task("watch", ["build"], function () {
 // Browsersync
 gulp.task("browser:sync", ["nodemon"], function () {
     browserSync.init(null, {
-        proxy: "http://localhost:54879"
+        proxy: variables.misc.browserSync.proxy
     })
 });

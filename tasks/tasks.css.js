@@ -3,11 +3,12 @@ var gulp = require("gulp"),
     uglify = require("gulp-uglify"),
     merge = require("merge-stream"),
     browserSync = require("browser-sync"),
-    reload = browserSync.reload;
+    reload = browserSync.reload,
+    variables = require("./variables");
 
 // Css tasks
 gulp.task("css:min", function () {
-    gulp.src("dist/css/**/*.css")
+    gulp.src(variables.libPaths.src.allCssInSrc)
         .pipe(uglify())
         .pipe(gulp.dest("."));
 });
@@ -16,32 +17,32 @@ gulp.task("css", ["css:uglify"]);
 
 // SASS tasks
 gulp.task("sass", ["fonts"], function () {
-    var custom = gulp.src("src/**/*.scss")
+    var custom = gulp.src(variables.libPaths.src.allSassInSrc)
         .pipe(sass())
-        .pipe(gulp.dest("dist/css"))
+        .pipe(gulp.dest(variables.libPaths.dest.css))
         .pipe(reload({
             stream: true
         }));
 
-    var customFontAwesome = gulp.src("src/styles/custom-font-awesome.scss")
+    var customFontAwesome = gulp.src(variables.libPaths.src.customFontAwesome)
         .pipe(sass())
-        .pipe(gulp.dest("dist/css/libs"))
+        .pipe(gulp.dest(variables.libPaths.dest.css))
         .pipe(reload({
             stream: true
         }));
 
-    var bootstrap = gulp.src('src/styles/bootstrap.scss')
+    var bootstrap = gulp.src(variables.libPaths.src.bootstrap)
         .pipe(sass({
             outputStyle: 'nested',
             precison: 3,
             errLogToConsole: true,
-            includePaths: ['./node_modules/bootstrap-sass/' + 'assets/stylesheets']
+            includePaths: [variables.libPaths.src.bootstrapSass]
         }))
-        .pipe(gulp.dest("dist/css/libs"));
+        .pipe(gulp.dest(variables.libPaths.dest.css));
 
-    var fontAwesome = gulp.src("./node_modules/font-awesome/scss/font-awesome.scss")
+    var fontAwesome = gulp.src(variables.libPaths.src.fontAwesome)
         .pipe(sass())
-        .pipe(gulp.dest("dist/css/libs"));
+        .pipe(gulp.dest(variables.libPaths.dest.css));
 
 
     return merge(custom, customFontAwesome, bootstrap, fontAwesome);
