@@ -9,6 +9,7 @@ npm-debug.log
 *.js
 *.js.map
 !gulpfile.js
+!/tasks/*.js
 !systemjs-config.js
 qq
 !typings
