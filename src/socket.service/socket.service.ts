@@ -1,4 +1,5 @@
 import io = require('socket.io-client');
+var config: ClientAppConfig.ClientConfiguration = require("../client.config.json!json");
 
 export class SocketService {
     "use strict";
@@ -7,28 +8,28 @@ export class SocketService {
     private data: any;
 
     constructor(private $rootScope: ng.IScope) {
-        this.socket = io.connect("http://localhost:54879");
+        this.socket = io.connect(config.client.baseUrl);
     }
 
-    getId () {
+    getId() {
         return this.socket.id;
     }
 
     on(eventName, callback) {
         var that = this;
-        that.socket.on(eventName, function () {
+        that.socket.on(eventName, () => {
             var args = arguments;
-            that .$rootScope.$apply(function () {
-                callback.apply(that .socket, args);
+            that.$rootScope.$apply(() => {
+                callback.apply(that.socket, args);
             });
         });
     }
 
     emit(eventName, data?, callback?) {
         var that = this;
-        that.socket.emit(eventName, data, function () {
+        that.socket.emit(eventName, data, () => {
             var args = arguments;
-            that.$rootScope.$apply(function () {
+            that.$rootScope.$apply(() => {
                 if (callback) {
                     callback.apply(that.socket, args);
                 }
