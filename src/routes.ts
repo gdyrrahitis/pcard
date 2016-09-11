@@ -8,10 +8,11 @@ export function registerRoutes(app: ng.IModule) {
         var home = config.client.routes.find((v) => v.controller === "homeController");
         var room = config.client.routes.find((v) => v.controller === "roomController");
 
-        $routeProvider.when(home.path, {
-            templateUrl: home.templateUrl,
-            controller: home.controller
-        })
+        $routeProvider
+            .when(home.path, {
+                templateUrl: home.templateUrl,
+                controller: home.controller
+            })
             .when(room.path, {
                 templateUrl: room.templateUrl,
                 controller: room.controller
