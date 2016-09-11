@@ -1,4 +1,4 @@
-var config: AppConfig.Configuration = require("./app.config.json");
+var config: ServerAppConfig.ServerConfiguration = require("./server/server.config.json");
 
 import * as express from "express";
 import * as path from "path";
