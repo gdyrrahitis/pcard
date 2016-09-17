@@ -16,22 +16,18 @@ export class SocketService {
     }
 
     on(eventName, callback) {
-        var that = this;
-        that.socket.on(eventName, () => {
-            var args = arguments;
-            that.$rootScope.$apply(() => {
-                callback.apply(that.socket, args);
+        this.socket.on(eventName, (...args) => {
+            this.$rootScope.$apply(() => {
+                callback.apply(this.socket, args);
             });
         });
     }
 
     emit(eventName, data?, callback?) {
-        var that = this;
-        that.socket.emit(eventName, data, () => {
-            var args = arguments;
-            that.$rootScope.$apply(() => {
+        this.socket.emit(eventName, data, (...args) => {
+            this.$rootScope.$apply(() => {
                 if (callback) {
-                    callback.apply(that.socket, args);
+                    callback.apply(this.socket, args);
                 }
             });
         });

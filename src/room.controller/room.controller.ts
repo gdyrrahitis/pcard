@@ -1,15 +1,21 @@
-import {SocketService} from "../socket.service/socket.service";
+import { SocketService } from "../socket.service/socket.service";
+import { BaseController } from "../base.controller/base.controller";
+var config: ClientAppConfig.ClientConfiguration = require("../client.config.json!");
 
-export class RoomController {
+export class RoomController extends BaseController {
     "use strict";
 
-    private mountainGoat = ["zero", "half", "one", "two", "three", "five", "eight", "thirteen", "twenty", "forty", "one-hundred", "coffee", "question"];
+    private mountainGoat = config.poker.mountainGoat;
 
-    constructor(private $scope: IRoomControllerScope,
+    constructor(protected $scope: IRoomControllerScope,
         private $log: ng.ILogService,
         private $routeParams: IRoomRoute,
         private $localStorage: ILocalStorage,
-        private socketService: SocketService) {
+        private socketService: SocketService
+    ) {
+        super($scope);
+        this.setUniqueId("RoomController");
+
         $scope.room = $routeParams.id;
         $scope.list = this.mountainGoat;
         $scope.selectedItem;
@@ -33,19 +39,20 @@ export class RoomController {
     };
 
     private showAttendees = (data: any[]) => {
-        var that = this;
+        this.showCurrentUser(data);
+        this.showAllAttendeesExceptCurrentUser(data);
+    }
 
-        var currentUser = data.filter((x) => {
-            return x.userId === that.$localStorage.id;
-        });
-
-        if(currentUser.length > 0) {
-            that.$scope.currentUser = currentUser[0];
-        }
-
-        var attendees = data.filter((x) => {
-            return x.userId !== that.$localStorage.id;
-        });
+    private showAllAttendeesExceptCurrentUser = (data: any[]) => {
+        var attendees = data.filter(x => x.userId !== this.$localStorage.id);
         this.$scope.attendees = attendees;
+    }
+
+    private showCurrentUser = (data: any[]) => {
+        var currentUser = data.filter(x => x.userId === this.$localStorage.id);
+
+        if (currentUser.length > 0) {
+            this.$scope.currentUser = currentUser[0];
+        }
     }
 }

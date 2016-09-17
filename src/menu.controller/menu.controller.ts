@@ -1,12 +1,17 @@
 import {SocketService} from "../socket.service/socket.service";
+import { BaseController } from "../base.controller/base.controller";
 
-export class MenuController {
+export class MenuController extends BaseController {
     "use strict";
     
-    constructor(private $scope: IMenuControllerScope,
+    constructor(protected $scope: IMenuControllerScope,
         private $location: ng.ILocationService,
         private $localStorage: ILocalStorage,
-        private socketService: SocketService) {
+        private socketService: SocketService
+    ) {
+        super($scope);
+        this.setUniqueId("MenuController");
+
         this.$scope.navigateToHome = this.navigateToHome;
     }
 

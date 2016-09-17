@@ -2,12 +2,12 @@ export class Socket {
     private rooms = [];
     private maxRoomsAllowed: number = 1;
     
-    constructor(private io: SocketIO.Server) { }
+    constructor(private io: any) { }
 
     connect() {
         let that = this;
         // Socket.io configuration
-        that.io.on("connection", function (socket: ISocket) {
+        that.io.on("connection", function (socket: any) {
             console.log("New connection made to server." + socket.id);
 
             // Disconnect socket
@@ -25,6 +25,8 @@ export class Socket {
             });
 
             socket.on("create-private", function (data, callback) {
+                console.log(JSON.stringify(arguments))
+                console.log(arguments[1].toString())
                 // Is there any other user connected to this room?
                 // If not, then this user is the moderator
                 // Also block this room from creation by other users
@@ -51,6 +53,7 @@ export class Socket {
 
                 console.log("Created private room: " + data.room);
                 callback({ access: true });
+                console.log(callback.toString())
                 that.io.to("private-" + data.room).emit("show-attendees", that.rooms);
             });
 
