@@ -1,4 +1,3 @@
-import { Action } from "./common/Types";
 import { Application } from "express";
 
 export function registerMiddlewares(target: Application, actions: Action<any>[]) {
