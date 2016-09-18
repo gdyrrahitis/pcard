@@ -7,6 +7,7 @@
     "core-js": "registry:dt/core-js#0.0.0+20160725163759",
     "gulp": "registry:dt/gulp#3.8.0+20160907112908",
     "homeControllerScope": "file:typings/custom/home.controller.scope/index.d.ts",
+    "jasmine": "registry:dt/jasmine#2.2.0+20160621224255",
     "jquery": "registry:dt/jquery#1.10.0+20160908203239",
     "localstorage": "file:typings/custom/localstorage/index.d.ts",
     "menuControllerScope": "file:typings/custom/menu.controller.scope/index.d.ts",
@@ -15,7 +16,8 @@
     "roomRoute": "file:typings/custom/room.route/index.d.ts",
     "serverConfig": "file:typings/custom/server.config/index.d.ts",
     "socket": "file:typings/custom/socket/index.d.ts",
-    "user": "file:typings/custom/user/index.d.ts",
-    "types": "file:typings/custom/types/index.d.ts"
+    "tuple": "file:typings/custom/tuple/index.d.ts",
+    "types": "file:typings/custom/types/index.d.ts",
+    "user": "file:typings/custom/user/index.d.ts"
   }
 }
