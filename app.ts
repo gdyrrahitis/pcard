@@ -1,11 +1,9 @@
 var config: ServerAppConfig.ServerConfiguration = require("./server/server.config.json");
-
 import * as express from "express";
 import * as path from "path";
 import { registerMiddlewares } from "./server/express.middlewares";
 
 let app: express.Application = express();
-
 let middewareActions = [
     () => express.static(__dirname)
 ];
