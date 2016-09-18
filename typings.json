@@ -15,6 +15,7 @@
     "roomRoute": "file:typings/custom/room.route/index.d.ts",
     "serverConfig": "file:typings/custom/server.config/index.d.ts",
     "socket": "file:typings/custom/socket/index.d.ts",
-    "user": "file:typings/custom/user/index.d.ts"
+    "user": "file:typings/custom/user/index.d.ts",
+    "types": "file:typings/custom/types/index.d.ts"
   }
 }
