@@ -25,8 +25,6 @@ export class Socket {
             });
 
             socket.on("create-private", function (data, callback) {
-                console.log(JSON.stringify(arguments))
-                console.log(arguments[1].toString())
                 // Is there any other user connected to this room?
                 // If not, then this user is the moderator
                 // Also block this room from creation by other users
@@ -53,7 +51,6 @@ export class Socket {
 
                 console.log("Created private room: " + data.room);
                 callback({ access: true });
-                console.log(callback.toString())
                 that.io.to("private-" + data.room).emit("show-attendees", that.rooms);
             });
 
