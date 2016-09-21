@@ -1,5 +1,3 @@
-import { Predicate } from "../server/common/Types";
-
 export function registerRoutes(app: ng.IModule, routes: Predicate<ClientAppConfig.Route>[], defaultRoute?: string) {
     "use strict";
     var config: ClientAppConfig.ClientConfiguration = require("../client.config.json!json");
