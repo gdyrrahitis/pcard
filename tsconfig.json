@@ -4,7 +4,7 @@
         "moduleResolution": "node",
         "noImplicitAny": false,
         "sourceMap": true,
-        "target": "es6"
+        "target": "es5"
     },
     "files": [
         "./typings/index.d.ts",
