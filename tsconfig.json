@@ -21,17 +21,18 @@
         "./src/socket.service/socket.service.ts",
         "./src/main.ts",
         "./src/routes.ts",
-        "./spec/server.specs/handlers.specs.ts",
-        "./spec/client.specs/base.controller.specs.ts",
-        "./spec/home.specs/home.controller.specs.ts",
-        "./spec/client.specs/menu.controller.specs.ts",
-        "./spec/client.specs/room.controller.specs.ts",
-        "./spec/client.specs/socket.service.specs.ts",
-        "./spec/client.specs/routes.specs.ts"
+        "./spec/server.specs/handlers.spec.ts",
+        "./spec/client.specs/base.controller.spec.ts",
+        "./spec/client.specs/home.controller.spec.ts",
+        "./spec/client.specs/menu.controller.spec.ts",
+        "./spec/client.specs/room.controller.spec.ts",
+        "./spec/client.specs/socket.service.spec.ts",
+        "./spec/client.specs/routes.spec.ts"
     ],
     "exclude": [
         "node_modules",
         "src/typings",
-        "typings"
+        "typings",
+        "typings/globals/core-js/index.d.ts"
     ]
 }
