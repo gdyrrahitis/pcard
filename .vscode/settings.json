@@ -3,6 +3,8 @@
     "files.exclude": {
         "server/**/*.js": true,
         "src/**/*.js": true,
+        "app.js": true,
+        "karma.conf.js": false,
         "**/*.js.map": true,
         "**/.git": true,
         "**/.svn": true,
