@@ -8,6 +8,7 @@ server/**/*.js.map
 npm-debug.log
 *.js
 *.js.map
+!karma.conf.js
 !gulpfile.js
 !/tasks/*.js
 !systemjs-config.js
