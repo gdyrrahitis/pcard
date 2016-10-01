@@ -6,7 +6,7 @@
         "ngSanitize": "node_modules/angular-sanitize",
         "ngRoute": "node_modules/angular-route",
         "ngStorage": "node_modules/ngstorage/",
-        "json": "node_modules/system-json/"
+        "json": "node_modules/systemjs-plugin-json/"
     };
 
     var packages = {
