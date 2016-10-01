@@ -11,7 +11,7 @@ export class Socket {
         let that = this;
         that.io.on("connection", function (socket: ISocket) {
             console.log("New connection made to server." + socket.id);
-            let handlers = new ServerHandlers(that.rooms, socket, that.io);
+            let handlers = new ServerHandlers(that.rooms, socket);
             let mappings = new Mappings(handlers);
             let events = mappings.getMappingsByEvent();
 
