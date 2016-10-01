@@ -14,7 +14,10 @@
     "jquery": "registry:dt/jquery#1.10.0+20160908203239",
     "localstorage": "file:typings/custom/localstorage/index.d.ts",
     "menuControllerScope": "file:typings/custom/menu.controller.scope/index.d.ts",
+    "mime": "registry:dt/mime#0.0.0+20160316155526",
     "node": "registry:dt/node#6.0.0+20160921192128",
+    "orchestrator": "registry:dt/orchestrator#0.0.0+20160316155526",
+    "q": "registry:dt/q#0.0.0+20160613154756",
     "roomControllerScope": "file:typings/custom/room.controller.scope/index.d.ts",
     "roomRoute": "file:typings/custom/room.route/index.d.ts",
     "serve-static": "registry:dt/serve-static#0.0.0+20160606155157",
@@ -24,6 +27,7 @@
     "socket.io-client": "registry:dt/socket.io-client#1.4.4+20160317120654",
     "tuple": "file:typings/custom/tuple/index.d.ts",
     "types": "file:typings/custom/types/index.d.ts",
-    "user": "file:typings/custom/user/index.d.ts"
+    "user": "file:typings/custom/user/index.d.ts",
+    "vinyl": "registry:dt/vinyl#1.2.0+20160924121322"
   }
 }
