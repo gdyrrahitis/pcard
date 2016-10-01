@@ -1,5 +1,5 @@
 export class ServerHandlers {
-    constructor(private rooms: any[], private socket: ISocket, private io: SocketIO.Server) { }
+    constructor(private rooms: any[], private socket: ISocket) { }
 
     disconnect = () => {
         var that = this;
@@ -11,7 +11,7 @@ export class ServerHandlers {
         });
 
         if (room) {
-            this.io.to("private-" + room.room).emit("show-attendees", this.rooms);
+            this.socket.server.to("private-" + room.room).emit("show-attendees", this.rooms);
         }
     }
 
@@ -41,7 +41,7 @@ export class ServerHandlers {
         this.socket.join("private-" + data.room);
 
         callback({ access: true });
-        this.io.to("private-" + data.room).emit("show-attendees", this.rooms);
+        this.socket.server.to("private-" + data.room).emit("show-attendees", this.rooms);
     }
 
     joinPrivateRoom = (data, callback) => {
@@ -67,7 +67,7 @@ export class ServerHandlers {
         this.socket.join("private-" + data.room);
 
         callback({ access: true });
-        this.io.to("private-" + data.room).emit("show-attendees", this.rooms);
+        this.socket.server.to("private-" + data.room).emit("show-attendees", this.rooms);
     }
 
     leavePrivateRoom = (data) => {
@@ -80,7 +80,7 @@ export class ServerHandlers {
         console.log("Leaving room: " + JSON.stringify(room));
 
         if (room) {
-            this.io.to("private-" + room.room).emit("show-attendees", this.rooms);
+            this.socket.server.to("private-" + room.room).emit("show-attendees", this.rooms);
         }
     }
 
@@ -93,12 +93,12 @@ export class ServerHandlers {
         });
 
         if (room) {
-            this.io.to(room.id).emit("user-banned");
-            this.io.to("private-" + room.room).emit("show-attendees", this.rooms);
+            this.socket.server.to(room.id).emit("user-banned");
+            this.socket.server.to("private-" + room.room).emit("show-attendees", this.rooms);
         }
     }
 
     getAllConnectedUsers = (room) => {
-        this.io.to("private-" + room).emit("show-attendees", this.rooms);
+        this.socket.server.to("private-" + room).emit("show-attendees", this.rooms);
     }
 }
