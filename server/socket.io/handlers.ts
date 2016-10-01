@@ -2,11 +2,12 @@ export class ServerHandlers {
     constructor(private rooms: any[], private socket: ISocket, private io: SocketIO.Server) { }
 
     disconnect = () => {
+        var that = this;
         var room = this.rooms.filter(function (r) {
-            return r.id === this.socket.id;
+            return r.id === that.socket.id;
         })[0];
         this.rooms = this.rooms.filter(function (r) {
-            return r.id !== this.socket.id;
+            return r.id !== that.socket.id;
         });
 
         if (room) {
