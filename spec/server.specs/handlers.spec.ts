@@ -1,7 +1,7 @@
 import { ServerHandlers } from "../../server/socket.io/handlers";
 var socketMock = require("socket-io-mock");
 
-describe("Socket.io subscriber handlers", () => {
+describe("Socket.io subscriber disconnect handler", () => {
     var socket,
         rooms = [{ id: 1, room: 1 }, { id: 2, room: 1 }, { id: 3, room: 2 }],
         handler: ServerHandlers;

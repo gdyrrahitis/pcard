@@ -1,14 +1,14 @@
 export class ServerHandlers {
     constructor(private rooms: any[], private socket: ISocket) { }
 
+    private filterCollection = (r: any[], predicate: Predicate<Predicate<boolean>>) => r.filter(predicate);
+    private filterItemsWithSameId = (r: any) => r.id === this.socket.id;
+    private filterItemsWithDifferentIds = (r: any) => r.id !== this.socket.id;
+    private firstOfCollection = (r: any[]) => r[0];
+
     disconnect = () => {
-        var that = this;
-        var room = this.rooms.filter(function (r) {
-            return r.id === that.socket.id;
-        })[0];
-        this.rooms = this.rooms.filter(function (r) {
-            return r.id !== that.socket.id;
-        });
+        var room = this.firstOfCollection(this.filterCollection(this.rooms, this.filterItemsWithSameId));
+        this.rooms = this.rooms.filter(this.filterItemsWithDifferentIds);
 
         if (room) {
             this.socket.server.to("private-" + room.room).emit("show-attendees", this.rooms);
