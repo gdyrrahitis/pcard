@@ -18,7 +18,7 @@ var libPaths = {
         systemJs: `${basePaths.src.nodeModules}/systemjs/dist/system.src.js`,
         customFontAwesome: `${basePaths.src.srcRoot}/styles/custom-font-awesome.scss`,
         bootstrap: `${basePaths.src.srcRoot}/styles/bootstrap.scss`,
-        bootstrapSass: `${basePaths.src.nodeModules}bootstrap-sass/assets/stylesheets`,
+        bootstrapSass: `${basePaths.src.nodeModules}/bootstrap-sass/assets/stylesheets`,
         fontAwesome: `${basePaths.src.nodeModules}/font-awesome/scss/font-awesome.scss`,
         bootstrapFonts: `${basePaths.src.nodeModules}/bootstrap-sass/assets/fonts/bootstrap/*.*`,
         fontAwesomeFonts: `${basePaths.src.nodeModules}/font-awesome/fonts/*.*`
