@@ -70,4 +70,24 @@ describe("Socket.io subscriber createPrivateRoom handler", () => {
         }
         spyOn(socket.socketClient.server, "to").and.callThrough();
     });
+
+    it("should emit 'room-occupied' event for room already created", () => {
+        // Arrange
+        let data = { room: "1" };
+        let callbackSpy = jasmine.createSpy("callback", (data: { access: boolean }) => { });
+        handler = new ServerHandlers(rooms, socket.socketClient);
+        socket.socketClient.on("room-occupied", (data: any) => {
+            // Assert
+            expect(data).not.toBeNull();
+            expect(data.access).toBeFalsy();
+        });
+
+        // Act
+        handler.createPrivateRoom(data, callbackSpy);
+
+        // Assert
+        expect(callbackSpy).toHaveBeenCalled();
+        expect(callbackSpy.calls.count()).toEqual(1);
+        expect(callbackSpy).toHaveBeenCalledWith({ access: false });
+    });
 });
