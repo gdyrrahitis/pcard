@@ -3,7 +3,11 @@ var socketMock = require("socket-io-mock");
 
 describe("Socket.io subscriber disconnect handler", () => {
     var socket,
-        rooms = [{ id: 1, room: 1 }, { id: 2, room: 1 }, { id: 3, room: 2 }],
+        rooms: Connection[] = [
+            { id: "1", room: "1", moderator: true, userId: "" },
+            { id: "2", room: "1", moderator: false, userId: "" },
+            { id: "3", room: "2", moderator: false, userId: "" }
+        ],
         handler: ServerHandlers;
 
     beforeEach(() => {
@@ -18,13 +22,13 @@ describe("Socket.io subscriber disconnect handler", () => {
 
     it("should broadcast to private-1 room and emit 'show-attendees' event with rooms - 1", () => {
         // Arrange
-        socket.socketClient.id = 2;
-        socket.on("show-attendees", (data) => {
-            // TODO: Handler is not called
+        socket.socketClient.id = "2";
+        socket.socketClient.on("show-attendees", (data) => {
             // Early assertion on event
-            console.log("Callback")
-            expect(false).toBeTruthy();
-            expect(data).toEqual([{ id: 1, room: 1 }, { id: 3, room: 2 }])
+            expect(data).toEqual([
+                { id: "1", room: "1", moderator: true, userId: "" },
+                { id: "3", room: "2", moderator: false, userId: "" }
+            ]);
         });
         handler = new ServerHandlers(rooms, socket.socketClient);
 
@@ -37,7 +41,7 @@ describe("Socket.io subscriber disconnect handler", () => {
 
     it("should not broadcast to private-1 room because room provided was not found", () => {
         // Arrange
-        socket.socketClient.id = 5;
+        socket.socketClient.id = "5";
         handler = new ServerHandlers(rooms, socket.socketClient);
 
         // Act
@@ -45,5 +49,25 @@ describe("Socket.io subscriber disconnect handler", () => {
 
         // Assertion
         expect(socket.socketClient.server.to).not.toHaveBeenCalled();
+    });
+});
+
+describe("Socket.io subscriber createPrivateRoom handler", () => {
+    var socket,
+        rooms: Connection[] = [
+            { id: "1", room: "1", moderator: true, userId: "" },
+            { id: "2", room: "1", moderator: false, userId: "" },
+            { id: "3", room: "2", moderator: false, userId: "" }
+        ],
+        handler: ServerHandlers;
+
+    beforeEach(() => {
+        socket = new socketMock();
+        socket.socketClient.server = {
+            to: function (input: string) {
+                return socket;
+            }
+        }
+        spyOn(socket.socketClient.server, "to").and.callThrough();
     });
 });

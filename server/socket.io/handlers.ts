@@ -1,25 +1,26 @@
 export class ServerHandlers {
-    constructor(private rooms: any[], private socket: ISocket) { }
+    constructor(private connections: Connection[], private socket: ISocket) { }
 
-    private filterCollection = (r: any[], predicate: Predicate<Predicate<boolean>>) => r.filter(predicate);
-    private filterItemsWithSameId = (r: any) => r.id === this.socket.id;
-    private filterItemsWithDifferentIds = (r: any) => r.id !== this.socket.id;
-    private firstOfCollection = (r: any[]) => r[0];
+    private roomPrefix: string = "private-";
+    private showAttendeesEvent: string = "show-attendees";
+
+    private filterCollection = <T>(r: T[], predicate: Predicate<T>) => r.filter(predicate);
+    private filterItemsWithEqualId = <T>(r: T) => (<any>r).id === this.socket.id;
+    private filterItemsWithDifferentIds = <T>(r: T) => (<any>r).id !== this.socket.id;
+    private firstOfCollection = <T>(r: T[]) => r[0];
+    private prefixWordWith = (word: string, prefix: string) => prefix.concat(word);
 
     disconnect = () => {
-        var room = this.firstOfCollection(this.filterCollection(this.rooms, this.filterItemsWithSameId));
-        this.rooms = this.rooms.filter(this.filterItemsWithDifferentIds);
+        var connection = this.firstOfCollection(this.filterCollection(this.connections, this.filterItemsWithEqualId));
+        this.connections = this.filterCollection(this.connections, this.filterItemsWithDifferentIds);
 
-        if (room) {
-            this.socket.server.to("private-" + room.room).emit("show-attendees", this.rooms);
+        if (connection) {
+            this.socket.server.to(this.prefixWordWith(connection.room, this.roomPrefix)).emit(this.showAttendeesEvent, this.connections);
         }
     }
 
     createPrivateRoom = (data, callback) => {
-        // Is there any other user connected to this room?
-        // If not, then this user is the moderator
-        // Also block this room from creation by other users
-        var roomExistsAlreadyForOtherUser = this.rooms.filter(function (r) {
+        var roomExistsAlreadyForOtherUser = this.connections.filter(function (r) {
             return r.room === data.room;
         }).length > 0;
         if (roomExistsAlreadyForOtherUser) {
@@ -29,7 +30,7 @@ export class ServerHandlers {
         }
 
         this.socket.room = "room-" + data.room;
-        this.rooms[this.socket.room] = this.socket;
+        this.connections[this.socket.room] = this.socket;
         // No room found, book it
         var roomObj = {
             id: this.socket.id,
@@ -37,15 +38,15 @@ export class ServerHandlers {
             room: data.room,
             moderator: true
         };
-        this.rooms.push(roomObj);
+        this.connections.push(roomObj);
         this.socket.join("private-" + data.room);
 
         callback({ access: true });
-        this.socket.server.to("private-" + data.room).emit("show-attendees", this.rooms);
+        this.socket.server.to("private-" + data.room).emit("show-attendees", this.connections);
     }
 
     joinPrivateRoom = (data, callback) => {
-        var doesRoomExist = this.rooms.filter(function (r) {
+        var doesRoomExist = this.connections.filter(function (r) {
             return r.room === data.room;
         }).length > 0;
         if (!doesRoomExist) {
@@ -55,7 +56,7 @@ export class ServerHandlers {
         }
 
         this.socket.room = "room-" + data.room;
-        this.rooms[this.socket.room] = this.socket;
+        this.connections[this.socket.room] = this.socket;
         // No room found, book it
         var roomObj = {
             id: this.socket.id,
@@ -63,42 +64,42 @@ export class ServerHandlers {
             room: data.room,
             moderator: false
         };
-        this.rooms.push(roomObj);
+        this.connections.push(roomObj);
         this.socket.join("private-" + data.room);
 
         callback({ access: true });
-        this.socket.server.to("private-" + data.room).emit("show-attendees", this.rooms);
+        this.socket.server.to("private-" + data.room).emit("show-attendees", this.connections);
     }
 
     leavePrivateRoom = (data) => {
-        var room = this.rooms.filter(function (r) {
+        var room = this.connections.filter(function (r) {
             return r.userId === data.id;
         })[0];
-        this.rooms = this.rooms.filter(function (r) {
+        this.connections = this.connections.filter(function (r) {
             return r.userId !== data.id;
         });
         console.log("Leaving room: " + JSON.stringify(room));
 
         if (room) {
-            this.socket.server.to("private-" + room.room).emit("show-attendees", this.rooms);
+            this.socket.server.to("private-" + room.room).emit("show-attendees", this.connections);
         }
     }
 
     ban = (data) => {
-        var room = this.rooms.filter(function (r) {
+        var room = this.connections.filter(function (r) {
             return r.userId === data.userId;
         })[0];
-        this.rooms = this.rooms.filter(function (r) {
+        this.connections = this.connections.filter(function (r) {
             return r.userId !== data.userId;
         });
 
         if (room) {
             this.socket.server.to(room.id).emit("user-banned");
-            this.socket.server.to("private-" + room.room).emit("show-attendees", this.rooms);
+            this.socket.server.to("private-" + room.room).emit("show-attendees", this.connections);
         }
     }
 
     getAllConnectedUsers = (room) => {
-        this.socket.server.to("private-" + room).emit("show-attendees", this.rooms);
+        this.socket.server.to("private-" + room).emit("show-attendees", this.connections);
     }
 }
