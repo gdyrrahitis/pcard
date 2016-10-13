@@ -1,0 +1,1 @@
+export let compose = <T1, T2, T3>(f: (x: T2) => T3, g: (x: T1) => T2) => (x: T1) => f(g(x));
