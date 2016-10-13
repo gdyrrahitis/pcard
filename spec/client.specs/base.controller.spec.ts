@@ -9,13 +9,12 @@ describe("Base controller spec", () => {
         x = $injector;
     }));
 
-    it("Should create a new instance", () => {
-console.log(x)
+    xit("Should create a new instance", () => {
         // Assert
         expect(controller).toBeDefined();
     });
 
-    it("Should have controllerId as the input of setUniqueId", () => {
+    xit("Should have controllerId as the input of setUniqueId", () => {
         // Arrange
         let input = "myUniqueId";
 
