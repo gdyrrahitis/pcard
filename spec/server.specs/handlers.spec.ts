@@ -20,7 +20,7 @@ describe("Socket.io subscriber disconnect handler", () => {
         spyOn(socket.socketClient.server, "to").and.callThrough();
     });
 
-    it("should broadcast to private-1 room and emit 'show-attendees' event with rooms - 1", () => {
+    xit("should broadcast to private-1 room and emit 'show-attendees' event with rooms - 1", () => {
         // Arrange
         socket.socketClient.id = "2";
         socket.socketClient.on("show-attendees", (data) => {
@@ -39,7 +39,7 @@ describe("Socket.io subscriber disconnect handler", () => {
         expect(socket.socketClient.server.to).toHaveBeenCalled();
     });
 
-    it("should not broadcast to private-1 room because room provided was not found", () => {
+    xit("should not broadcast to private-1 room because room provided was not found", () => {
         // Arrange
         socket.socketClient.id = "5";
         handler = new ServerHandlers(rooms, socket.socketClient);
@@ -71,7 +71,7 @@ describe("Socket.io subscriber createPrivateRoom handler", () => {
         spyOn(socket.socketClient.server, "to").and.callThrough();
     });
 
-    it("should emit 'room-occupied' event for room already created", () => {
+    xit("should emit 'room-occupied' event for room already created", () => {
         // Arrange
         let data = { room: "1" };
         let callbackSpy = jasmine.createSpy("callback", (data: { access: boolean }) => { });
