@@ -1,6 +1,8 @@
 // Place your settings in this file to overwrite the default settings
 {
     "files.exclude": {
+        "common/**/*.js": true,
+        "spec/**/*.js": true,
         "server/**/*.js": true,
         "src/**/*.js": true,
         "app.js": true,
@@ -11,4 +13,6 @@
         "**/.hg": true,
         "**/.DS_Store": true
     }
+,
+"typescript.check.workspaceVersion": false
 }
