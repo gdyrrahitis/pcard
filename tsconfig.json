@@ -9,28 +9,43 @@
     "files": [
         "./typings/index.d.ts",
         "./app.ts",
+        
         "./server/server.ts",
         "./server/setup.socket.ts",
         "./server/socket.io/socket.ts",
         "./server/socket.io/handlers.ts",
         "./server/socket.io/mappings.ts",
         "./server/express.middlewares.ts",
+
         "./src/home.controller/home.controller.ts",
         "./src/menu.controller/menu.controller.ts",
         "./src/room.controller/room.controller.ts",
         "./src/socket.service/socket.service.ts",
         "./src/main.ts",
         "./src/routes.ts",
+
         "./spec/server.specs/handlers.spec.ts",
         "./spec/client.specs/base.controller.spec.ts",
         "./spec/client.specs/home.controller.spec.ts",
         "./spec/client.specs/menu.controller.spec.ts",
         "./spec/client.specs/room.controller.spec.ts",
         "./spec/client.specs/socket.service.spec.ts",
-        "./spec/client.specs/routes.spec.ts"
+        "./spec/client.specs/routes.spec.ts",
+        "./spec/common.specs/collections/f.collections.spec.ts",
+        "./spec/common.specs/objects/f.objects.spec.ts",
+        "./spec/common.specs/transforms/f.transforms.spec.ts",
+        "./spec/common.specs/operations/f.operations.spec.ts",
+
+        "./common/collections/f.collections.ts",
+        "./common/collections/f.collections.d.ts",
+        "./common/objects/f.objects.ts",
+        "./common/operations/f.operations.ts"
     ],
     "exclude": [
         "node_modules",
-        "typings"
+        "/node_modules",
+        "../node_modules",
+        "typings",
+        "typings/globals"
     ]
 }
