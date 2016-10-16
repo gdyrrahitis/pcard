@@ -37,9 +37,9 @@
         "./spec/common.specs/operations/f.operations.spec.ts",
 
         "./common/collections/f.collections.ts",
-        "./common/collections/f.collections.d.ts",
         "./common/objects/f.objects.ts",
-        "./common/operations/f.operations.ts"
+        "./common/operations/f.operations.ts",
+        "./common/transforms/f.compose.ts"
     ],
     "exclude": [
         "node_modules",
