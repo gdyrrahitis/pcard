@@ -1,28 +1,25 @@
+import { getFirst, filterProp, filter, findIndex, reducer, removeFromIndexNumberOfItems } from "../../common/index";
 export class ServerHandlers {
     constructor(private connections: Connection[], private socket: ISocket) { }
 
     private roomPrefix: string = "private-";
     private showAttendeesEvent: string = "show-attendees";
-
-    private filterCollection = <T>(r: T[], predicate: Predicate<T>) => r.filter(predicate);
-    private filterItemsWithEqualId = <T>(r: T) => (<any>r).id === this.socket.id;
-    private filterItemsWithDifferentIds = <T>(r: T) => (<any>r).id !== this.socket.id;
-    private firstOfCollection = <T>(r: T[]) => r[0];
     private prefixWordWith = (word: string, prefix: string) => prefix.concat(word);
 
     disconnect = () => {
-        var connection = this.firstOfCollection(this.filterCollection(this.connections, this.filterItemsWithEqualId));
-        this.connections = this.filterCollection(this.connections, this.filterItemsWithDifferentIds);
+        let socketId = this.socket.id;
+        let startIndex = findIndex(reducer(socketId)("id"))(this.connections);
+        let connection = getFirst(removeFromIndexNumberOfItems<Connection>(startIndex, 1)(this.connections));
 
         if (connection) {
-            this.socket.server.to(this.prefixWordWith(connection.room, this.roomPrefix)).emit(this.showAttendeesEvent, this.connections);
+            this.socket.server.to(this.prefixWordWith(connection.room, this.roomPrefix))
+                .emit(this.showAttendeesEvent, this.connections);
         }
     }
 
     createPrivateRoom = (data, callback) => {
-        var roomExistsAlreadyForOtherUser = this.connections.filter(function (r) {
-            return r.room === data.room;
-        }).length > 0;
+        var roomExistsAlreadyForOtherUser = getFirst(filter(filterProp(data.room)("room"))(this.connections));
+
         if (roomExistsAlreadyForOtherUser) {
             callback({ access: false });
             this.socket.emit("room-occupied");
