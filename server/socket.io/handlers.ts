@@ -8,7 +8,7 @@ export class ServerHandlers {
 
     disconnect = () => {
         let socketId = this.socket.id;
-        let startIndex = findIndex(reducer(socketId)("id"))(this.connections);
+        let startIndex = findIndex(reducer("id")(socketId))(this.connections);
         let connection = getFirst(removeFromIndexNumberOfItems<Connection>(startIndex, 1)(this.connections));
 
         if (connection) {
@@ -21,25 +21,45 @@ export class ServerHandlers {
         var roomExistsAlreadyForOtherUser = getFirst(filter(filterProp(data.room)("room"))(this.connections));
 
         if (roomExistsAlreadyForOtherUser) {
-            callback({ access: false });
-            this.socket.emit("room-occupied");
+            this.denyAccess(callback);
             return;
         }
 
-        this.socket.room = "room-" + data.room;
-        this.connections[this.socket.room] = this.socket;
         // No room found, book it
-        var roomObj = {
+        this.connectToRoom(data);
+        this.socket.join("private-" + data.room);
+
+        callback({ access: true });
+        this.emitEventToRoom(data.room, "show-attendees", this.connections);
+    }
+
+    private denyAccess(callback: any) {
+        callback({ access: false });
+        this.socket.emit("room-occupied");
+    }
+
+    private connectToRoom(data) {
+        this.bookToRoom(data);
+        var connection = this.createConnectionFrom(data);
+        this.connections.push(connection);
+    }
+
+    private emitEventToRoom(room, event, data) {
+        this.socket.server.to("private-" + room).emit(event, data);
+    }
+
+    private createConnectionFrom(data): Connection {
+        return {
             id: this.socket.id,
             userId: data.userId,
             room: data.room,
             moderator: true
         };
-        this.connections.push(roomObj);
-        this.socket.join("private-" + data.room);
+    }
 
-        callback({ access: true });
-        this.socket.server.to("private-" + data.room).emit("show-attendees", this.connections);
+    private bookToRoom(data) {
+        this.socket.room = "room-" + data.room;
+        this.connections[this.socket.room] = this.socket;
     }
 
     joinPrivateRoom = (data, callback) => {
