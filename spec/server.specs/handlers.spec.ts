@@ -39,7 +39,7 @@ describe("Socket.io subscriber disconnect handler", () => {
         expect(socket.server.to).toHaveBeenCalled();
     });
 
-    xit("should not broadcast to private-1 room because room provided was not found", () => {
+    it("should not broadcast to private-1 room because room provided was not found", () => {
         // Arrange
         socket.id = "5";
         handler = new ServerHandlers(connections, socket);
