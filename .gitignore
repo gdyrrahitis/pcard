@@ -16,3 +16,4 @@ qq
 !typings
 typings/*
 !typings/custom/
+coverage
