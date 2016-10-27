@@ -16,6 +16,9 @@ module.exports = function (config) {
     files: [
       'node_modules/angular/angular.js',
       'node_modules/angular-mocks/angular-mocks.js',
+      "node_modules/angular-sanitize/angular-sanitize.js",
+      "node_modules/angular-route/angular-route.js",
+      "node_modules/ngstorage/ngStorage.js",
       'spec/**/*.ts'
     ],
 
@@ -28,8 +31,10 @@ module.exports = function (config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
+      'src/**/*.ts': ['typescript', 'babel'],
       'spec/**/*.spec.ts': ['typescript', 'babel', 'browserify'],
-      'spec/**/*.spec.js': ['babel', 'browserify']
+      'spec/**/*.spec.js': ['babel', 'browserify'],
+      'spec/**/*.js': ['coverage']
     },
 
     typescriptPreprocessor: {
@@ -66,14 +71,16 @@ module.exports = function (config) {
       'karma-babel-Preprocessor',
       'karma-browserify',
       'karma-jasmine',
-      'karma-phantomjs-launcher'
+      'karma-phantomjs-launcher',
+      'karma-chrome-launcher',
+      'karma-coverage'
     ],
 
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress'],
+    reporters: ['progress', 'coverage'],
 
 
     // web server port
@@ -104,6 +111,11 @@ module.exports = function (config) {
 
     // Concurrency level
     // how many browser should be started simultaneous
-    concurrency: Infinity
+    concurrency: Infinity,
+
+    coverageReporter: {
+      type: 'html',
+      dir: 'coverage/'
+    }
   })
 }

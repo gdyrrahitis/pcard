@@ -1,10 +1,16 @@
 var gulp = require("gulp"),
     express = require("gulp-express"),
     nodemon = require("gulp-nodemon"),
+    open = require("gulp-open"),
     variables = require("./variables");
 
 gulp.task("server", function () {
     express.run([variables.basePaths.server.path]);
+});
+
+gulp.task("gulp-coverage", function () {W
+    gulp.src(variables.basePaths.coverage.path)
+        .pipe(open());
 });
 
 gulp.task('nodemon', ["build"], function (cb) {

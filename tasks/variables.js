@@ -8,6 +8,9 @@ var basePaths = {
     },
     server: {
         path: "server/server.js"
+    },
+    coverage: {
+        path: "./coverage/PhantomJS 2.1.1 (Windows 8 0.0.0)/index.html"
     }
 };
 
