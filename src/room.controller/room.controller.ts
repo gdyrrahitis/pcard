@@ -1,6 +1,6 @@
 import { SocketService } from "../socket.service/socket.service";
 import { BaseController } from "../base.controller/base.controller";
-var config: ClientAppConfig.ClientConfiguration = require("../client.config.json!");
+var config: ClientAppConfig.ClientConfiguration = require("../client.config.json");
 
 export class RoomController extends BaseController {
     "use strict";
