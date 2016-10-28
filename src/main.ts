@@ -1,6 +1,6 @@
 import * as ng from "angular";
-import "ngSanitize";
-import "ngRoute";
+import "angular-sanitize";
+import "angular-route";
 import "ngStorage";
 import { HomeController } from "./home.controller/home.controller";
 import { RoomController } from "./room.controller/room.controller";
@@ -10,7 +10,7 @@ import { registerRoutes } from "./routes";
 
 export module Bnc {
     "use strict";
-    var config: ClientAppConfig.ClientConfiguration = require("../client.config.json!json");
+    var config: ClientAppConfig.ClientConfiguration = require("./client.config.json");
 
     var app = ng.module("app", ["ngSanitize", "ngRoute", "ngStorage"])
         .controller("homeController", HomeController)
