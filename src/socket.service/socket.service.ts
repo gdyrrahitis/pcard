@@ -1,5 +1,5 @@
 import io = require('socket.io-client');
-var config: ClientAppConfig.ClientConfiguration = require("../client.config.json!json");
+var config: ClientAppConfig.ClientConfiguration = require("../client.config.json");
 
 export class SocketService {
     "use strict";
