@@ -1,15 +1,9 @@
-import io = require('socket.io-client');
-var config: ClientAppConfig.ClientConfiguration = require("../client.config.json");
-
 export class SocketService {
     "use strict";
 
-    private socket: SocketIOClient.Socket;
     private data: any;
 
-    constructor(private $rootScope: ng.IScope) {
-        this.socket = io.connect(config.client.baseUrl);
-    }
+    constructor(private $rootScope: ng.IScope, private socket: SocketIOClient.Socket) { }
 
     getId() {
         return this.socket.id;
