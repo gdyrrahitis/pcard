@@ -39,7 +39,7 @@ describe("Services", () => {
             let expected = "123";
 
             // Act
-            let id = service.getId();
+            let id = service.socketId;
 
             // Assert
             expect(id).not.toBeUndefined();
