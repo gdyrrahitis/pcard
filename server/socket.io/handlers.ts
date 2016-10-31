@@ -3,12 +3,15 @@ export class ServerHandlers {
     constructor(private connections: Connection[], private socket: ISocket) { }
 
     private roomPrefix: string = "private-";
+    // TODO: Make constants
     private showAttendeesEvent: string = "show-attendees";
-    private prefixWordWith = (word: string, prefix: string) => prefix.concat(word);
+    private roomOccupiedEvent: string = "room-occupied";
+    private roomNotFoundEvent: string = "room-not-found";
+    private userBannedEvent: string = "user-banned";
 
     disconnect = () => {
         let socketId = this.socket.id;
-        let connection = this.popConnection("id", socketId);
+        let connection = this.getFirstConnectionBy("id", socketId);
 
         if (connection) {
             this.socket.server.to(this.prefixWordWith(connection.room, this.roomPrefix))
@@ -16,25 +19,27 @@ export class ServerHandlers {
         }
     }
 
-    private popConnection(property: string, value: any) {
+    private getFirstConnectionBy(property: string, value: any) {
         let startIndex = findIndex(reducer(property)(value))(this.connections);
         return getFirst(removeFromIndexNumberOfItems<Connection>(startIndex, 1)(this.connections));
     }
+
+    private prefixWordWith = (word: string, prefix: string) => prefix.concat(word);
 
     createPrivateRoom = (data, callback) => {
         var roomExistsAlreadyForOtherUser = getFirst(filter(filterProp(data.room)("room"))(this.connections));
 
         if (roomExistsAlreadyForOtherUser) {
-            this.performActionAndNotifyUserForEvent("room-occupied", callback);
+            this.performActionAndNotifyUserForEvent(this.roomOccupiedEvent, callback);
             return;
         }
 
         data.moderator = true;
         this.connectToRoom(data);
-        this.socket.join("private-" + data.room);
+        this.socket.join(this.prefixWordWith(data.room, this.roomPrefix));
 
         callback({ access: true });
-        this.emitEventToRoom(data.room, "show-attendees", this.connections);
+        this.emitEventToRoom(data.room, this.showAttendeesEvent, this.connections);
     }
 
     private performActionAndNotifyUserForEvent(event: string, callback: any) {
@@ -49,7 +54,7 @@ export class ServerHandlers {
     }
 
     private emitEventToRoom(room, event, data) {
-        this.socket.server.to("private-" + room).emit(event, data);
+        this.socket.server.to(this.prefixWordWith(room, this.roomPrefix)).emit(event, data);
     }
 
     private createConnectionFrom(data): Connection {
@@ -69,36 +74,34 @@ export class ServerHandlers {
     joinPrivateRoom = (data, callback) => {
         var doesRoomExist = getFirst(filter(filterProp(data.room)("room"))(this.connections));
         if (!doesRoomExist) {
-            this.performActionAndNotifyUserForEvent("room-not-found", callback);
+            this.performActionAndNotifyUserForEvent(this.roomNotFoundEvent, callback);
             return;
         }
 
         data.moderator = false;
         this.connectToRoom(data);
-        this.socket.join("private-" + data.room);
+        this.socket.join(this.prefixWordWith(data.room, this.roomPrefix));
 
         callback({ access: true });
-        this.emitEventToRoom(data.room, "show-attendees", this.connections);
+        this.emitEventToRoom(data.room, this.showAttendeesEvent, this.connections);
     }
 
     leavePrivateRoom = (data) => {
-        let connection = this.popConnection("userId", data.id);
+        let connection = this.getFirstConnectionBy("userId", data.id);
 
         if (connection) {
-            this.emitEventToRoom(data.room, "show-attendees", this.connections);
+            this.emitEventToRoom(data.room, this.showAttendeesEvent, this.connections);
         }
     }
 
     ban = (data) => {
-        let connection = this.popConnection("userId", data.userId);
+        let connection = this.getFirstConnectionBy("userId", data.userId);
 
         if (connection) {
-            this.socket.server.to(connection.id).emit("user-banned");
-            this.emitEventToRoom(connection.room, "show-attendees", this.connections);
+            this.socket.server.to(connection.id).emit(this.userBannedEvent);
+            this.emitEventToRoom(connection.room, this.showAttendeesEvent, this.connections);
         }
     }
 
-    getAllConnectedUsers = (room) => {
-        this.emitEventToRoom(room, "show-attendees", this.connections);
-    }
+    getAllConnectedUsers = (room) => this.emitEventToRoom(room, this.showAttendeesEvent, this.connections);
 }
