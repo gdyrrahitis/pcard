@@ -1,5 +1,6 @@
 // Karma configuration
 // Generated on Sun Sep 18 2016 21:11:13 GMT+0100 (GMT Daylight Time)
+var istanbul = require('browserify-istanbul')
 require('babel-register');
 module.exports = function (config) {
   config.set({
@@ -31,44 +32,23 @@ module.exports = function (config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'src/**/*.ts': ['typescript', 'babel'],
-      'spec/**/*.spec.ts': ['typescript', 'babel', 'browserify'],
-      'spec/**/*.spec.js': ['babel', 'browserify'],
-      'spec/**/*.js': ['coverage']
-    },
-
-    typescriptPreprocessor: {
-      // options passed to the typescript compiler 
-      options: {
-        sourceMap: false, // (optional) Generates corresponding .map file. 
-        target: 'es6', // (optional) Specify ECMAScript target version: 'ES3' (default), or 'ES5' 
-        module: 'commonjs', // (optional) Specify module code generation: 'commonjs' or 'amd' 
-        noImplicitAny: true, // (optional) Warn on expressions and declarations with an implied 'any' type. 
-        removeComments: true, // (optional) Do not emit comments to output. 
-        concatenateOutput: false // (optional) Concatenate and emit output to single file. By default true if module option is omited, otherwise false. 
-      },
-      // transforming the filenames 
-      transformPath: function (path) {
-        return path.replace(/\.ts$/, '.js');
-      }
-    },
-
-    babelPreprocessor: {
-      options: {
-        presets: ['es2015'],
-        sourceMap: 'inline'
-      }
+      '**/*.ts': ['browserify']
     },
 
     browserify: {
       debug: true,
       plugin: ['tsify'],
-      transform: [['babelify', { presets: ["es2015"], extensions: [".ts", ".js"] }]]
+      transform: [
+        istanbul({
+          instrumenter: require('isparta'),
+          instrumenterConfig: { babel: { presets: ["es2015"] } },
+          ignore: ['**/node_modules/**', '**/dist/**', '**/tasks/**', '**/typings/**', '**/spec/**']
+        }),
+        ['babelify', { presets: ["es2015"], extensions: [".ts", ".js"] }]
+      ]
     },
 
     plugins: [
-      'karma-typescript-preprocessor',
-      'karma-babel-Preprocessor',
       'karma-browserify',
       'karma-jasmine',
       'karma-phantomjs-launcher',
