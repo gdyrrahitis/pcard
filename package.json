@@ -45,6 +45,7 @@
     "babelify": "^7.3.0",
     "browser-sync": "^2.14.0",
     "browserify": "^13.1.0",
+    "browserify-istanbul": "^2.0.0",
     "concurrently": "^2.2.0",
     "del": "^2.2.2",
     "express": "^4.14.0",
