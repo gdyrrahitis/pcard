@@ -24,7 +24,7 @@ export class RoomController extends BaseController {
         $scope.banUser = this.banUser;
         $scope.currentUser;
 
-        this.$localStorage.id = this.socketService.getId();
+        this.$localStorage.id = this.socketService.socketId;
         this.socketService.on("show-attendees", this.showAttendees);
         this.socketService.emit("get-all-attendees", $routeParams.id);
     }

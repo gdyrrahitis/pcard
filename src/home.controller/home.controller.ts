@@ -23,7 +23,7 @@ export class HomeController extends BaseController {
         this.socketService.on("all-rooms-occupied", this.allRoomsOccupied);
         this.socketService.on("room-not-found", this.roomNotFound);
 
-        this.disconnectUserIfGetsToHome(this.socketService.getId());
+        this.disconnectUserIfGetsToHome(this.socketService.socketId);
     }
 
     createRoom = () => {
@@ -47,7 +47,7 @@ export class HomeController extends BaseController {
 
     private join = (event: string, room: number, callback?: any) => {
         this.socketService.emit(event, {
-            userId: this.socketService.getId(),
+            userId: this.socketService.socketId,
             room: room
         }, callback);
     };
