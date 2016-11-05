@@ -42,7 +42,7 @@ module.exports = function (config) {
         istanbul({
           instrumenter: require('isparta'),
           instrumenterConfig: { babel: { presets: ["es2015"] } },
-          ignore: ['**/node_modules/**', '**/dist/**', '**/tasks/**', '**/typings/**', '**/spec/**']
+          ignore: ['**/node_modules/**', '**/dist/**', '**/tasks/**', '**/typings/**', '**/spec/**', '**/index.ts']
         }),
         ['babelify', { presets: ["es2015"], extensions: [".ts", ".js"] }]
       ]
@@ -94,8 +94,11 @@ module.exports = function (config) {
     concurrency: Infinity,
 
     coverageReporter: {
-      type: 'html',
-      dir: 'coverage/'
+      dir: 'coverage/',
+      reporters: [
+        { type: "html", subdir: "html" },
+        { type: 'text-summary' }
+      ]
     }
   })
 }
