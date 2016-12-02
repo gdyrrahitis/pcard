@@ -41,10 +41,10 @@ module.exports = function (config) {
       transform: [
         istanbul({
           instrumenter: require('isparta'),
-          instrumenterConfig: { babel: { presets: ["es2015"] } },
+          instrumenterConfig: { babel: { presets: ["es2015"], retainLines : true } },
           ignore: ['**/node_modules/**', '**/dist/**', '**/tasks/**', '**/typings/**', '**/spec/**', '**/index.ts']
         }),
-        ['babelify', { presets: ["es2015"], extensions: [".ts", ".js"] }]
+        ['babelify', { presets: ["es2015"], extensions: [".ts", ".js"], retainLines : true }]
       ]
     },
 
@@ -94,6 +94,7 @@ module.exports = function (config) {
     concurrency: Infinity,
 
     coverageReporter: {
+      includeAllSources: true,
       dir: 'coverage/',
       reporters: [
         { type: "html", subdir: "html" },
