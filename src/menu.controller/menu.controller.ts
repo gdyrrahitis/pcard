@@ -5,7 +5,6 @@ export class MenuController extends BaseController {
     "use strict";
     private privateLeaveEvent: string = "private-leave";
     private root: string = "/";
-    private _id: string;
 
     constructor(protected $scope: IMenuControllerScope,
         private $location: ng.ILocationService,
@@ -15,7 +14,6 @@ export class MenuController extends BaseController {
         super($scope);
 
         this.setUniqueId("MenuController");
-        this._id = this.$localStorage.id;
 
         this.$scope.navigateToHome = this.navigateToHome;
     }
@@ -30,8 +28,9 @@ export class MenuController extends BaseController {
     }
 
     private get eventArguments() {
+        let id = this.$localStorage.id;
         return {
-            id: this._id
+            id: id
         };
     }
 }
