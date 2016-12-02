@@ -43,16 +43,16 @@ export class RoomController extends BaseController {
         this.showAllAttendeesExceptCurrentUser(data);
     }
 
-    private showAllAttendeesExceptCurrentUser = (data: any[]) => {
-        var attendees = data.filter(x => x.userId !== this.$localStorage.id);
-        this.$scope.attendees = attendees;
-    }
-
     private showCurrentUser = (data: any[]) => {
         var currentUser = data.filter(x => x.userId === this.$localStorage.id);
 
         if (currentUser.length > 0) {
             this.$scope.currentUser = currentUser[0];
         }
+    }
+
+    private showAllAttendeesExceptCurrentUser = (data: any[]) => {
+        var attendees = data.filter(x => x.userId !== this.$localStorage.id);
+        this.$scope.attendees = attendees;
     }
 }
