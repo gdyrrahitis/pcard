@@ -1,4 +1,4 @@
-# BNC, Agile poker planning real-time application
+# Agile poker planning real-time application
 
 A real-time application for teams to make estimations using the agile poker planning technique.
 Poker planning is all about estimation, so a poker planning session is about describing an agile story to team, with each individual (estimator), making estimations about this story.
