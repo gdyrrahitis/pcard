@@ -1,3 +1,15 @@
+# blacklist
+branches:
+  except:
+    - legacy
+    - experimental
+
+# whitelist
+branches:
+  only:
+    - master
+    - features
+
 language: node_js
 node_js:
   - "node"
