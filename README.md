@@ -1,6 +1,6 @@
 # BNC, Agile poker planning real-time application
 
-[![Build Status](https://travis-ci.org/gdyrrahitis/pcard.svg?branch=master)](https://travis-ci.org/gdyrrahitis/pcard)
+[![Build Status](https://travis-ci.org/gdyrrahitis/pcard.svg?branch=features)](https://travis-ci.org/gdyrrahitis/pcard)
 
 ## Synopsis
 
