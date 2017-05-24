@@ -2,5 +2,5 @@
     var gulp = require("gulp"),
         requireDir = require("require-dir");
 
-    requireDir("./tasks", { recurse: true });
+    requireDir("./src/tasks", { recurse: true });
 })();

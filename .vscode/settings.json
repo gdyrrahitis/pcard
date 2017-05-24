@@ -4,15 +4,18 @@
         "common/**/*.js": true,
         "spec/**/*.js": true,
         "server/**/*.js": true,
-        "src/**/*.js": true,
+        "src/client/**/*.js": true,
+        "src/server/**/*.js": true,
+        "src/common/**/*.js": true,
         "app.js": true,
         "karma.conf.js": false,
         "**/*.js.map": true,
         "**/.git": true,
         "**/.svn": true,
         "**/.hg": true,
-        "**/.DS_Store": true
-    }
-,
-"typescript.check.workspaceVersion": false
+        "**/.DS_Store": true,
+        "dist": false
+    },
+    "typescript.check.workspaceVersion": false,
+    "vsicons.presets.angular": false
 }

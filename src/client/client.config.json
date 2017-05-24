@@ -1,0 +1,36 @@
+{
+    "client": {
+        "baseUrl": "http://localhost:3001",
+        "basePath": "/",
+        "html5Mode": true,
+        "routes": [
+            {
+                "path": "/home",
+                "templateUrl": "controllers/home.controller/home.controller.html",
+                "controller": "homeController"
+            },
+            {
+                "path": "/room/:id",
+                "templateUrl": "controllers/room.controller/room.controller.html",
+                "controller": "roomController"
+            }
+        ]
+    },
+    "poker": {
+        "mountainGoat": [
+            "zero",
+            "half",
+            "one",
+            "two",
+            "three",
+            "five",
+            "eight",
+            "thirteen",
+            "twenty",
+            "forty",
+            "one-hundred",
+            "coffee",
+            "question"
+        ]
+    }
+}
