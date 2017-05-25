@@ -1,5 +1,5 @@
 {
-  "name": "bits-n-chips",
+  "name": "pcard",
   "version": "1.0.0",
   "description": "A scrum poker planning real-time application",
   "main": "gulpfile.js",
@@ -19,14 +19,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/gdyrrahitis/bitsnchips.git"
+    "url": "https://github.com/gdyrrahitis/pcard.git"
   },
   "author": "gdyrrahitis",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/gdyrrahitis/bitsnchips/issues"
+    "url": "https://github.com/gdyrrahitis/pcard/issues"
   },
-  "homepage": "https://github.com/gdyrrahitis/bitsnchips#readme",
+  "homepage": "https://github.com/gdyrrahitis/pcard#readme",
   "dependencies": {
     "angular": "^1.5.8",
     "angular-route": "^1.5.8",
