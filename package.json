@@ -82,6 +82,7 @@
     "tsify": "^1.0.7",
     "typescript": "^1.8.3",
     "vinyl-source-stream": "^1.1.0",
-    "watchify": "^3.7.0"
+    "watchify": "^3.7.0",
+    "typings": "^2.1.1"
   }
 }
