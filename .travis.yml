@@ -13,3 +13,7 @@ branches:
 language: node_js
 node_js:
   - "node"
+
+script: 
+  - typings install
+  - npm test
