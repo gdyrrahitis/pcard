@@ -1,8 +1,10 @@
 import { RoomController } from "./room.controller";
 
-describe("Room", () => {
+describe("Controller", () => {
+    let config: ClientAppConfig.ClientConfiguration = require("../../client.config.json");
+
     beforeEach(() => {
-        let SocketService = function ($rootScope: ng.IScope) {
+        let socketIo = function ($rootScope: ng.IScope) {
             let events: { eventName: string, callback: any }[] = [];
             let on = (eventName: string, callback: any) => {
                 events.push({ eventName: eventName, callback: callback });
@@ -21,11 +23,12 @@ describe("Room", () => {
             };
         };
         angular.module("app", ["ngSanitize", "ngRoute", "ngStorage"])
+            .constant("configuration", config)
             .controller("roomController", RoomController)
-            .factory("socketService", ["$rootScope", SocketService]);
+            .factory("socketService", ["$rootScope", socketIo]);
     });
 
-    describe("Controller", () => {
+    describe("Room", () => {
         let $scope: IRoomControllerScope;
         let controller: RoomController;
         let socketService;
@@ -88,8 +91,8 @@ describe("Room", () => {
         it("should set current user to the one that is found in the users list and attendees to the rest when 'show-attendees' event raises", () => {
             // arrange
             let user = { id: 1, userId: localStorageService.id };
-            let otherUser = {id: 1, userId: "qwerty"};
-            let users = [ otherUser, user ];
+            let otherUser = { id: 1, userId: "qwerty" };
+            let users = [otherUser, user];
 
             // act
             socketService.emit("show-attendees", users);

@@ -9,22 +9,19 @@ import { SocketService } from "./services/socket.service/socket.service";
 import { registerRoutes } from "./routes";
 import * as io from "socket.io-client";
 
-export module Bnc {
-    "use strict";
-    var config: ClientAppConfig.ClientConfiguration = require("./client.config.json");
+export module pcard {
+    let config: ClientAppConfig.ClientConfiguration = require("./client.config.json");
 
-    var socket = io.connect(config.client.baseUrl);
-    var app = ng.module("app", ["ngSanitize", "ngRoute", "ngStorage"])
+    let socket = io.connect(config.client.baseUrl);
+    let app = ng.module("app", ["ngSanitize", "ngRoute", "ngStorage"])
         .value("socket", socket)
+        .constant("configuration", config)
         .controller("homeController", HomeController)
         .controller("roomController", RoomController)
         .controller("menuController", MenuController)
         .factory("socketService", ["$rootScope", "socket", SocketService]);
 
-    // configure routes
-    registerRoutes(app,
-        [(v) => v.controller === "homeController", (v) => v.controller === "roomController"],
-        config.client.basePath);
+    registerRoutes(app, config);
 
     app.run(["$rootScope", "$location", "socketService",
         ($rootScope: ng.IScope, $location: ng.ILocationService, socketService: SocketService) => {

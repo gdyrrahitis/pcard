@@ -1,7 +1,8 @@
-export function registerRoutes(app: ng.IModule, routes: Predicate<ClientAppConfig.Route>[], defaultRoute?: string) {
-    var config: ClientAppConfig.ClientConfiguration = require("./client.config.json");
+export function registerRoutes(app: ng.IModule, config: ClientAppConfig.ClientConfiguration) {
 
     app.config(($routeProvider: ng.route.IRouteProvider, $locationProvider: ng.ILocationProvider) => {
+        let routes = [(v) => v.controller === "homeController", (v) => v.controller === "roomController"];
+
         $locationProvider.html5Mode(config.client.html5Mode);
 
         routes.forEach(v => {
@@ -13,7 +14,7 @@ export function registerRoutes(app: ng.IModule, routes: Predicate<ClientAppConfi
         });
 
         $routeProvider.otherwise({
-            redirectTo: defaultRoute || config.client.basePath
+            redirectTo: config.client.basePath || config.client.basePath
         });
     });
 }

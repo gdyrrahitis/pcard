@@ -1,18 +1,21 @@
 import { SocketService } from "../../services/socket.service/socket.service";
 import { BaseController } from "../base.controller/base.controller";
-var config: ClientAppConfig.ClientConfiguration = require("../../client.config.json");
 
 export class RoomController extends BaseController {
-    private mountainGoat = config.poker.mountainGoat;
+    private config: ClientAppConfig.ClientConfiguration;
+    private mountainGoat;
 
     constructor(protected $scope: IRoomControllerScope,
         private $log: ng.ILogService,
         private $routeParams: IRoomRoute,
         private $localStorage: ILocalStorage,
-        private socketService: SocketService
+        private socketService: SocketService,
+        private configuration: ClientAppConfig.ClientConfiguration
     ) {
         super($scope);
         this.setUniqueId("RoomController");
+        this.config = configuration;
+        this.mountainGoat = configuration.poker.mountainGoat;
 
         $scope.room = $routeParams.id;
         $scope.list = this.mountainGoat;
