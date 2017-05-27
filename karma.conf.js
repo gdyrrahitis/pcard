@@ -1,8 +1,13 @@
 // Karma configuration
 // Generated on Sun Sep 18 2016 21:11:13 GMT+0100 (GMT Daylight Time)
-var istanbul = require('browserify-istanbul')
+var istanbul = require('browserify-istanbul');
 require('babel-register');
 module.exports = function (config) {
+  var browsers = ["Chrome"];
+  if (process.env.TRAVIS) {
+    browsers = ['Chrome_travis_ci'];
+  }
+
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -83,9 +88,16 @@ module.exports = function (config) {
     autoWatch: true,
 
 
+
+    customLaunchers: {
+      Chrome_travis_ci: {
+        base: 'Chrome',
+        flags: ['--no-sandbox']
+      }
+    },
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome'],
+    browsers: browsers,
 
 
     // Continuous Integration mode
