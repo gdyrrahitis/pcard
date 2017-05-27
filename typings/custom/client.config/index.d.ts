@@ -1,8 +1,3 @@
-// declare module 'client.config.json!json' {
-//     var json: ClientConfiguration;
-//     export = json;
-// }
-
 declare module ClientAppConfig {
     interface Route {
         path: string,
