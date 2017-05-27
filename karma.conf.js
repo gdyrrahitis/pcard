@@ -23,11 +23,11 @@ module.exports = function (config) {
       { pattern: 'node_modules/karma-jasmine-html-reporter/src/css/jasmine.css' },
       { pattern: 'node_modules/karma-jasmine-html-reporter/src/lib/html.jasmine.reporter.js' },
       { pattern: 'node_modules/karma-jasmine-html-reporter/src/lib/adapter.js' },
+      "node_modules/ngstorage/ngStorage.js",
       'node_modules/angular/angular.js',
       'node_modules/angular-mocks/angular-mocks.js',
       "node_modules/angular-sanitize/angular-sanitize.js",
       "node_modules/angular-route/angular-route.js",
-      "node_modules/ngstorage/ngStorage.js",
       { pattern: 'src/client/client.config.json', watched: true, included: false, served: true },
       'src/client/**/*.js'
     ],
