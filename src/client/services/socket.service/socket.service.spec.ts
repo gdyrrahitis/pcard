@@ -1,4 +1,3 @@
-import "ngStorage";
 import { SocketService } from "./socket.service";
 var socketMock = require("socket-io-mock");
 

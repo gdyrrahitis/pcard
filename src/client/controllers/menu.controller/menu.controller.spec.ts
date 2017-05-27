@@ -1,4 +1,3 @@
-import "ngStorage";
 import { MenuController } from "./menu.controller";
 
 describe("MenuController spec", () => {

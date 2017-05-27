@@ -1,4 +1,3 @@
-import "ngStorage";
 import { RoomController } from "./room.controller";
 
 describe("Controller", () => {

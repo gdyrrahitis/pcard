@@ -1,7 +1,7 @@
 import * as ng from "angular";
 import "angular-sanitize";
 import "angular-route";
-import "ngStorage";
+import "ngstorage";
 import { HomeController } from "./controllers/home.controller/home.controller";
 import { RoomController } from "./controllers/room.controller/room.controller";
 import { MenuController } from "./controllers/menu.controller/menu.controller";
