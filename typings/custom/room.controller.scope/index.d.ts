@@ -1,4 +1,3 @@
-/// <reference path="../../globals/angular/index.d.ts" />
 /// <reference path="../user/index.d.ts" />
 /// <reference path="../user/index.d.ts" />
 

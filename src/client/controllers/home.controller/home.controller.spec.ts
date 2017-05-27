@@ -1,12 +1,16 @@
+import * as angular from "angular";
 import { HomeController } from "./home.controller";
 
-describe("HomeController spec", () => {
+describe("Controller", () => {
 
     beforeEach(() => {
         let SocketService = function () {
             return {
+                // tslint:disable-next-line:no-empty
                 on: function () { },
+                // tslint:disable-next-line:no-empty
                 emit: function () { },
+                // tslint:disable-next-line:no-empty
                 getId: function () { }
             };
         };
@@ -15,7 +19,7 @@ describe("HomeController spec", () => {
             .factory("socketService", ["$rootScope", SocketService]);
     });
 
-    describe("Controller", () => {
+    describe("Home", () => {
         let $scope: IHomeControllerScope;
         let controller: HomeController;
         let service;

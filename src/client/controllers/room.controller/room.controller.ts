@@ -1,5 +1,6 @@
 import { SocketService } from "../../services/socket.service/socket.service";
 import { BaseController } from "../base.controller/base.controller";
+import * as ng from "angular";
 
 export class RoomController extends BaseController {
     private config: ClientAppConfig.ClientConfiguration;

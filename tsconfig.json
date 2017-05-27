@@ -7,10 +7,19 @@
         "target": "es6",
         "removeComments": false,
         "allowSyntheticDefaultImports": true,
-        "suppressExcessPropertyErrors": true
+        "suppressExcessPropertyErrors": true,
+        "baseUrl": ".",
+        "paths": {
+            "*": [
+                "./typings/custom/*"
+            ]
+        },
+        "typeRoots": [
+            "node_modules/@types",
+            "typings/custom"
+        ]
     },
     "files": [
-        "./typings/index.d.ts",
         "./app.ts",
         "./src/server/setup.socket.ts",
         "./src/server/socket.io/socket.ts",
@@ -43,7 +52,6 @@
         "node_modules",
         "/node_modules",
         "../node_modules",
-        "typings",
-        "typings/globals"
+        "typings"
     ]
 }

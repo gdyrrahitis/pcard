@@ -1,3 +1,4 @@
+import * as angular from "angular";
 import { SocketService } from "./socket.service";
 var socketMock = require("socket-io-mock");
 
@@ -15,7 +16,7 @@ describe("Services", () => {
             }]);
     });
 
-    describe("SocketService spec", () => {
+    describe("Socket", () => {
         let $scope;
         let service: SocketService;
         beforeEach(angular.mock.module("app"));

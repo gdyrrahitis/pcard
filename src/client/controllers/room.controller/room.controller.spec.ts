@@ -1,3 +1,4 @@
+import * as angular from "angular";
 import { RoomController } from "./room.controller";
 
 describe("Controller", () => {
@@ -53,11 +54,7 @@ describe("Controller", () => {
         it("should broadcast ban when user is banned", () => {
             // arrange
             spyOn(socketService, "emit");
-            let user: IUser = {
-                id: 1,
-                room: 5,
-                userId: localStorageService.id
-            };
+            let user: IUser = { id: 1, room: 5, userId: localStorageService.id };
 
             // act
             controller.banUser(user);
@@ -90,9 +87,9 @@ describe("Controller", () => {
         // tslint:disable-next-line:max-line-length
         it("should set current user to the one that is found in the users list and attendees to the rest when 'show-attendees' event raises", () => {
             // arrange
-            let user = { id: 1, userId: localStorageService.id };
-            let otherUser = { id: 1, userId: "qwerty" };
-            let users = [otherUser, user];
+            let user: IUser = { id: 1, room: 1, userId: localStorageService.id };
+            let otherUser : IUser = { id: 1, room: 1, userId: "qwerty" };
+            let users: IUser[] = [otherUser, user];
 
             // act
             socketService.emit("show-attendees", users);

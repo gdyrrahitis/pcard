@@ -1,5 +1,4 @@
 node_modules
-src/typings
 dist
 src/client/**/*.js
 src/**/*.js.map
@@ -12,11 +11,7 @@ app.js.map
 npm-debug.log
 !karma.conf.js
 !gulpfile.js
-!/tasks/*.js
 !systemjs-config.js
 !src/tasks/*.js
 qq
-!typings
-typings/*
-!typings/custom/
 coverage

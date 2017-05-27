@@ -1,12 +1,16 @@
+import * as angular from "angular";
 import { MenuController } from "./menu.controller";
 
-describe("MenuController spec", () => {
+describe("Controller", () => {
 
     beforeEach(() => {
         let SocketService = function () {
             return {
+                // tslint:disable-next-line:no-empty
                 on: function () { },
+                // tslint:disable-next-line:no-empty
                 emit: function () { },
+                // tslint:disable-next-line:no-empty
                 getId: function () { }
             };
         };
@@ -15,7 +19,7 @@ describe("MenuController spec", () => {
             .factory("socketService", ["$rootScope", SocketService]);
     });
 
-    describe("Controller", () => {
+    describe("Menu", () => {
         let $scope: IMenuControllerScope;
         let controller: MenuController;
         let socketService;
@@ -42,14 +46,14 @@ describe("MenuController spec", () => {
         }));
 
         it("should navigate to home", () => {
-            // Arrange
-            let id = "5"
+            // arrange
+            let id = "5";
             localStorageService.id = id;
 
-            // Act
+            // act
             controller.navigateToHome();
 
-            // Assert
+            // assert
             expect(socketService.emit).toHaveBeenCalled();
             expect(socketService.emit).toHaveBeenCalledWith("private-leave", {id: id});
             expect(locationService.path).toHaveBeenCalledWith("/");
