@@ -1,5 +1,5 @@
+import "ngStorage";
 import { SocketService } from "./socket.service";
-var config: ClientAppConfig.ClientConfiguration = require("../../client.config.json");
 var socketMock = require("socket-io-mock");
 
 describe("Services", () => {

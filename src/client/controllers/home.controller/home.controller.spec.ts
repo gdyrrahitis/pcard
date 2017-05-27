@@ -1,3 +1,4 @@
+import "ngStorage";
 import { HomeController } from "./home.controller";
 
 describe("HomeController spec", () => {
