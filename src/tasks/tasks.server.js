@@ -9,8 +9,7 @@ gulp.task("server", function () {
 });
 
 gulp.task("gulp-coverage", function () {W
-    gulp.src(variables.basePaths.coverage.path)
-        .pipe(open());
+    gulp.src(variables.basePaths.coverage.path).pipe(open());
 });
 
 gulp.task('nodemon', ["build"], function (cb) {

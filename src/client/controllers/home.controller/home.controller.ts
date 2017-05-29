@@ -20,7 +20,6 @@ export class HomeController extends BaseController {
         this.socketService.on("room-occupied", this.accessDenied);
         this.socketService.on("all-rooms-occupied", this.allRoomsOccupied);
         this.socketService.on("room-not-found", this.roomNotFound);
-
         this.disconnectUserIfGetsToHome(this.socketService.socketId);
     }
 
@@ -54,6 +53,7 @@ export class HomeController extends BaseController {
         if (!id) {
             return;
         }
+
         this.socketService.emit("disconnect", id);
     }
 

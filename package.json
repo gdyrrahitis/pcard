@@ -7,14 +7,13 @@
     "babel": "./node_modules/.bin/babel-node --presets es2015",
     "test": "npm run tsc && karma start karma.conf.js",
     "start": "concurrently \"npm run tsc:w\" \"npm run gulp-nodemon\" ",
-    "start:prod": "npm run server",
-    "gulp-server": "gulp build:w",
+    "start:prod": "gulp build && npm run server",
+    "gulp-server:watch": "gulp build:w",
     "gulp-nodemon": "gulp nodemon",
     "gulp-coverage": "gulp gulp-coverage",
     "server": "node server/server.js",
     "tsc": "tsc",
     "tsc:w": "tsc -w",
-    "tsc:batch": "tsc",
     "open:coverage": "npm run gulp-coverage"
   },
   "repository": {
@@ -86,11 +85,13 @@
     "karma-coverage": "^1.1.1",
     "karma-htmlfile-reporter": "^0.1.2",
     "karma-jasmine": "^1.1.0",
+    "karma-ng-html2js-preprocessor": "^1.0.0",
     "merge-stream": "^1.0.0",
     "require-dir": "^0.3.0",
     "run-sequence": "^1.2.2",
     "socket-io-mock": "^1.0.1",
     "typescript": "^2.3.3",
-    "vinyl-source-stream": "^1.1.0"
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "^3.9.0"
   }
 }

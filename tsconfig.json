@@ -8,12 +8,6 @@
         "removeComments": false,
         "allowSyntheticDefaultImports": true,
         "suppressExcessPropertyErrors": true,
-        "baseUrl": ".",
-        "paths": {
-            "*": [
-                "./typings/custom/*"
-            ]
-        },
         "typeRoots": [
             "node_modules/@types",
             "typings/custom"

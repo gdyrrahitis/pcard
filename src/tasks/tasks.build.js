@@ -7,7 +7,6 @@ var gulp = require("gulp"),
     source = require('vinyl-source-stream'),
     nodemon = require("gulp-nodemon");
 
-// Build
 gulp.task("build", function (callback) {
     sequence("clean", ["sass", "bundle", "fonts"], callback);
 });

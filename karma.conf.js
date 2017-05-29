@@ -4,8 +4,18 @@ var istanbul = require('browserify-istanbul');
 require('babel-register');
 module.exports = function (config) {
   var browsers = ["Chrome"];
+  var logLevel = config.LOG_INFO;
+  var singleRun = true;
+  var autoWatch = false
+  var env = process.env.NODE_ENV || "development";
   if (process.env.TRAVIS) {
     browsers = ['Chrome_travis_ci'];
+  }
+
+  if (!process.env.TRAVIS && env === "development") {
+    logLevel = config.LOG_DEBUG;
+    autoWatch = true;
+    singleRun = false;
   }
 
   config.set({
@@ -53,8 +63,7 @@ module.exports = function (config) {
           instrumenter: require('isparta'),
           instrumenterConfig: { babel: { presets: ["es2015"], retainLines: true } },
           ignore: ['**/node_modules/**', '**/dist/**', '**/tasks/**', '**/typings/**', '**/index.ts']
-        }),
-        //['babelify', { presets: ["es2015"], extensions: [".ts", ".js"], retainLines : true }]
+        })
       ]
     },
 
@@ -81,13 +90,11 @@ module.exports = function (config) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_DEBUG,
+    logLevel: logLevel,
 
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: true,
-
-
+    autoWatch: autoWatch,
 
     customLaunchers: {
       Chrome_travis_ci: {
@@ -102,7 +109,7 @@ module.exports = function (config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: true,
+    singleRun: singleRun,
 
     // Concurrency level
     // how many browser should be started simultaneous

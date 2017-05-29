@@ -2,71 +2,130 @@ import * as angular from "angular";
 import { HomeController } from "./home.controller";
 
 describe("Controller", () => {
-
+    let socketIo;
     beforeEach(() => {
-        let SocketService = function () {
+        socketIo = function ($rootScope: ng.IScope) {
+            let events: { eventName: string, callback: any }[] = [];
+            let on = (eventName: string, callback: any) => {
+                events.push({ eventName: eventName, callback: callback });
+            };
+
+            let emit = (eventName: string, data: any) => {
+                let event = events.filter(evt => evt.eventName === eventName)[0];
+                if (event) {
+                    event.callback(data);
+                }
+            };
             return {
-                // tslint:disable-next-line:no-empty
-                on: function () { },
-                // tslint:disable-next-line:no-empty
-                emit: function () { },
-                // tslint:disable-next-line:no-empty
-                getId: function () { }
+                on: on,
+                emit: emit,
+                socketId: "socketId1234"
             };
         };
         angular.module("app", ["ngSanitize", "ngRoute", "ngStorage"])
             .controller("homeController", HomeController)
-            .factory("socketService", ["$rootScope", SocketService]);
+            .factory("socketService", ["$rootScope", socketIo]);
     });
 
     describe("Home", () => {
         let $scope: IHomeControllerScope;
-        let controller: HomeController;
+        let $controllerProvider;
         let service;
 
         beforeEach(angular.mock.module("app"));
-        beforeEach(angular.mock.inject(function ($rootScope, $controller, _socketService_) {
+        beforeEach(angular.mock.inject(function ($rootScope: any, $controller: any, _socketService_: any) {
             $scope = <IHomeControllerScope>$rootScope.$new();
             service = _socketService_;
-            controller = <HomeController>$controller("homeController", {
-                $scope: $scope,
-                service
-            });
+            $controllerProvider = $controller;
         }));
 
-        xit("should set $scope.error to with message when room not found", () => {
+        it("should set $scope.error to with message when room not found", () => {
             // arrange | act
+            <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
+            service.emit("room-not-found", []);
 
             // assert
             expect($scope.error).toBe("Could not find room.");
         });
 
-        xit("should set $scope.error to with message regarding access when access is denied to room", () => {
-            expect(false).toBeTruthy();
+        it("should set $scope.error to with message regarding access when access is denied to room", () => {
+            // arrange | act
+            <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
+            service.emit("room-occupied", []);
+
+            // assert
+            expect($scope.error).toBe("Cannot access room because it is already booked!");
         });
 
-        xit("should set $scope.error to with message regarding rooms when all rooms are busy", () => {
-            expect(false).toBeTruthy();
+        it("should set $scope.error to with message regarding rooms when all rooms are busy", () => {
+            // arrange | act
+            <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
+            service.emit("all-rooms-occupied", []);
+
+            // assert
+            expect($scope.error).toBe("All rooms are busy. Try again later!");
         });
 
-        xit("should not emit 'disconnect' when id is set", () => {
-            expect(false).toBeTruthy();
+        it("should emit 'disconnect' when id is set", () => {
+            // arrange | act
+            spyOn(service, "emit");
+            <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
+
+            // assert
+            expect(service.emit).toHaveBeenCalledWith("disconnect", socketIo().socketId);
         });
 
-        xit("should emit 'disconnect' when id is not set", () => {
-            expect(false).toBeTruthy();
+        it("should not emit 'disconnect' when id is not set", () => {
+            // arrange | act
+            service.socketId = undefined;
+            spyOn(service, "emit");
+            <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
+
+            // assert
+            expect(service.emit).not.toHaveBeenCalled();
         });
 
-        xit("should emit 'create-private' when createRoom is called", () => {
-            expect(false).toBeTruthy();
+        it("should emit 'create-private' when createRoom is called", () => {
+            // arrange
+            let controller = <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
+            spyOn(service, "emit");
+
+            // act
+            controller.createRoom();
+
+            // assert
+            expect(service.emit).toHaveBeenCalledWith("create-private", { userId: service.socketId, room: 1 }, jasmine.any(Function));
         });
 
-        xit("should emit 'join-private' when submitRoom is called and form is valid", () => {
-            expect(false).toBeTruthy();
+        it("should emit 'join-private' when submitRoom is called and form is valid", () => {
+            // arrange
+            let controller = <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
+            spyOn(service, "emit");
+            let form = {
+                $valid: true
+            };
+            $scope.room = 2;
+
+            // act
+            controller.submitRoom(<any>form);
+
+            // assert
+            expect(service.emit).toHaveBeenCalledWith("join-private", { userId: service.socketId, room: 2 }, jasmine.any(Function));
         });
 
-        xit("should not emit 'join-private' when submitRoom is called and form is not valid", () => {
-            expect(false).toBeTruthy();
+        it("should not emit 'join-private' when submitRoom is called and form is not valid", () => {
+            // arrange
+            let controller = <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
+            spyOn(service, "emit");
+            let form = {
+                $valid: false
+            };
+
+            // act
+            controller.submitRoom(<any>form);
+
+            // assert
+            expect(service.emit).not.toHaveBeenCalled();
         });
     });
 });
