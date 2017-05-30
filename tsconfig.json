@@ -13,39 +13,8 @@
             "typings/custom"
         ]
     },
-    "files": [
-        "./app.ts",
-        "./src/server/setup.socket.ts",
-        "./src/server/socket.io/socket.ts",
-        "./src/server/socket.io/handlers.ts",
-        "./src/server/socket.io/mappings.ts",
-        "./src/server/express.middlewares.ts",
-        "./src/client/controllers/home.controller/home.controller.ts",
-        "./src/client/controllers/menu.controller/menu.controller.ts",
-        "./src/client/controllers/room.controller/room.controller.ts",
-        "./src/client/services/socket.service/socket.service.ts",
-        "./src/client/main.ts",
-        "./src/client/routes.ts",
-        "./src/server/socket.io/handlers.spec.ts",
-        "./src/client/controllers/base.controller/base.controller.spec.ts",
-        "./src/client/controllers/home.controller/home.controller.spec.ts",
-        "./src/client/controllers/menu.controller/menu.controller.spec.ts",
-        "./src/client/controllers/room.controller/room.controller.spec.ts",
-        "./src/client/services/socket.service/socket.service.spec.ts",
-        "./src/client/routes.spec.ts",
-        "./src/common/collections/f.collections.spec.ts",
-        "./src/common/objects/f.objects.spec.ts",
-        "./src/common/operations/f.operations.spec.ts",
-        "./src/common/transforms/f.transforms.spec.ts",
-        "./src/common/collections/f.collections.ts",
-        "./src/common/objects/f.objects.ts",
-        "./src/common/operations/f.operations.ts",
-        "./src/common/transforms/f.compose.ts"
-    ],
     "exclude": [
         "node_modules",
-        "/node_modules",
-        "../node_modules",
         "typings"
     ]
 }
