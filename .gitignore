@@ -4,6 +4,8 @@ src/client/**/*.js
 src/**/*.js.map
 src/server/**/*.js
 src/server/**/*.js.map
+src/domain/**/*.js
+src/domain/**/*.js.map
 src/common/**/*.js
 src/common/**/*.js.map
 app.js
