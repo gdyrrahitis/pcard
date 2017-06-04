@@ -30,7 +30,7 @@ export class RoomController extends BaseController {
 
         this.$localStorage.id = this.socketService.socketId;
         this.socketService.on("room-show-all", this.showAttendees);
-        this.socketService.emit("room-get-all", $routeParams.id);
+        this.socketService.emit("room-get-all", { roomId: $routeParams.id });
     }
 
     public selectCard = (element) => {
@@ -39,7 +39,7 @@ export class RoomController extends BaseController {
     }
 
     public banUser = (user: IUser) => {
-        this.socketService.emit("ban", user);
+        this.socketService.emit("ban", { roomId: this.$routeParams.id, userId: user.id });
     }
 
     private showAttendees = (users: UserRole[]) => {

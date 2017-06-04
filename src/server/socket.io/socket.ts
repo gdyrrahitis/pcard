@@ -58,6 +58,7 @@ export class Socket {
                 if (room) {
                     room.removeUser(data.userId);
                     socket.server.to(room.id).emit(roomShowAllEvent, room.users);
+                    socket.disconnect(true);
                 }
             }
 
@@ -117,7 +118,7 @@ export class Socket {
                 let room = this.rooms.filter(r => r.id == data.roomId)[0];
                 if (room) {
                     room.removeUser(data.userId);
-                    socket.server.to(room.id).emit(userBannedEvent);
+                    this.io.to(data.userId).emit(userBannedEvent);
                     socket.server.to(room.id).emit(roomShowAllEvent, room.users);
                 }
             }

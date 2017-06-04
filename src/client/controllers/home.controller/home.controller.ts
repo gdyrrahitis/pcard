@@ -36,7 +36,8 @@ export class HomeController extends BaseController {
 
     public submitRoom = (form: ng.IFormController) => {
         if (form.$valid) {
-            let data = { name: this.$scope.name, roomId: this.$scope.room };
+            let data = { name: this.$scope.guestName, roomId: this.$scope.room };
+
             this.socketService.emit("room-join", data, (response) => {
                 if (response.access) {
                     this.$location.path(`/room/${this.$scope.room}`);
