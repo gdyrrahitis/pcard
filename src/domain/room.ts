@@ -3,7 +3,7 @@ import { Deck } from "./deck";
 import { Card } from "./card";
 
 export class Room {
-    private users: UserRole[] = [];
+    private _users: UserRole[] = [];
     private _deck: Deck;
     constructor(public id: string) {
         if (!id) {
@@ -16,9 +16,13 @@ export class Room {
     public get deck(): Deck {
         return this._deck;
     }
+    
+    public get users(): UserRole[] {
+        return JSON.parse(JSON.stringify(this._users));
+    }
 
     public getUser(id: string): UserRole {
-        return this.users.filter(u => u.id == id)[0];
+        return this._users.filter(u => u.id == id)[0];
     }
 
     public addUser(user: User) {
@@ -26,19 +30,19 @@ export class Room {
             throw new Error("Cannot add user with same id");
         }
 
-        this.users.push(this.IsAnyUser() ?
+        this._users.push(this.IsAnyUser() ?
             new Guest(user.id, user.name) :
             new Moderator(user.id, user.name));
     }
 
     private IsAnyUser(): boolean {
-        return this.users.length !== 0;
+        return this._users.length !== 0;
     }
 
     public removeUser(id: string) {
-        let index = this.users.findIndex(u => u.id === id);
+        let index = this._users.findIndex(u => u.id === id);
         if (index !== -1) {
-            this.users.splice(index, 1);
+            this._users.splice(index, 1);
         }
     }
 

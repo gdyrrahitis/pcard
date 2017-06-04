@@ -29,8 +29,8 @@ var libPaths = {
     dest: {
         js: `${basePaths.dest.root}/js/libs`,
         css: `${basePaths.dest.root}/css/libs`,
-        fonts: `${basePaths.dest.root}/css/fonts`,
-        fontsBootstrap: `${basePaths.dest.root}/css/fonts/bootstrap`
+        fonts: `${basePaths.dest.root}/css/libs/fonts`,
+        fontsBootstrap: `${basePaths.dest.root}/css/libs/fonts/bootstrap`
     }
 };
 

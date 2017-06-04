@@ -5,13 +5,13 @@
         "html5Mode": true,
         "routes": [
             {
-                "path": "/home",
-                "templateUrl": "controllers/home.controller/home.controller.html",
+                "path": "/",
+                "templateUrl": "src/client/controllers/home.controller/home.controller.html",
                 "controller": "homeController"
             },
             {
                 "path": "/room/:id",
-                "templateUrl": "controllers/room.controller/room.controller.html",
+                "templateUrl": "src/client/controllers/room.controller/room.controller.html",
                 "controller": "roomController"
             }
         ]

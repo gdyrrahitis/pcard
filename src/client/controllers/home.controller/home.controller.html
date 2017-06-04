@@ -1,5 +1,5 @@
 <div id="{{controllerId}}">
-    <h1>BNC Agile poker planning</h1>
+    <h1>Agile poker planning</h1>
     <div class="row">
         <div class="col-md-12">
             <div class="row">
@@ -9,8 +9,7 @@
                         <div class="form-group" ng-class="{ 'has-error': (RoomForm.$submitted && RoomForm.room.$invalid) || (RoomForm.room.$invalid && !RoomForm.room.$pristine) }">
                             <div class="input-group input-group-lg form-group">
                                 <div class="input-group-addon">#</div>
-                                <input class="form-control input-lg" type="number" min="0" required name="room" ng-model="room" placeholder="Room number"
-                                />
+                                <input class="form-control input-lg" type="text" required name="room" ng-model="room" placeholder="Room id" />
                             </div>
                             <button type="submit" class="btn btn-primary btn-lg" ng-disabled="(RoomForm.$submitted && RoomForm.room.$invalid) || (RoomForm.room.$invalid && !RoomForm.room.$pristine)">Go</button>
                             <p ng-show="(RoomForm.$submitted && RoomForm.room.$invalid) || (RoomForm.room.$invalid && !RoomForm.room.$pristine)" class="help-block">Enter a valid room number.</p>

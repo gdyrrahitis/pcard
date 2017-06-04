@@ -8,6 +8,6 @@ declare interface IRoomControllerScope extends ng.IScope {
     selectedList: any[];
     selectCard: (element: any) => void;
     banUser: (user: IUser) => void;
-    currentUser: IUser;
+    currentUser: any;
     attendees: any[]
 }

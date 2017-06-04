@@ -1,5 +1,6 @@
 import * as angular from "angular";
 import { RoomController } from "./room.controller";
+import { UserRole, Moderator, Guest } from "../../../domain/user";
 
 describe("Controller", () => {
     let config: ClientAppConfig.ClientConfiguration = require("../../client.config.json");
@@ -37,6 +38,7 @@ describe("Controller", () => {
         let localStorageService;
 
         beforeEach(angular.mock.module("app"));
+
         beforeEach(angular.mock.inject(($rootScope, $controller, _socketService_, $localStorage) => {
             $scope = <IRoomControllerScope>$rootScope.$new();
             socketService = _socketService_;
@@ -51,53 +53,59 @@ describe("Controller", () => {
             });
         }));
 
-        it("should broadcast ban when user is banned", () => {
-            // arrange
-            spyOn(socketService, "emit");
-            let user: IUser = { id: 1, room: 5, userId: localStorageService.id };
+        describe("ban", () => {
+            it("should broadcast ban when user is banned", () => {
+                // arrange
+                spyOn(socketService, "emit");
+                let user: IUser = { id: 1, room: 5, userId: localStorageService.id };
 
-            // act
-            controller.banUser(user);
+                // act
+                controller.banUser(user);
 
-            // assert
-            expect(socketService.emit).toHaveBeenCalledWith("ban", user);
+                // assert
+                expect(socketService.emit).toHaveBeenCalledWith("ban", user);
+            });
         });
 
-        it("should push new items in selectedList", () => {
-            // arrange
-            let element = { card: "card" };
+        describe("selectCard", () => {
+            it("should push new items in selectedList", () => {
+                // arrange
+                let element = { card: "card" };
 
-            // act
-            controller.selectCard(element);
+                // act
+                controller.selectCard(element);
 
-            // assert
-            expect($scope.selectedItem).toBe(element.card);
-            expect($scope.selectedList.length).toBe(1);
+                // assert
+                expect($scope.selectedItem).toBe(element.card);
+                expect($scope.selectedList.length).toBe(1);
+            });
         });
 
-        it("should return undefined current user and attendees when 'show-attendees' event raises with empty data", () => {
-            // arrange | Act
-            socketService.emit("show-attendees", []);
+        describe("room-show-all", () => {
+            it("should return undefined current user and attendees when 'room-show-all' event raises with empty data", () => {
+                // arrange | Act
+                socketService.emit("room-show-all", []);
 
-            // assert
-            expect($scope.currentUser).toBeUndefined();
-            expect($scope.attendees.length).toBe(0);
-        });
+                // assert
+                expect($scope.currentUser).toBeUndefined();
+                expect($scope.attendees.length).toBe(0);
+            });
 
-        // tslint:disable-next-line:max-line-length
-        it("should set current user to the one that is found in the users list and attendees to the rest when 'show-attendees' event raises", () => {
-            // arrange
-            let user: IUser = { id: 1, room: 1, userId: localStorageService.id };
-            let otherUser : IUser = { id: 1, room: 1, userId: "qwerty" };
-            let users: IUser[] = [otherUser, user];
+            // tslint:disable-next-line:max-line-length
+            it("should set current user to the one that is found in the users list and attendees to the rest when 'room-show-all' event raises", () => {
+                // arrange
+                let user: UserRole = new Moderator(localStorageService.id, "George");
+                let otherUser: UserRole = new Guest("123", "John");
+                let users: UserRole[] = [otherUser, user];
 
-            // act
-            socketService.emit("show-attendees", users);
+                // act
+                socketService.emit("room-show-all", users);
 
-            // assert
-            expect($scope.currentUser).toBe(user);
-            expect($scope.attendees.length).toBe(1);
-            expect($scope.attendees[0]).toBe(otherUser);
+                // assert
+                expect($scope.currentUser).toBe(user);
+                expect($scope.attendees.length).toBe(1);
+                expect($scope.attendees[0]).toBe(otherUser);
+            });
         });
     });
 });

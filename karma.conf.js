@@ -39,7 +39,8 @@ module.exports = function (config) {
       "node_modules/angular-sanitize/angular-sanitize.js",
       "node_modules/angular-route/angular-route.js",
       { pattern: 'src/client/client.config.json', watched: true, included: false, served: true },
-      'src/client/**/*.js'
+      'src/client/**/*.js',
+      "src/domain/**/*.js"
     ],
 
 

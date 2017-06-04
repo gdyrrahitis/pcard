@@ -24,11 +24,9 @@ export module pcard {
     registerRoutes(app, config);
 
     app.run(["$rootScope", "$location", "socketService",
-        ($rootScope: ng.IScope, $location: ng.ILocationService, socketService: SocketService) => {
-            socketService.on("user-banned", () => {
-                $location.path("/");
-            });
-        }]);
+        ($rootScope: ng.IScope, $location: ng.ILocationService, socketService: SocketService) => 
+            socketService.on("user-banned", () => $location.path("/"))
+    ]);
 
     export var Application = app;
 }

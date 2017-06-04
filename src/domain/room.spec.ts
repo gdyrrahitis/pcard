@@ -207,7 +207,7 @@ describe("Model", () => {
                 // arrange
                 let room = new Room(roomId);
                 let user: User = { id: "user1", name: "George" };
-                room.addUser(user); 
+                room.addUser(user);
                 room.associate(user.id)("one");
 
                 // act
@@ -236,6 +236,49 @@ describe("Model", () => {
 
                 // act | assert
                 expect(() => room.disassociate(user.id)("fake")).toThrowError("Card 'fake' does not exist");
+            });
+        });
+
+        describe("users", () => {
+            it("should get a copy of users array", () => {
+                // arrange
+                let room = new Room(roomId);
+                let user1: User = { id: "user1", name: "George" };
+                let user2: User = { id: "user2", name: "John" };
+                room.addUser(user1);
+                room.addUser(user2);
+
+                // act
+                let result = room.users;
+
+                // assert
+                expect(result.length).toBe(2);
+                expect(result[0].id).toBe("user1");
+                expect(result[0].name).toBe("George");
+                expect(result[1].id).toBe("user2");
+                expect(result[1].name).toBe("John");
+            });
+
+            it("should array be a copy object", () => {
+                // arrange
+                let room = new Room(roomId);
+                let user1: User = { id: "user1", name: "George" };
+                let user2: User = { id: "user2", name: "John" };
+                room.addUser(user1);
+                room.addUser(user2);
+
+                // act
+                let result = room.users;
+                result[0].id = "user3";
+                let array = room.users;
+            
+                // assert
+                expect(result.length).toBe(2);
+                expect(result[0].id).toBe("user3");
+                expect(result[0].name).toBe("George");
+                expect(result[1].id).toBe("user2");
+                expect(result[1].name).toBe("John");
+                expect(array[0].id).toBe("user1");
             });
         });
     });

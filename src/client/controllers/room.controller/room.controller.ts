@@ -1,5 +1,6 @@
 import { SocketService } from "../../services/socket.service/socket.service";
 import { BaseController } from "../base.controller/base.controller";
+import { UserRole } from "../../../domain/user";
 import * as ng from "angular";
 
 export class RoomController extends BaseController {
@@ -15,6 +16,7 @@ export class RoomController extends BaseController {
     ) {
         super($scope);
         this.setUniqueId("RoomController");
+        
         this.config = configuration;
         this.mountainGoat = configuration.poker.mountainGoat;
 
@@ -27,8 +29,8 @@ export class RoomController extends BaseController {
         $scope.currentUser = undefined;
 
         this.$localStorage.id = this.socketService.socketId;
-        this.socketService.on("show-attendees", this.showAttendees);
-        this.socketService.emit("get-all-attendees", $routeParams.id);
+        this.socketService.on("room-show-all", this.showAttendees);
+        this.socketService.emit("room-get-all", $routeParams.id);
     }
 
     public selectCard = (element) => {
@@ -40,21 +42,20 @@ export class RoomController extends BaseController {
         this.socketService.emit("ban", user);
     }
 
-    private showAttendees = (data: any[]) => {
-        this.showCurrentUser(data);
-        this.showAllAttendeesExceptCurrentUser(data);
+    private showAttendees = (users: UserRole[]) => {
+        this.showCurrentUser(users);
+        this.showAllAttendeesExceptCurrentUser(users);
     }
 
-    private showCurrentUser = (data: any[]) => {
-        var currentUser = data.filter(x => x.userId === this.$localStorage.id)[0];
-
+    private showCurrentUser = (users: UserRole[]) => {
+        var currentUser = users.filter(x => x.id === this.$localStorage.id)[0];
         if (currentUser) {
             this.$scope.currentUser = currentUser;
         }
     }
 
-    private showAllAttendeesExceptCurrentUser = (data: any[]) => {
-        var attendees = data.filter(x => x.userId !== this.$localStorage.id);
+    private showAllAttendeesExceptCurrentUser = (users: UserRole[]) => {
+        var attendees = users.filter(x => x.id !== this.$localStorage.id);
         this.$scope.attendees = attendees;
     }
 }
