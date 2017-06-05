@@ -154,7 +154,7 @@ describe("Controller", () => {
             it("should emit 'room-join' when submitRoom is called and form is valid", () => {
                 // arrange
                 let controller = <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
-                $scope.name = "George";
+                $scope.guestName = "George";
                 spyOn(service, "emit");
                 let form = {
                     $valid: true

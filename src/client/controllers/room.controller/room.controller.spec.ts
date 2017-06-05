@@ -34,20 +34,25 @@ describe("Controller", () => {
         let $scope: IRoomControllerScope;
         let controller: RoomController;
         let socketService;
-        let locationService;
+        let $logProvider;
+        let logService;
         let localStorageService;
+        let $routeParams;
 
         beforeEach(angular.mock.module("app"));
 
-        beforeEach(angular.mock.inject(($rootScope, $controller, _socketService_, $localStorage) => {
+
+        beforeEach(angular.mock.inject(($rootScope, $controller, _socketService_, _$log_, _$routeParams_, $localStorage) => {
             $scope = <IRoomControllerScope>$rootScope.$new();
             socketService = _socketService_;
-
+            logService = _$log_;
             localStorageService = $localStorage;
+            $routeParams = _$routeParams_;
 
             controller = <RoomController>$controller("roomController", {
                 $scope: $scope,
-                locationService,
+                logService,
+                $routeParams,
                 localStorageService,
                 socketService
             });
@@ -57,13 +62,14 @@ describe("Controller", () => {
             it("should broadcast ban when user is banned", () => {
                 // arrange
                 spyOn(socketService, "emit");
-                let user: IUser = { id: 1, room: 5, userId: localStorageService.id };
+                let user: UserRole = new Moderator(localStorageService.id, "Ggear");
+                $routeParams.id = "abc123";
 
                 // act
                 controller.banUser(user);
 
                 // assert
-                expect(socketService.emit).toHaveBeenCalledWith("ban", user);
+                expect(socketService.emit).toHaveBeenCalledWith("ban", { roomId: $routeParams.id, userId: user.id });
             });
         });
 
@@ -106,6 +112,9 @@ describe("Controller", () => {
                 expect($scope.attendees.length).toBe(1);
                 expect($scope.attendees[0]).toBe(otherUser);
             });
+        });
+
+        describe("$locationChangeStart", () => {
         });
     });
 });

@@ -38,7 +38,7 @@ export class RoomController extends BaseController {
         this.$scope.selectedList.push(this.$scope.selectedItem);
     }
 
-    public banUser = (user: IUser) => {
+    public banUser = (user: UserRole) => {
         this.socketService.emit("ban", { roomId: this.$routeParams.id, userId: user.id });
     }
 
