@@ -45,18 +45,32 @@ describe("Controller", () => {
             });
         }));
 
-        it("should navigate to home", () => {
-            // arrange
-            let id = "5";
-            localStorageService.id = id;
+        describe("navigateToHome", () => {
+            it("should not emit 'room-leave' when id is not set", () => {
+                // arrange
+                localStorageService.id = undefined;
 
-            // act
-            controller.navigateToHome();
+                // act
+                controller.navigateToHome();
 
-            // assert
-            expect(socketService.emit).toHaveBeenCalled();
-            expect(socketService.emit).toHaveBeenCalledWith("private-leave", {id: id});
-            expect(locationService.path).toHaveBeenCalledWith("/");
+                // assert
+                expect(socketService.emit).not.toHaveBeenCalled();
+                expect(locationService.path).toHaveBeenCalledWith("/");
+            });
+
+            it("should navigate to home", () => {
+                // arrange
+                let id = "5";
+                localStorageService.id = id;
+
+                // act
+                controller.navigateToHome();
+
+                // assert
+                expect(socketService.emit).toHaveBeenCalled();
+                expect(socketService.emit).toHaveBeenCalledWith("room-leave", { id: id });
+                expect(locationService.path).toHaveBeenCalledWith("/");
+            });
         });
     });
 });
