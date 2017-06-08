@@ -1,13 +1,11 @@
 // Place your settings in this file to overwrite the default settings
 {
     "files.exclude": {
-        "common/**/*.js": true,
-        "spec/**/*.js": true,
-        "server/**/*.js": true,
         "src/client/**/*.js": true,
         "src/server/**/*.js": true,
-        "src/common/**/*.js": true,
+        "src/shared/**/*.js": true,
         "src/domain/**/*.js": true,
+        "src/e2e/**/*.js": true,
         "app.js": true,
         "karma.conf.js": false,
         "**/*.js.map": true,
