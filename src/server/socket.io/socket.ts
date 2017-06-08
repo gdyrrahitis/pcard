@@ -6,6 +6,7 @@ const roomShowAllEvent: string = "room-show-all";
 const roomsFullEvent: string = "rooms-full";
 const roomNotFoundEvent: string = "room-not-found";
 const userBannedEvent: string = "user-banned";
+const userDisconnectedEvent: string = "user-disconnected";
 const internalServerError: string = "internal-server-error";
 const max: number = 10000;
 export class Socket {
@@ -44,21 +45,22 @@ export class Socket {
                 callback({ access: true, roomId: roomId });
             }
 
-            socket.on("disconnect", (data) => {
+            socket.on("room-disconnect", (data, callback) => {
                 try {
-                    disconnect(data);
+                    disconnect(data, callback);
                 } catch (error) {
                     socket.emit(internalServerError, error);
                 }
             });
 
-            let disconnect = (data) => {
+            let disconnect = (data, callback) => {
                 let room: Room = this.rooms.filter(r => r.id == data.roomId)[0];
 
                 if (room) {
                     room.removeUser(data.userId);
                     socket.server.to(room.id).emit(roomShowAllEvent, room.users);
-                    socket.disconnect(true);
+                    socket.emit(userDisconnectedEvent, room.id);
+                    callback();
                 }
             }
 

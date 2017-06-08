@@ -1,8 +1,12 @@
 import * as angular from "angular";
+import * as toast from "toastr";
 import { HomeController } from "./home.controller";
+import { SocketService, ModalService, NotificationService } from "../../services/index";
 
 describe("Controller", () => {
     let socketIo;
+    let notif;
+
     beforeEach(() => {
         socketIo = function ($rootScope: ng.IScope) {
             let events: { eventName: string, callback: any }[] = [];
@@ -22,27 +26,36 @@ describe("Controller", () => {
                 socketId: "socketId1234"
             };
         };
-        angular.module("app", ["ngSanitize", "ngRoute", "ngStorage"])
+
+        angular.module("app", ["ui.bootstrap", "ngSanitize", "ngRoute", "ngStorage"])
+            .constant("$toastr", toast)
+            .service("socket", socketIo)
             .controller("homeController", HomeController)
-            .factory("socketService", ["$rootScope", socketIo]);
+            .service("socketService", SocketService)
+            .service("notificationService", ["$toastr", NotificationService]);
     });
 
     describe("Home", () => {
         let $scope: IHomeControllerScope;
         let $controllerProvider;
-        let service;
+        let socketService;
+        let notificationService;
+        let locationService;
 
         beforeEach(angular.mock.module("app"));
-        beforeEach(angular.mock.inject(function ($rootScope: any, $controller: any, _socketService_: any) {
+        beforeEach(angular.mock.inject(function ($rootScope: any, $controller: any,
+            _$location_: any, _socketService_: any, _notificationService_: any) {
             $scope = <IHomeControllerScope>$rootScope.$new();
-            service = _socketService_;
+            locationService = _$location_;
+            socketService = _socketService_;
+            notificationService = _notificationService_;
             $controllerProvider = $controller;
         }));
 
         describe("internal-server-error", () => {
             it("should have $scope.error to undefined for non-invoked event", () => {
                 // arrange | act
-                <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
+                <HomeController>$controllerProvider("homeController", { $scope: $scope, socketService });
 
                 // assert
                 expect($scope.error).toBeUndefined();
@@ -50,8 +63,8 @@ describe("Controller", () => {
 
             it("should set $scope.error to with message when internal server error is thrown", () => {
                 // arrange | act
-                <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
-                service.emit("internal-server-error", new Error("Unhandled exception"));
+                <HomeController>$controllerProvider("homeController", { $scope: $scope, socketService });
+                socketService.emit("internal-server-error", new Error("Unhandled exception"));
 
                 // assert
                 expect($scope.error).toBe("Unhandled exception");
@@ -61,7 +74,7 @@ describe("Controller", () => {
         describe("room-not-found", () => {
             it("should have $scope.error to undefined for non-invoked event", () => {
                 // arrange | act
-                <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
+                <HomeController>$controllerProvider("homeController", { $scope: $scope, socketService });
 
                 // assert
                 expect($scope.error).toBeUndefined();
@@ -69,8 +82,8 @@ describe("Controller", () => {
 
             it("should set $scope.error to with message when room not found", () => {
                 // arrange | act
-                <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
-                service.emit("room-not-found", []);
+                <HomeController>$controllerProvider("homeController", { $scope: $scope, socketService });
+                socketService.emit("room-not-found", []);
 
                 // assert
                 expect($scope.error).toBe("Could not find room.");
@@ -80,7 +93,7 @@ describe("Controller", () => {
         describe("rooms-full", () => {
             it("should have $scope.error to undefined for non-invoked event", () => {
                 // arrange | act
-                <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
+                <HomeController>$controllerProvider("homeController", { $scope: $scope, socketService });
 
                 // assert
                 expect($scope.error).toBeUndefined();
@@ -88,40 +101,41 @@ describe("Controller", () => {
 
             it("should set $scope.error to with message regarding rooms when all rooms are busy", () => {
                 // arrange | act
-                <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
-                service.emit("rooms-full", []);
+                <HomeController>$controllerProvider("homeController", { $scope: $scope, socketService });
+                socketService.emit("rooms-full", []);
 
                 // assert
-                expect($scope.error).toBe("All rooms are busy. Try again later!");
+                expect($scope.error).toBe("All rooms are being used. Try again later!");
             });
         });
 
-        describe("disconnect", () => {
+        // TODO: Move to room
+        xdescribe("disconnect", () => {
             it("should emit 'disconnect' when id is set", () => {
                 // arrange | act
-                spyOn(service, "emit");
-                <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
+                spyOn(socketService, "emit");
+                <HomeController>$controllerProvider("homeController", { $scope: $scope, socketService });
 
                 // assert
-                expect(service.emit).toHaveBeenCalledWith("disconnect", socketIo().socketId);
+                expect(socketService.emit).toHaveBeenCalledWith("disconnect", socketIo().socketId);
             });
 
             it("should not emit 'disconnect' when id is not set", () => {
                 // arrange | act
-                service.socketId = undefined;
-                spyOn(service, "emit");
-                <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
+                socketService.socketId = undefined;
+                spyOn(socketService, "emit");
+                <HomeController>$controllerProvider("homeController", { $scope: $scope, socketService });
 
                 // assert
-                expect(service.emit).not.toHaveBeenCalled();
+                expect(socketService.emit).not.toHaveBeenCalled();
             });
         });
 
         describe("createRoom", () => {
             it("should not emit 'room-create' when submitRoom is called and form is not valid", () => {
                 // arrange
-                let controller = <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
-                spyOn(service, "emit");
+                let controller = <HomeController>$controllerProvider("homeController", { $scope: $scope, socketService });
+                spyOn(socketService, "emit");
                 let form = {
                     $valid: false
                 };
@@ -130,14 +144,14 @@ describe("Controller", () => {
                 controller.createRoom(<any>form);
 
                 // assert
-                expect(service.emit).not.toHaveBeenCalled();
+                expect(socketService.emit).not.toHaveBeenCalled();
             });
 
             it("should emit 'room-create' when createRoom is called", () => {
                 // arrange
-                let controller = <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
+                let controller = <HomeController>$controllerProvider("homeController", { $scope: $scope, socketService });
                 $scope.name = "George";
-                spyOn(service, "emit");
+                spyOn(socketService, "emit");
                 let form = {
                     $valid: true
                 };
@@ -146,16 +160,16 @@ describe("Controller", () => {
                 controller.createRoom(<any>form);
 
                 // assert
-                expect(service.emit).toHaveBeenCalledWith("room-create", { name: "George" }, jasmine.any(Function));
+                expect(socketService.emit).toHaveBeenCalledWith("room-create", { name: "George" }, jasmine.any(Function));
             });
         });
 
         describe("submitRoom", () => {
             it("should emit 'room-join' when submitRoom is called and form is valid", () => {
                 // arrange
-                let controller = <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
+                let controller = <HomeController>$controllerProvider("homeController", { $scope: $scope, socketService });
                 $scope.guestName = "George";
-                spyOn(service, "emit");
+                spyOn(socketService, "emit");
                 let form = {
                     $valid: true
                 };
@@ -165,13 +179,13 @@ describe("Controller", () => {
                 controller.submitRoom(<any>form);
 
                 // assert
-                expect(service.emit).toHaveBeenCalledWith("room-join", { roomId: 2, name: "George" }, jasmine.any(Function));
+                expect(socketService.emit).toHaveBeenCalledWith("room-join", { roomId: 2, name: "George" }, jasmine.any(Function));
             });
 
             it("should not emit 'room-join' when submitRoom is called and form is not valid", () => {
                 // arrange
-                let controller = <HomeController>$controllerProvider("homeController", { $scope: $scope, service });
-                spyOn(service, "emit");
+                let controller = <HomeController>$controllerProvider("homeController", { $scope: $scope, socketService });
+                spyOn(socketService, "emit");
                 let form = {
                     $valid: false
                 };
@@ -180,7 +194,38 @@ describe("Controller", () => {
                 controller.submitRoom(<any>form);
 
                 // assert
-                expect(service.emit).not.toHaveBeenCalled();
+                expect(socketService.emit).not.toHaveBeenCalled();
+            });
+        });
+
+        describe("user-disconnected", () => {
+            it("should show warning notification with message and progress bar", () => {
+                // arrange
+                spyOn(notificationService, "warning");
+                let controller = <HomeController>$controllerProvider("homeController", { $scope: $scope, locationService, socketService, notificationService });
+                let roomId = "123";
+                let options: ToastrOptions = { progressBar: true };
+
+                // act
+                socketService.emit("user-disconnected", roomId);
+
+                // assert
+                expect(notificationService.warning)
+                    .toHaveBeenCalledWith(`User disconnected from room: ${roomId}`, "Disconnect", options);
+            });
+
+            it("should show error notification with message and progress bar for undefined roomId", () => {
+                // arrange
+                spyOn(notificationService, "error");
+                let controller = <HomeController>$controllerProvider("homeController", { $scope: $scope, locationService, socketService, notificationService });
+                let options: ToastrOptions = { progressBar: true };
+
+                // act
+                socketService.emit("user-disconnected", undefined);
+
+                // assert
+                expect(notificationService.error)
+                    .toHaveBeenCalledWith(`Room id is not defined, unexpected error occured`, "Error", options);
             });
         });
     });

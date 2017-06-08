@@ -1,12 +1,12 @@
-import { SocketService } from "../../services/socket.service/socket.service";
+import { SocketService, NotificationService } from "../../services/index";
 import { BaseController } from "../base.controller/base.controller";
 
 export class HomeController extends BaseController {
     constructor(protected $scope: IHomeControllerScope,
-        private $log: ng.ILogService,
         private $location: ng.ILocationService,
         private $localStorage: ILocalStorage,
-        private socketService: SocketService
+        private socketService: SocketService,
+        private notificationService: NotificationService
     ) {
         super($scope);
         this.setUniqueId("HomeController");
@@ -16,10 +16,9 @@ export class HomeController extends BaseController {
         $scope.createRoom = this.createRoom;
         $scope.submitRoom = this.submitRoom;
 
-        this.socketService.on("rooms-full", this.allRoomsOccupied);
+        this.socketService.on("rooms-full", this.roomsFull);
         this.socketService.on("room-not-found", this.roomNotFound);
         this.socketService.on("internal-server-error", this.internalServerError);
-        this.disconnectUserIfGetsToHome(this.socketService.socketId);
     }
 
     public createRoom = (form: ng.IFormController) => {
@@ -46,15 +45,15 @@ export class HomeController extends BaseController {
         }
     }
 
-    private disconnectUserIfGetsToHome(id: string) {
-        if (!id) {
-            return;
-        }
-
-        this.socketService.emit("disconnect", id);
+    private roomNotFound = () => {
+        this.$scope.error = "Could not find room.";
     }
 
-    private roomNotFound = () => this.$scope.error = "Could not find room.";
-    private allRoomsOccupied = () => this.$scope.error = "All rooms are busy. Try again later!";
-    private internalServerError = (error: Error) => this.$scope.error = error.message;
+    private roomsFull = () => {
+        this.$scope.error = "All rooms are being used. Try again later!";
+    }
+
+    private internalServerError = (error: Error) => {
+        this.$scope.error = error.message;
+    }
 }
