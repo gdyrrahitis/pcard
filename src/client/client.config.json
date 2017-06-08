@@ -1,6 +1,6 @@
 {
     "client": {
-        "baseUrl": "http://localhost:3001",
+        "baseUrl": "http://localhost:8000",
         "basePath": "/",
         "html5Mode": true,
         "routes": [
