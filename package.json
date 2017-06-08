@@ -5,6 +5,8 @@
   "main": "gulpfile.js",
   "scripts": {
     "test": "tsc && karma start karma.conf.js",
+    "test:dev": "gulp test:dev",
+    "test:travis": "gulp test:travis",
     "start": "if-env NODE_ENV=production && npm run start:prod || npm run start:dev",
     "start:dev": "gulp app:dev",
     "start:prod": "gulp app:prod && npm run server",

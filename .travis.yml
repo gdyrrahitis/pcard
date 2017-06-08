@@ -13,7 +13,7 @@ branches:
 dist: trusty
 language: node_js
 node_js:
-  - "4"
+  - "5"
 
 before_install:
   - export CHROME_BIN=chromium-browser
@@ -21,4 +21,4 @@ before_install:
   - sh -e /etc/init.d/xvfb start
 
 script: 
-  - npm test
+  - npm run test:travis
