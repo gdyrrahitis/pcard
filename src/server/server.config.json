@@ -17,7 +17,7 @@
         "entry": "index.html"
     },
     "server": {
-        "port": 3001
+        "port": 8000
     },
     "socketio": {
         "maxRoomsAllowed": 10000
