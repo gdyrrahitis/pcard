@@ -38,6 +38,8 @@ module.exports = function (config) {
       'node_modules/angular-mocks/angular-mocks.js',
       "node_modules/angular-sanitize/angular-sanitize.js",
       "node_modules/angular-route/angular-route.js",
+      "node_modules/toastr/toastr.js",
+      "node_modules/angular-ui-bootstrap/dist/ui-bootstrap.js",
       { pattern: 'src/client/client.config.json', watched: true, included: false, served: true },
       'src/client/**/*.js',
       "src/domain/**/*.js"
