@@ -54,5 +54,5 @@ export module pcard {
         }
     ]);
 
-    export var Application = app;
+    export var application = app;
 }

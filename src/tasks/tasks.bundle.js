@@ -21,7 +21,7 @@ function bundle(bundler) {
 function bundleWithBrowserSync(bundler) {
     return bundle(bundler)
         .on("error", function (e) {
-            gutil.log(e);
+            gutil.log(gutil.colors.bgRed(e));
         })
         .pipe(gulp.dest("dist/"))
         .pipe(browserSync.stream());
@@ -34,9 +34,9 @@ gulp.task("bundle", function () {
 gulp.task("bundle:prod", function () {
     bundle(entry)
         .pipe(buffer())
-        .pipe(uglify({ mangle: false }))
+        .pipe(uglify())
         .on("error", function (e) {
-            gutil.log(e);
+            gutil.log(gutil.colors.bgRed(e));
         })
         .pipe(gulp.dest("dist/"));
 });
