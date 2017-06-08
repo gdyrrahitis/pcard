@@ -1,25 +1,14 @@
 var gulp = require("gulp"),
-    express = require("gulp-express"),
-    sequence = require("run-sequence"),
-    browserify = require("browserify"),
-    tsify = require("tsify"),
-    babelify = require("babelify"),
-    source = require('vinyl-source-stream'),
-    nodemon = require("gulp-nodemon");
+    sequence = require("run-sequence");
 
 gulp.task("build", function (callback) {
-    sequence("clean", ["sass", "bundle", "fonts"], callback);
+    sequence("clean", "ts", ["sass", "fonts"], "bundle", callback);
 });
 
 gulp.task("build:w", function (callback) {
-    sequence("clean", ["browser:sync", "watch"], callback);
+    sequence("build", ["watch"], callback);
 });
 
-gulp.task("bundle", function () {
-    browserify("src/client/main.ts")  // Pass browserify the entry point
-        .plugin(tsify, { target: 'es6', module: 'commonjs' }) 
-        .transform(babelify, { presets: ["es2015"], extensions: [".js"], sourceMap: 'inline' })
-        .bundle()
-        .pipe(source("src/client/main.js"))
-        .pipe(gulp.dest("dist/"));
+gulp.task("build:prod", function (callback) {
+    sequence("clean", "ts", ["sass:prod", "fonts"], "bundle:prod", "css:minify", callback);
 });

@@ -1,19 +1,35 @@
 var gulp = require("gulp"),
-    browserSync = require("browser-sync"),
+    gutil = require("gulp-util"),
+    browserSync = require("./browser.sync.js"),
     reload = browserSync.reload,
-    variables = require("./variables");
+    browserify = require("browserify"),
+    watchify = require("watchify");
+    bundleTasks = require("./tasks.bundle"),
+    bundleWithBrowserSync = bundleTasks.bundleWithBrowserSync,
+    bundle = bundleTasks.bundle,
 
-// Watching
-gulp.task("watch", ["build"], function () {
-    gulp.watch("src/client/**/*.scss", ["sass"]);
+gulp.task("watch", function () {
+    gulp.watch("src/client/**/*.scss", ["sass"], reload);
     gulp.watch("src/client/**/*.html", reload);
-    gulp.watch("src/client/**/*.js", reload);
     gulp.watch("index.html", reload);
-});
+    gulp.watch("app.ts", ["ts"]);
+    gulp.watch("src/server/**/*.ts", ["ts"]);
+    gulp.watch("src/domain/**/*.ts", ["ts"]);
+    gulp.watch("src/shared/**/*.ts", ["ts"]);
 
-// Browsersync
-gulp.task("browser:sync", ["nodemon"], function () {
-    browserSync.init(null, {
-        proxy: variables.misc.browserSync.proxy
-    })
+    var watcher = watchify(browserify("./src/client/main.ts", watchify.args));
+    bundleWithBrowserSync(watcher);
+    watcher.on("update", function () {
+        bundleWithBrowserSync(watcher);
+    });
+
+    watcher.on("log", gutil.log);
+
+    browserSync.init({
+        port: 4000,
+        server: {
+            baseDir: "./",
+            logFileChanges: false
+        }
+    });
 });
