@@ -1,10 +1,10 @@
 export class ModalService {
     private modalInstance: angular.ui.bootstrap.IModalInstanceService;
 
-    constructor(private uiModal: angular.ui.bootstrap.IModalService) { }
+    constructor(private $uiModal: angular.ui.bootstrap.IModalService) { }
 
     public open(options: angular.ui.bootstrap.IModalSettings) {
-        this.modalInstance = this.uiModal.open(options);
+        this.modalInstance = this.$uiModal.open(options);
     }
 
     public dismiss(reason?: any) {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="app">
+<html lang="en" ng-app="app" ng-strict-di>
 
 <head>
     <base href="/" />
@@ -7,6 +7,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <script>
+        window.twttr = (function (d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                t = window.twttr || {};
+            if (d.getElementById(id)) return t;
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "https://platform.twitter.com/widgets.js";
+            fjs.parentNode.insertBefore(js, fjs);
+
+            t._e = [];
+            t.ready = function (f) {
+                t._e.push(f);
+            };
+
+            return t;
+        }(document, "script", "twitter-wjs"));
+    </script>
     <link rel="stylesheet" type="text/css" href="dist/css/libs/styles/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="dist/css/libs/styles/custom-font-awesome.css">
     <link rel="stylesheet" type="text/css" href="dist/css/libs/toastr.css">
@@ -23,13 +41,25 @@
         <hr />
         <footer>
             <div class="row">
-                <div class="col-sm-6">George Dyrrahitis</div>
                 <div class="col-sm-6">
-                    <ul class="list-inline">
-                        <li><span>Follow me on:</span></li>
-                        <li> <a href="https://github.com/gdyrrahitis" target="_blank"><i class="fa fa-github large dark"></i></a></li>
-                        <li> <a href="https://twitter.com/gdyrra" target="_blank"><i class="fa fa-twitter large"></i></a></li>
+                    <em class="creditor">Created by George Dyrrachitis</em>
+                </div>
+                <div class="col-sm-6">
+                    <ul class="list-inline list-unstyled pull-right">
+                        <li>
+                            <iframe src="https://ghbtns.com/github-btn.html?user=gdyrrahitis&type=follow&count=true&size=large" frameborder="0" scrolling="0"
+                                width="220px" height="30px"></iframe>
+                        </li>
+                        <li>
+                            <a data-show-count="false" class="twitter-follow-button" href="https://twitter.com/giorgosdyrra" data-size="large">
+Follow @giorgosdyrra</a>
+                        </li>
                     </ul>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <small class="text-left"><div><i class="fa fa-heart"></i> Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div></small>
                 </div>
             </div>
         </footer>

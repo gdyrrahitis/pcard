@@ -3,17 +3,23 @@ import * as socketIo from "socket.io";
 import * as http from "http";
 import * as path from "path";
 import * as express from "express";
+import * as bodyParser from "body-parser";
 
 let config: ServerAppConfig.ServerConfiguration = require("./src/server/server.config.json");
 let port: number = process.env.PORT || 8000;
 let env: string = process.env.NODE_ENV || "development";
-let middewareActions = [() => express.static(__dirname)];
 let app: express.Application = express();
 
-app.use(express.static(__dirname));
+let rooms: express.Application = express();
+rooms.get("/", (request, response) => {
+    response.json({ limit: config.socketio.maxRoomsAllowed });
+});
+app.use("/rooms", rooms)
 app.use(express.static("src"));
 app.use(express.static("node_modules"));
 app.use("/dist", express.static(path.join(__dirname, "/dist")));
+app.use(express.static(__dirname));
+app.use(bodyParser.json());
 
 // just send the index.html for other files to support HTML5Mode
 app.all("/*", (req, res, next) => res.sendFile(config.staticResources.entry, { root: __dirname }));

@@ -19,7 +19,7 @@ export class RoomController extends BaseController {
     ) {
         super($scope);
         this.setUniqueId("RoomController");
-console.log(configuration)
+
         this.config = configuration;
         this.mountainGoat = configuration.poker.mountainGoat;
 

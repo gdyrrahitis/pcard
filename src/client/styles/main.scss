@@ -1,5 +1,5 @@
-@import '../controllers/home.controller/home.controller.scss';
-@import '../controllers/room.controller/room.controller.scss';
+@import '../controllers/home.controller/home.controller';
+@import '../controllers/room.controller/room.controller';
 
 .large {
     font-size: 22px;
@@ -11,4 +11,8 @@
 
 .nav, .pagination, .carousel, .panel-title a { 
     cursor: pointer; 
+}
+
+.creditor {
+    vertical-align: -webkit-baseline-middle;
 }

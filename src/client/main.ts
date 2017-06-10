@@ -5,8 +5,9 @@ import "angular-sanitize";
 import "angular-route";
 import "ngstorage";
 import "angular-ui-bootstrap";
-import { HomeController, RoomController, MenuController } from "./controllers/index";
-import { SocketService, ModalService, NotificationService } from "./services/index";
+import { HomeController, RoomController, MenuController, JoinRoomModalController } from "./controllers/index";
+import { SocketService, ModalService, NotificationService, HttpService } from "./services/index";
+import { PluralFilter } from "./filters/index";
 import { registerRoutes } from "./routes";
 
 export module pcard {
@@ -17,12 +18,15 @@ export module pcard {
         .value("socket", socket)
         .constant("configuration", config)
         .constant("$toastr", toast)
-        .controller("homeController", ["$scope", "$location", "$localStorage", "socketService", "notificationService", HomeController])
-        .controller("roomController", ["$scope", "$rootScope", "$location", "$routeParams", "$localStorage", "socketService", "configuration", RoomController])
-        .controller("menuController", ["$scope", "$location", "$localStorage", "socketService", MenuController])
         .service("socketService", ["$rootScope", "socket", SocketService])
         .service("modalService", ["$uibModal", ModalService])
-        .service("notificationService", ["$toastr", NotificationService]);
+        .service("notificationService", ["$toastr", NotificationService])
+        .service("httpService", ["$http", HttpService])
+        .filter("plural", PluralFilter)
+        .controller("homeController", ["$scope", "$location", "$localStorage", "socketService", "notificationService", "modalService", "httpService", HomeController])
+        .controller("roomController", ["$scope", "$rootScope", "$location", "$routeParams", "$localStorage", "socketService", "configuration", RoomController])
+        .controller("menuController", ["$scope", "$location", "$localStorage", "socketService", MenuController])
+        .controller("joinRoomModalController", ["$scope", "$uibModalInstance", JoinRoomModalController]);
 
     registerRoutes(app, config);
 

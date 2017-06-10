@@ -27,12 +27,16 @@ function bundleWithBrowserSync(bundler) {
         .pipe(browserSync.stream());
 }
 
+gulp.task("bundle:once", function () {
+    bundleWithBrowserSync(entry);
+});
+
 gulp.task("bundle", function () {
     bundleWithBrowserSync(entry);
 });
 
 gulp.task("bundle:prod", function () {
-    bundle(entry)
+    bundle(browserify("./src/client/main.prod.ts"))
         .pipe(buffer())
         .pipe(uglify())
         .on("error", function (e) {

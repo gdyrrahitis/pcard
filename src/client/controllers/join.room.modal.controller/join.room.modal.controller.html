@@ -1,0 +1,18 @@
+<div class="modal-header">
+    <h3 class="modal-title" id="modal-title">Join room</h3>
+</div>
+<div class="modal-body">
+    <form novalidate name="join">
+        <div class="form-group" ng-class="{ 'has-error has-feedback': join.room.$error.required && !join.room.$pristine }">
+            <label class="control-label">Enter a room id to join a room</label>
+            <input type="text" name="room" class="form-control" placeholder="Room id" required ng-model="roomId">
+            <span ng-show="join.room.$error.required && !join.room.$pristine" class="glyphicon glyphicon-remove form-control-feedback"
+                aria-hidden="true"></span>
+            <span ng-show="join.room.$error.required && !join.room.$pristine" class="help-block">Room id is required</span>
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" type="button" ng-click="go()" ng-disabled="join.room.$error.required">Go</button>
+    <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+</div>
