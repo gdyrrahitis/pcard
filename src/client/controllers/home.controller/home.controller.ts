@@ -89,18 +89,6 @@ export class HomeController extends BaseController {
         this.$scope.alerts.push({ message: error.message });
     }
 
-    public isRoomValid(form: ng.IFormController) {
-        return (form.$submitted && form.room.$invalid) || (form.room.$invalid && !form.room.$pristine);
-    }
-
-    public isNameValid(form: ng.IFormController) {
-        return (form.$submitted && form.guestName.$invalid) || (form.guestName.$invalid && !form.guestName.$pristine);
-    }
-
-    public isRoomNameValid(form: ng.IFormController) {
-        return (form.$submitted && form.name.$invalid) || (form.name.$invalid && !form.name.$pristine);
-    }
-
     public join = () => {
         this.modalService.open({
             animation: true,
@@ -120,7 +108,6 @@ export class HomeController extends BaseController {
     }
 
     public closeAlert = (index: number) => {
-        console.log("closing alert")
         this.$scope.alerts.splice(index, 1);
     }
 }

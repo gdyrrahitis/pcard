@@ -5,8 +5,6 @@ import * as ng from "angular";
 
 export class RoomController extends BaseController {
     private onRouteChangeOff: any;
-    private config: ClientAppConfig.ClientConfiguration;
-    private mountainGoat;
     private isBanned: boolean = false;
 
     constructor(protected $scope: IRoomControllerScope,
@@ -15,28 +13,22 @@ export class RoomController extends BaseController {
         private $routeParams: IRoomRoute,
         private $localStorage: ILocalStorage,
         private socketService: SocketService,
-        private configuration: ClientAppConfig.ClientConfiguration
+        private cards: string[],
+        private $window: ng.IWindowService
     ) {
         super($scope);
         this.setUniqueId("RoomController");
 
-        this.config = configuration;
-        this.mountainGoat = configuration.poker.mountainGoat;
-
         $scope.room = $routeParams.id;
-        $scope.list = this.mountainGoat;
-        $scope.selectedItem = undefined;
+        $scope.list = cards;
         $scope.selectedList = [];
         $scope.selectCard = this.selectCard;
         $scope.banUser = this.banUser;
-        $scope.currentUser = undefined;
+        $localStorage.id = this.socketService.socketId;
 
-        this.$localStorage.id = this.socketService.socketId;
         this.socketService.on("room-show-all", this.showAttendees);
         this.socketService.emit("room-get-all", { roomId: $routeParams.id });
-        this.$scope.$on("user-ban-start", () => {
-            this.isBanned = true;
-        });
+        this.$scope.$on("user-ban-start", () => this.isBanned = true);
         this.onRouteChangeOff = this.$rootScope.$on("$locationChangeStart", this.routeChange);
     }
 
@@ -71,7 +63,8 @@ export class RoomController extends BaseController {
             this.isBanned = false;
             if (window.confirm("Are you sure you want to leave?")) {
                 this.socketService.emit("room-disconnect",
-                    { roomId: this.$routeParams.id, userId: this.$localStorage.id }, () => {
+                    { roomId: this.$routeParams.id, userId: this.$localStorage.id }, (v) => {
+                        console.log("in")
                         this.onRouteChangeOff();
                         event.preventDefault();
                         this.$location.path("/");

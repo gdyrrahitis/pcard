@@ -16,7 +16,7 @@ export module pcard {
     let socket = io.connect(config.client.baseUrl);
     let app = ng.module("app", ["ui.bootstrap", "ngSanitize", "ngRoute", "ngStorage"])
         .value("socket", socket)
-        .constant("configuration", config)
+        .constant("cards", config.poker.mountainGoat)
         .constant("$toastr", toast)
         .service("socketService", ["$rootScope", "socket", SocketService])
         .service("modalService", ["$uibModal", ModalService])
@@ -24,7 +24,7 @@ export module pcard {
         .service("httpService", ["$http", HttpService])
         .filter("plural", PluralFilter)
         .controller("homeController", ["$scope", "$location", "$localStorage", "socketService", "notificationService", "modalService", "httpService", HomeController])
-        .controller("roomController", ["$scope", "$rootScope", "$location", "$routeParams", "$localStorage", "socketService", "configuration", RoomController])
+        .controller("roomController", ["$scope", "$rootScope", "$location", "$routeParams", "$localStorage", "socketService", "cards", "$window", RoomController])
         .controller("menuController", ["$scope", "$location", "$localStorage", "socketService", MenuController])
         .controller("joinRoomModalController", ["$scope", "$uibModalInstance", JoinRoomModalController]);
 

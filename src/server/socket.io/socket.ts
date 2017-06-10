@@ -16,7 +16,6 @@ export class Socket {
 
     public connect() {
         this.io.on("connection", (socket: ISocket) => {
-            console.log(socket.id)
             socket.on("room-create", (data, callback) => {
                 try {
                     createRoom(data, callback);
@@ -86,7 +85,6 @@ export class Socket {
                         this.io.emit("users-all", this.rooms.map(x => x.users.length).reduce((p, c, ) => p + c));
                     }
                 } catch (error) {
-                    console.log(error)
                     callback({ access: false });
                     socket.emit(internalServerError, error);
                 }

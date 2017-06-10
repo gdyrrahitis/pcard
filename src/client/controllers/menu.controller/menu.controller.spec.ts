@@ -16,12 +16,12 @@ describe("Controller", () => {
         };
         angular.module("app", ["ngSanitize", "ngRoute", "ngStorage"])
             .controller("menuController", MenuController)
-            .factory("socketService", ["$rootScope", SocketService]);
+            .service("socketService", ["$rootScope", SocketService]);
     });
 
     describe("Menu", () => {
         let $scope: IMenuControllerScope;
-        let controller: MenuController;
+        let createController: () => MenuController;
         let socketService;
         let locationService;
         let localStorageService;
@@ -37,18 +37,21 @@ describe("Controller", () => {
 
             localStorageService = $localStorage;
 
-            controller = <MenuController>$controller("menuController", {
-                $scope: $scope,
-                locationService,
-                localStorageService,
-                socketService
-            });
+            createController = () => {
+                return <MenuController>$controller("menuController", {
+                    $scope: $scope,
+                    locationService,
+                    localStorageService,
+                    socketService
+                });
+            }
         }));
 
         describe("navigateToHome", () => {
             it("should not emit 'room-leave' when id is not set", () => {
                 // arrange
                 localStorageService.id = undefined;
+                let controller = createController();
 
                 // act
                 controller.navigateToHome();
@@ -62,6 +65,7 @@ describe("Controller", () => {
                 // arrange
                 let id = "5";
                 localStorageService.id = id;
+                let controller = createController();
 
                 // act
                 controller.navigateToHome();
