@@ -27,10 +27,6 @@ function bundleWithBrowserSync(bundler) {
         .pipe(browserSync.stream());
 }
 
-gulp.task("bundle:once", function () {
-    bundleWithBrowserSync(entry);
-});
-
 gulp.task("bundle", function () {
     bundleWithBrowserSync(entry);
 });

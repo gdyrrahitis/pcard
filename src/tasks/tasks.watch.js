@@ -3,10 +3,10 @@ var gulp = require("gulp"),
     browserSync = require("./browser.sync.js"),
     reload = browserSync.reload,
     browserify = require("browserify"),
-    watchify = require("watchify");
-bundleTasks = require("./tasks.bundle"),
+    watchify = require("watchify"),
+    bundleTasks = require("./tasks.bundle"),
     bundleWithBrowserSync = bundleTasks.bundleWithBrowserSync,
-    bundle = bundleTasks.bundle,
+    bundle = bundleTasks.bundle;
 
     gulp.task("watch", function () {
         gulp.watch("src/client/**/*.scss", ["sass"], reload);

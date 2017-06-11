@@ -30,24 +30,10 @@ gulp.task("nodemon", ["build"], function (cb) {
     });
 });
 
-gulp.task("nodemon:w", function (cb) {
-    var started = false;
-
-    return nodemon({
-        script: variables.basePaths.server.path,
-        env: {
-            "NODE_ENV": "development"
-        }
-    }).on("start", function () {
-        if (!started) {
-            cb();
-            started = true;
-        }
-    });
-});
-
 gulp.task("app:dev", function (done) {
-    sequence("build:w", ["nodemon:w"], done);
+    sequence("build:w", ["server"], done);
 });
+
+gulp.task("app:backend:dev", ["nodemon"]);
 
 gulp.task("app:prod", ["build:prod"]);
