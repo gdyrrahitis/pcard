@@ -13,7 +13,11 @@ gulp.task("test:dev", ["ts"], function (callback) {
 
 gulp.task("test:travis", ["ts"], function (callback) {
     if (process.env.TRAVIS) {
-        new karma(require("../../karma.conf.travis")).start();
+        new karma(require("../../karma.conf.travis")).
+            on("error", function (error) {
+                gutil.log(error);
+                process.exit(1);
+            }).start();
     }
     else {
         gutil.log(gutil.colors.bgRed("Fatal error. CI tests will run only in TRAVIS environment"));
