@@ -1,5 +1,7 @@
 var gulp = require("gulp"),
     gutil = require("gulp-util"),
+    mocha = require("gulp-mocha"),
+    sequence = require("run-sequence"),
     karma = require("karma").Server;
 
 gulp.task("test:dev", ["ts"], function (callback) {
@@ -17,3 +19,30 @@ gulp.task("test:travis", ["ts"], function (callback) {
         gutil.log(gutil.colors.bgRed("Fatal error. CI tests will run only in TRAVIS environment"));
     }
 });
+
+var mochaRun = function () {
+    return gulp.src("src/server/tests/**/*.js", { read: false })
+        .pipe(mocha({ timeout: 10000, reporter: "list" }))
+        .on("error", gutil.log);
+};
+
+gulp.task("mocha", function () {
+    return mochaRun();
+});
+
+gulp.task("mocha:dev", function (callback) {
+    gulp.watch("src/server/**/*.ts", function () {
+        sequence("ts", "mocha");
+    });
+    mochaRun();
+});
+
+gulp.task("mocha:travis", ["ts"], function (callback) {
+    if (process.env.TRAVIS) {
+        return mochaRun();
+    }
+    else {
+        gutil.log(gutil.colors.bgRed("Fatal error. CI tests will run only in TRAVIS environment"));
+    }
+});
+
