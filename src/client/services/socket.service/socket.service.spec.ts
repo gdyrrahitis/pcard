@@ -16,7 +16,7 @@ describe("Services", () => {
             }]);
     });
 
-    describe("Socket", () => {
+    xdescribe("Socket", () => {
         let $scope;
         let service: SocketService;
         beforeEach(angular.mock.module("app"));
