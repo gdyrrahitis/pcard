@@ -165,14 +165,15 @@ describe("Controller", () => {
             it("should emit 'room-create' when createRoom is called and username is valid", () => {
                 // arrange
                 let controller = createController();
-                $scope.name = "George";
+                let name = "George";
+                $scope.username = name;
                 spyOn(socketService, "emit");
 
                 // act
                 controller.createRoom();
 
                 // assert
-                expect(socketService.emit).toHaveBeenCalledWith("room-create", { name: "George" }, jasmine.any(Function));
+                expect(socketService.emit).toHaveBeenCalledWith("room-create", { name: name }, jasmine.any(Function));
             });
 
             it("should not emit 'room-create' when createRoom is called with no username", () => {
