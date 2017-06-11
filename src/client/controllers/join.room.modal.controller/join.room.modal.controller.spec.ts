@@ -74,10 +74,6 @@ describe("Controller", () => {
 
                 // act
                 controller.go();
-
-                setTimeout(() => {
-                    expect($scope.$emit).toHaveBeenCalled();
-                }, 300);
             });
         });
 
@@ -121,10 +117,6 @@ describe("Controller", () => {
 
                 // act
                 controller.cancel();
-
-                setTimeout(() => {
-                    expect($scope.$emit).toHaveBeenCalled();
-                }, 300);
             });
         });
     });
