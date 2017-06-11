@@ -1,7 +1,7 @@
 import { SocketService } from "../../services/socket.service/socket.service";
 import { BaseController } from "../base.controller/base.controller";
-import { UserRole } from "../../../domain/user";
-import * as ng from "angular";
+import { UserRole } from "../../../domain/index";
+import { RoomShowAllEvent, RoomGetAllEvent, UserBanStart, BanEvent, RoomDisconnectEvent } from "../../../domain/events/index";
 
 export class RoomController extends BaseController {
     private onRouteChangeOff: any;
@@ -19,16 +19,16 @@ export class RoomController extends BaseController {
         super($scope);
         this.setUniqueId("RoomController");
 
-        $scope.room = $routeParams.id;
         $scope.list = cards;
         $scope.selectedList = [];
         $scope.selectCard = this.selectCard;
         $scope.banUser = this.banUser;
         $localStorage.id = this.socketService.socketId;
 
-        this.socketService.on("room-show-all", this.showAttendees);
-        this.socketService.emit("room-get-all", { roomId: $routeParams.id });
-        this.$scope.$on("user-ban-start", () => this.isBanned = true);
+        let roomGetAllEvent = new RoomGetAllEvent({ roomId: $routeParams.id });
+        this.socketService.emit(RoomGetAllEvent.eventName, roomGetAllEvent.data);
+        this.socketService.on(RoomShowAllEvent.eventName, this.showAttendees);
+        this.$scope.$on(UserBanStart.eventName, () => this.isBanned = true);
         this.onRouteChangeOff = this.$rootScope.$on("$locationChangeStart", this.routeChange);
     }
 
@@ -38,7 +38,7 @@ export class RoomController extends BaseController {
     }
 
     public banUser = (user: UserRole) => {
-        this.socketService.emit("ban", { roomId: this.$routeParams.id, userId: user.id });
+        this.socketService.emit(BanEvent.eventName, { roomId: this.$routeParams.id, userId: user.id });
     }
 
     private showAttendees = (users: UserRole[]) => {
@@ -61,10 +61,11 @@ export class RoomController extends BaseController {
     private routeChange = (event: ng.IAngularEvent, newUrl: string) => {
         if (!this.isBanned) {
             this.isBanned = false;
-            if (window.confirm("Are you sure you want to leave?")) {
-                this.socketService.emit("room-disconnect",
-                    { roomId: this.$routeParams.id, userId: this.$localStorage.id }, (v) => {
-                        console.log("in")
+            if (this.$window.confirm("Are you sure you want to leave?")) {
+                let roomDisconnectEvent = new RoomDisconnectEvent({ roomId: this.$routeParams.id, userId: this.$localStorage.id });
+                this.socketService.emit(RoomDisconnectEvent.eventName,
+                    roomDisconnectEvent.data,
+                    () => {
                         this.onRouteChangeOff();
                         event.preventDefault();
                         this.$location.path("/");

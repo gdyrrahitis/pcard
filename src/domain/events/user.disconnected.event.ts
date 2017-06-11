@@ -1,5 +1,6 @@
-import { IEvent } from "./event";
+import { Event } from "./event";
 
-export class UserDisconnectedEvent implements IEvent {
-    public name: string = "user-disconnected";
+export class UserDisconnectedEvent {
+    static readonly eventName: string = Event.UserDisconnected;
+    constructor(public readonly roomId: string) { }
 }

@@ -1,5 +1,7 @@
-import { IEvent } from "./event";
+import { UserRole } from "../index";
+import { Event } from "./event";
 
-export class RoomShowAllEvent implements IEvent {
-    public name: string = "room-show-all";
+export class RoomShowAllEvent {
+    static readonly eventName: string = Event.RoomShowAll;
+    constructor(public readonly users: UserRole[]) { }
 }

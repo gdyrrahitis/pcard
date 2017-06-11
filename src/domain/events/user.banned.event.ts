@@ -1,5 +1,5 @@
-import { IEvent } from "./event";
+import { Event } from "./event";
 
-export class UserBannedEvent implements IEvent {
-    public name: string = "user-banned";
+export class UserBannedEvent {
+    static readonly eventName: string = Event.UserBanned;
 }

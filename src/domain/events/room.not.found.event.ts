@@ -1,5 +1,5 @@
-import { IEvent } from "./event";
+import { Event } from "./event";
 
-export class RoomNotFoundEvent implements IEvent {
-    public name: string = "room-not-found";
+export class RoomNotFoundEvent{
+    static readonly eventName: string = Event.RoomNotFound;
 }

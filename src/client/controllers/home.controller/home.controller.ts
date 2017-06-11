@@ -1,4 +1,10 @@
 import { SocketService, NotificationService, ModalService, HttpService } from "../../services/index";
+import {
+    ModalJoinResultEvent, RoomsFullEvent, RoomNotFoundEvent,
+    InternalServerErrorEvent, RoomsAllEvent, UsersAllEvent,
+    RequestAllRoomsEvent, RequestAllUsersEvent, RoomCreateEvent,
+    RoomJoinEvent
+} from "../../../domain/events/index";
 import { BaseController } from "../base.controller/base.controller";
 
 export class HomeController extends BaseController {
@@ -24,14 +30,14 @@ export class HomeController extends BaseController {
             $scope.username = $localStorage.username;
         }
 
-        $scope.$on("modal-join-result", (event, roomId) => this.joinRoom(roomId));
-        this.socketService.on("rooms-full", this.roomsFull);
-        this.socketService.on("room-not-found", this.roomNotFound);
-        this.socketService.on("internal-server-error", this.internalServerError);
-        this.socketService.on("rooms-all", this.allRooms);
-        this.socketService.on("users-all", this.allUsers);
-        this.socketService.emit("request-all-rooms");
-        this.socketService.emit("request-all-users");
+        $scope.$on(ModalJoinResultEvent.eventName, (event, roomId) => this.joinRoom(roomId));
+        this.socketService.on(RoomsFullEvent.eventName, this.roomsFull);
+        this.socketService.on(RoomNotFoundEvent.eventName, this.roomNotFound);
+        this.socketService.on(InternalServerErrorEvent.eventName, this.internalServerError);
+        this.socketService.on(RoomsAllEvent.eventName, this.allRooms);
+        this.socketService.on(UsersAllEvent.eventName, this.allUsers);
+        this.socketService.emit(RequestAllRoomsEvent.eventName);
+        this.socketService.emit(RequestAllUsersEvent.eventName);
         httpService.get("/rooms").then(this.success, this.fail);
     }
 
@@ -46,15 +52,18 @@ export class HomeController extends BaseController {
     public createRoom = () => {
         if (this.$scope.username) {
             this.$localStorage.username = this.$scope.username;
-            this.socketService.emit("room-create", {
-                name: this.$scope.username
-            }, (response) => {
-                if (response.access) {
-                    this.$location.path(`/room/${response.roomId}`);
-                }
-            });
+            let roomCreateEvent = new RoomCreateEvent({ name: this.$scope.username });
+            this.socketService.emit(RoomCreateEvent.eventName,
+                roomCreateEvent.data,
+                (response) => this.navigateToLocationBasedOnResponse(response, `/room/${response.roomId}`));
         } else {
             this.notificationService.error("Please provide a username", "Error", { progressBar: true });
+        }
+    }
+
+    private navigateToLocationBasedOnResponse(response: any, location: string) {
+        if (response.access) {
+            this.$location.path(location);
         }
     }
 
@@ -62,13 +71,10 @@ export class HomeController extends BaseController {
         if (roomId) {
             if (this.$scope.username) {
                 this.$localStorage.username = this.$scope.username;
-                let data = { name: this.$scope.username, roomId: roomId };
-
-                this.socketService.emit("room-join", data, (response) => {
-                    if (response.access) {
-                        this.$location.path(`/room/${roomId}`);
-                    }
-                });
+                let roomJoinEvent = new RoomJoinEvent({ name: this.$scope.username, roomId: roomId });
+                this.socketService.emit(RoomJoinEvent.eventName,
+                    roomJoinEvent.data,
+                    (response) => this.navigateToLocationBasedOnResponse(response, `/room/${roomId}`));
             } else {
                 this.notificationService.error("Please provide a username", "Error", { progressBar: true });
             }

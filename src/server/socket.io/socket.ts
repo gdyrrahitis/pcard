@@ -1,17 +1,13 @@
 import * as uuidV1 from "uuid/v1";
-import { Room } from "../../domain/room";
-import { User } from "../../domain/user";
+import { Room, User } from "../../domain/index";
+import {
+    InternalServerErrorEvent, RoomsFullEvent, RoomShowAllEvent,
+    RoomNotFoundEvent, UserBannedEvent, UserDisconnectedEvent
+} from "../../domain/events/index";
+const max: number = (<ServerAppConfig.ServerConfiguration>require("../server.config.json")).socketio.maxRoomsAllowed;
 
-const roomShowAllEvent: string = "room-show-all";
-const roomsFullEvent: string = "rooms-full";
-const roomNotFoundEvent: string = "room-not-found";
-const userBannedEvent: string = "user-banned";
-const userDisconnectedEvent: string = "user-disconnected";
-const internalServerError: string = "internal-server-error";
-const max: number = 10000;
 export class Socket {
     private rooms: Room[] = [];
-    private roomPrefix: string = "private-";
     constructor(private io: SocketIO.Server) { }
 
     public connect() {
@@ -26,14 +22,15 @@ export class Socket {
                     }
                 } catch (error) {
                     callback({ access: false });
-                    socket.emit(internalServerError, error);
+                    let internalServerErrorEvent = new InternalServerErrorEvent(error);
+                    socket.emit(InternalServerErrorEvent.eventName, internalServerErrorEvent.error);
                 }
             });
 
             let createRoom = (data, callback) => {
                 if (this.rooms.length >= max) {
                     callback({ access: false });
-                    socket.emit(roomsFullEvent);
+                    socket.emit(RoomsFullEvent.eventName);
                     return;
                 }
 
@@ -44,7 +41,9 @@ export class Socket {
 
                 socket.join(room.id);
                 socket.room = room.id;
-                socket.server.to(room.id).emit(roomShowAllEvent, room.users);
+
+                let roomShowAllEvent = new RoomShowAllEvent(room.users);
+                socket.server.to(room.id).emit(RoomShowAllEvent.eventName, roomShowAllEvent.users);
 
                 this.rooms.push(room);
                 callback({ access: true, roomId: roomId });
@@ -58,7 +57,7 @@ export class Socket {
                         this.io.emit("users-all", this.rooms.map(x => x.users.length).reduce((p, c, ) => p + c));
                     }
                 } catch (error) {
-                    socket.emit(internalServerError, error);
+                    socket.emit(InternalServerErrorEvent.eventName, error);
                 }
             });
 
@@ -67,15 +66,27 @@ export class Socket {
 
                 if (room) {
                     room.removeUser(data.userId);
-                    socket.server.to(room.id).emit(roomShowAllEvent, room.users);
-                    socket.emit(userDisconnectedEvent, room.id);
-                    if (room.users.length === 0) {
-                        let index = this.rooms.findIndex((value) => value.id === room.id);
-                        this.rooms.splice(index, 1);
+                    let roomShowAllEvent = new RoomShowAllEvent(room.users);
+                    socket.server.to(room.id).emit(RoomShowAllEvent.eventName, roomShowAllEvent.users);
+
+                    let userDisconnectedEvent = new UserDisconnectedEvent(room.id);
+                    socket.emit(UserDisconnectedEvent.eventName, userDisconnectedEvent.roomId);
+
+                    if (isRoomEmpty(room)) {
+                        removeRoomFromList(room);
                     }
 
                     callback();
                 }
+            }
+
+            function isRoomEmpty(room: Room): boolean {
+                return room.users.length === 0;
+            }
+
+            let removeRoomFromList = (room: Room) => {
+                let index = this.rooms.findIndex((value) => value.id === room.id);
+                this.rooms.splice(index, 1);
             }
 
             socket.on("room-join", (data, callback) => {
@@ -86,7 +97,7 @@ export class Socket {
                     }
                 } catch (error) {
                     callback({ access: false });
-                    socket.emit(internalServerError, error);
+                    socket.emit(InternalServerErrorEvent.eventName, error);
                 }
             });
 
@@ -94,7 +105,7 @@ export class Socket {
                 var room = this.rooms.filter(r => r.id == data.roomId)[0];
                 if (!room) {
                     callback({ access: false });
-                    socket.emit(roomNotFoundEvent);
+                    socket.emit(RoomNotFoundEvent.eventName);
                     return;
                 }
 
@@ -102,7 +113,9 @@ export class Socket {
                 room.addUser(user);
 
                 callback({ access: true });
-                socket.server.to(room.id).emit(roomShowAllEvent, room.users);
+
+                let roomShowAllEvent = new RoomShowAllEvent(room.users);
+                socket.server.to(room.id).emit(RoomShowAllEvent.eventName, roomShowAllEvent.users);
                 socket.room = room.id;
                 socket.join(room.id);
             }
@@ -115,7 +128,7 @@ export class Socket {
                         this.io.emit("users-all", this.rooms.map(x => x.users.length).reduce((p, c, ) => p + c));
                     }
                 } catch (error) {
-                    socket.emit(internalServerError, error);
+                    socket.emit(InternalServerErrorEvent.eventName, error);
                 }
             });
 
@@ -123,7 +136,8 @@ export class Socket {
                 let room: Room = this.rooms.filter(r => r.id == data.roomId)[0];
                 if (room) {
                     room.removeUser(data.userId);
-                    socket.server.to(room.id).emit(roomShowAllEvent, room.users);
+                    let roomShowAllEvent = new RoomShowAllEvent(room.users);
+                    socket.server.to(room.id).emit(RoomShowAllEvent.eventName, roomShowAllEvent.users);
                     if (room.users.length === 0) {
                         let index = this.rooms.findIndex((value) => value.id === room.id);
                         this.rooms.splice(index, 1);
@@ -138,7 +152,7 @@ export class Socket {
                         this.io.emit("users-all", this.rooms.map(x => x.users.length).reduce((p, c, ) => p + c));
                     }
                 } catch (error) {
-                    socket.emit(internalServerError, error);
+                    socket.emit(InternalServerErrorEvent.eventName, error);
                 }
             });
 
@@ -146,8 +160,10 @@ export class Socket {
                 let room = this.rooms.filter(r => r.id == data.roomId)[0];
                 if (room) {
                     room.removeUser(data.userId);
-                    this.io.to(data.userId).emit(userBannedEvent);
-                    socket.server.to(room.id).emit(roomShowAllEvent, room.users);
+                    this.io.to(data.userId).emit(UserBannedEvent.eventName);
+
+                    let roomShowAllEvent = new RoomShowAllEvent(room.users);
+                    socket.server.to(room.id).emit(RoomShowAllEvent.eventName, roomShowAllEvent.users);
                 }
             }
 
@@ -155,14 +171,15 @@ export class Socket {
                 try {
                     roomGetAll(data);
                 } catch (error) {
-                    socket.emit(internalServerError, error);
+                    socket.emit(InternalServerErrorEvent.eventName, error);
                 }
             });
 
             let roomGetAll = (data) => {
                 let room = this.rooms.filter(r => r.id == data.roomId)[0];
                 if (room) {
-                    socket.server.to(room.id).emit(roomShowAllEvent, room.users);
+                    let roomShowAllEvent = new RoomShowAllEvent(room.users);
+                    socket.server.to(room.id).emit(RoomShowAllEvent.eventName, roomShowAllEvent.users);
                 }
             }
 
