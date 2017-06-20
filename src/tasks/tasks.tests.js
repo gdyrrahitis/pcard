@@ -34,7 +34,7 @@ gulp.task("mocha", function () {
     return mochaRun();
 });
 
-gulp.task("mocha:dev", function (callback) {
+gulp.task("mocha:dev", ["ts"], function (callback) {
     gulp.watch("src/server/**/*.ts", function () {
         sequence("ts", "mocha");
     });

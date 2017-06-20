@@ -1,21 +1,36 @@
 var gulp = require("gulp"),
     sass = require("gulp-sass"),
-    uglify = require('gulp-uglifycss'),
+    uglify = require("gulp-cssnano"),
+    concat = require("gulp-concat"),
+    sourcemaps = require("gulp-sourcemaps"),
     merge = require("merge-stream"),
+    sequence = require("run-sequence"),
+    gutil = require("gulp-util"),
     browserSync = require("./browser.sync.js"),
     reload = browserSync.reload,
     variables = require("./variables");
 
-// CSS tasks
-gulp.task("css:minify", function () {
+gulp.task("css:bundle", function () {
     gulp.src(variables.libPaths.dest.allCss)
-        .pipe(uglify({
-            "uglyComments": false
-        }))
-        .pipe(gulp.dest("./dist/css/libs/"));
+        .pipe(concat("site.css"))
+        .pipe(gulp.dest("./dist/css/libs/styles/"))
+        .pipe(sourcemaps.init())
+        .pipe(uglify())
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest("./dist/css/libs/styles/"));
 });
 
-gulp.task("css", ["css:minify"]);
+
+gulp.task("css:bundle:prod", function () {
+    gulp.src(variables.libPaths.dest.allCss)
+        .pipe(concat("site.css"))
+        .pipe(gulp.dest("./dist/css/libs/styles/"))
+        .pipe(uglify())
+        .pipe(gulp.dest("./dist/css/libs/styles/"));
+});
+
+gulp.task("css", ["css:bundle"]);
+gulp.task("css:prod", ["css:bundle:prod"]);
 
 // SASS tasks
 gulp.task("sass", ["fonts"], function () {

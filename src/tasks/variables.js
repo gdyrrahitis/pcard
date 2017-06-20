@@ -30,6 +30,7 @@ var libPaths = {
         js: `${basePaths.dest.root}/src/client/main.js`,
         css: `${basePaths.dest.root}/css/libs`,
         allCss: `${basePaths.dest.root}/css/libs/**/*.css`,
+        stylesCss: `${basePaths.dest.root}/css/libs/styles.css`,
         fonts: `${basePaths.dest.root}/css/libs/fonts`,
         fontsBootstrap: `${basePaths.dest.root}/css/libs/fonts/bootstrap`
     }
@@ -42,5 +43,5 @@ var misc = {
 }
 
 exports.basePaths = basePaths;
-exports.libPaths =libPaths;
+exports.libPaths = libPaths;
 exports.misc = misc;
