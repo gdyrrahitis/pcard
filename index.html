@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="app" ng-strict-di>
+<html lang="en" ng-app="app" >
 
 <head>
     <base href="/" />
@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <script>
+    <script async>
         window.twttr = (function (d, s, id) {
             var js, fjs = d.getElementsByTagName(s)[0],
                 t = window.twttr || {};
@@ -25,16 +25,15 @@
             return t;
         }(document, "script", "twitter-wjs"));
     </script>
-    <link rel="stylesheet" type="text/css" href="dist/css/libs/styles/bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="dist/css/libs/styles/custom-font-awesome.css">
-    <link rel="stylesheet" type="text/css" href="dist/css/libs/toastr.css">
-    <link href="dist/css/libs/styles/main.css" rel="stylesheet" type="text/css">
+    <link href="dist/css/libs/styles/site.css" rel="stylesheet" type="text/css">
     <script src="dist/src/client/main.js"></script>
 </head>
 
 <body>
     <div class="container">
-        <header ng-controller="menuController" ng-include="'./src/client/controllers/menu.controller/menu.controller.html'"></header>
+        <header>
+            <menu></menu>
+        </header>
 
         <ng-view></ng-view>
 
