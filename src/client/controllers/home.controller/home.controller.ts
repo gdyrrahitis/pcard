@@ -8,6 +8,8 @@ import {
 import { BaseController } from "../base.controller/base.controller";
 
 export class HomeController extends BaseController {
+
+    static $inject = ["$scope", "$location", "$localStorage", "socketService", "notificationService", "modalService", "httpService"];
     constructor(protected $scope: IHomeControllerScope,
         private $location: ng.ILocationService,
         private $localStorage: ILocalStorage,
@@ -98,8 +100,8 @@ export class HomeController extends BaseController {
     public join = () => {
         this.modalService.open({
             animation: true,
-            templateUrl: "src/client/controllers/join.room.modal.controller/join.room.modal.controller.html",
-            controller: "joinRoomModalController",
+            template: "<join></join>",
+            component: "join",
             size: "md",
             scope: this.$scope
         });

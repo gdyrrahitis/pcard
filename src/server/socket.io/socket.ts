@@ -184,6 +184,7 @@ export class Socket {
             }
 
             socket.on("request-all-rooms", () => {
+                console.log("daafe")
                 this.io.emit("rooms-all", this.rooms.length);
             });
 

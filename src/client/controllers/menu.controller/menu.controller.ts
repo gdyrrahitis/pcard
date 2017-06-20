@@ -5,6 +5,7 @@ export class MenuController extends BaseController {
     private privateLeaveEvent: string = "room-leave";
     private root: string = "/";
 
+    static $inject = ["$scope", "$location", "$localStorage", "socketService"];
     constructor(protected $scope: IMenuControllerScope,
         private $location: ng.ILocationService,
         private $localStorage: ILocalStorage,

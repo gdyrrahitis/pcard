@@ -23,10 +23,25 @@ export module pcard {
         .service("notificationService", ["$toastr", NotificationService])
         .service("httpService", ["$http", HttpService])
         .filter("plural", PluralFilter)
-        .controller("homeController", ["$scope", "$location", "$localStorage", "socketService", "notificationService", "modalService", "httpService", HomeController])
-        .controller("roomController", ["$scope", "$rootScope", "$location", "$routeParams", "$localStorage", "socketService", "cards", "$window", RoomController])
-        .controller("menuController", ["$scope", "$location", "$localStorage", "socketService", MenuController])
-        .controller("joinRoomModalController", ["$scope", "$uibModalInstance", JoinRoomModalController]);
+        .component("home", {
+            controller: HomeController,
+            templateUrl: "src/client/controllers/home.controller/home.controller.html"
+        })
+        .component("room", {
+            controller: RoomController,
+            templateUrl: "src/client/controllers/room.controller/room.controller.html"
+        })
+        .component("menu", {
+            controller: MenuController,
+            templateUrl: "src/client/controllers/menu.controller/menu.controller.html"
+        })
+        .component("join", {
+            bindings: {
+                $uibModalInstance: "<"
+            },
+            controller: JoinRoomModalController,
+            templateUrl: "src/client/controllers/join.room.modal.controller/join.room.modal.controller.html"
+        });
 
     registerRoutes(app, config);
 

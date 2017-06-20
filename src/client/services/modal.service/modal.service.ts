@@ -5,6 +5,7 @@ export class ModalService {
 
     public open(options: angular.ui.bootstrap.IModalSettings) {
         this.modalInstance = this.$uiModal.open(options);
+        options.scope.$uibModalInstance = this.modalInstance;
     }
 
     public dismiss(reason?: any) {

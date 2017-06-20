@@ -7,9 +7,11 @@ export function registerRoutes(app: ng.IModule, config: ClientAppConfig.ClientCo
 
         routes.forEach(v => {
             var route = config.client.routes.find(v);
-            $routeProvider.when(route.path, {
-                templateUrl: route.templateUrl,
-                controller: route.controller
+            $routeProvider.when("/", {
+                template: "<home></home>"
+            })
+            .when("/room/:id", {
+                template: "<room></room>"
             });
         });
 
