@@ -1,5 +1,5 @@
 import * as express from "express";
-let config: ServerAppConfig.ServerConfiguration = require("../server.config.json");
+const config: ServerAppConfig.ServerConfiguration = require("../server.config.json");
 
 export module routes.rooms {
     let rooms = express.Router();

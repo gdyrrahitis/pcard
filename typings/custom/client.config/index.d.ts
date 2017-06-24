@@ -1,8 +1,7 @@
 declare module ClientAppConfig {
     interface Route {
         path: string,
-        templateUrl: string,
-        controller: string
+        template: string
     }
 
     interface Client {

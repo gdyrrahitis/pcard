@@ -6,13 +6,11 @@
         "routes": [
             {
                 "path": "/",
-                "templateUrl": "src/client/controllers/home.controller/home.controller.html",
-                "controller": "homeController"
+                "template": "<pcard-home></pcard-home>"
             },
             {
                 "path": "/room/:id",
-                "templateUrl": "src/client/controllers/room.controller/room.controller.html",
-                "controller": "roomController"
+                "template": "<pcard-room></pcard-room>"
             }
         ]
     },

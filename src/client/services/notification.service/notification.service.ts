@@ -1,4 +1,6 @@
 export class NotificationService {
+    static $inject = ["$toastr"];
+    
     constructor(private toast: Toastr) { }
 
     public success(message: string, title?: string, options?: ToastrOptions): void {

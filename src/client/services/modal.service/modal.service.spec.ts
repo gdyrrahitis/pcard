@@ -1,6 +1,6 @@
 import { ModalService } from "./modal.service";
 
-describe("Service", () => {
+xdescribe("Service", () => {
     describe("modal.service", () => {
         describe("open", () => {
             it("should call ui.boostrap.modal open method with options", () => {
