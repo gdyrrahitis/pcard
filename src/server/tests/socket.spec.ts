@@ -6,7 +6,7 @@ import { UserRole } from "../../domain/index";
 import {
     RoomCreateEvent, RoomGetAllEvent, InternalServerErrorEvent, RoomShowAllEvent,
     RoomsAllEvent, UsersAllEvent, RoomNotFoundEvent, RoomJoinEvent, RequestAllRoomsEvent,
-    RequestAllUsersEvent
+    RequestAllUsersEvent, RoomDisconnectEvent, UserDisconnectedEvent
 } from "../../domain/events/index";
 
 const assert = chai.assert;
@@ -17,6 +17,7 @@ const options: SocketIOClient.ConnectOpts = {
 };
 const isGuid = (data: string) => /^[{]?[0-9a-fA-F]{8}[-]?([0-9a-fA-F]{4}[-]?){3}[0-9a-fA-F]{12}[}]?$/.test(data);
 const getFirstRoomThatMatchesGuidPattern = (rooms: { [room: string]: { sockets: { [id: string]: boolean }, length: number } }) => {
+    // TODO: Remove
     for (var room in rooms) {
         if (!rooms[room].hasOwnProperty(room)) {
             if (isGuid(room)) {
@@ -197,9 +198,8 @@ describe("Server", () => {
                     });
 
                     // act
-                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, () => {
-                        let roomId = getFirstRoomThatMatchesGuidPattern(rooms);
-                        roomJoinEventArgs = { roomId: roomId, name: "George" };
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        roomJoinEventArgs = { roomId: $create.roomId, name: "George" };
                         roomJoinEvent = new RoomJoinEvent(roomJoinEventArgs);
 
                         client.emit(RoomJoinEvent.eventName, roomJoinEvent.data, ($value: { access: boolean }) => {
@@ -304,9 +304,8 @@ describe("Server", () => {
                     });
 
                     // act
-                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, () => {
-                        let roomId = getFirstRoomThatMatchesGuidPattern(rooms);
-                        roomJoinEventArgs = { roomId: roomId, name: undefined };
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        roomJoinEventArgs = { roomId: $create.roomId, name: undefined };
                         roomJoinEvent = new RoomJoinEvent(roomJoinEventArgs);
 
                         client.emit(RoomJoinEvent.eventName, roomJoinEvent.data, ($value: { access: boolean }) => {
@@ -360,10 +359,9 @@ describe("Server", () => {
                     });
 
                     // act
-                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, () => {
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
                         status = "room-create";
-                        let roomId = getFirstRoomThatMatchesGuidPattern(rooms);
-                        roomJoinEventArgs = { roomId: roomId, name: john };
+                        roomJoinEventArgs = { roomId: $create.roomId, name: john };
                         roomJoinEvent = new RoomJoinEvent(roomJoinEventArgs);
 
                         // someone else is connected and joins room
@@ -383,6 +381,7 @@ describe("Server", () => {
 
                             newClient.on(UsersAllEvent.eventName, (users: number) => {
                                 assert.equal(2, users);
+                                newClient.disconnect();
                                 done();
                             });
 
@@ -395,7 +394,249 @@ describe("Server", () => {
             });
         });
 
-        describe("room-disconnect", () => { });
+        describe("room-disconnect", () => {
+            it("should emit 'internal-server-error' for null data", (done) => {
+                // arrrange
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter data is required");
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit(RoomDisconnectEvent.eventName, null, () => { });
+                });
+            });
+
+            it("should emit 'internal-server-error' for empty or not defined roomId", (done) => {
+                // arrange
+                let roomDisconnectEvent = new RoomDisconnectEvent({ roomId: undefined, userId: "1234" });
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter <Object>.roomId is required");
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit(RoomDisconnectEvent.eventName, roomDisconnectEvent.data, () => { });
+                });
+            });
+
+            it("should emit 'internal-server-error' for empty or not defined userId", (done) => {
+                // arrange
+                let roomDisconnectEvent = new RoomDisconnectEvent({ roomId: "1234", userId: undefined });
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter <Object>.userId is required");
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit(RoomDisconnectEvent.eventName, roomDisconnectEvent.data, () => { });
+                });
+            });
+
+            it("should emit 'internal-server-error' when room is not found", (done) => {
+                // arrange
+                let roomCreateEventArgs: { name: string } = { name: "George" };
+                let roomCreateEvent = new RoomCreateEvent(roomCreateEventArgs);
+                let roomId: string = "1234";
+                let roomDisconnectEvent = new RoomDisconnectEvent({ roomId: roomId, userId: "user1" });
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, `Could not find room '${roomId}'`);
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($value: { access: boolean }) => {
+                        assert.isTrue($value.access);
+                        client.emit(RoomDisconnectEvent.eventName, roomDisconnectEvent.data, () => { });
+                    });
+                });
+            });
+
+            it("should remove guest user from room", (done) => {
+                // arrange
+                let rooms = server.sockets.adapter.rooms;
+                let roomCreateEventArgs: { name: string } = { name: "George" };
+                let roomCreateEvent = new RoomCreateEvent(roomCreateEventArgs);
+                client.on("connect", () => {
+                    // act
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+                        let roomId = $create.roomId;
+                        let roomJoinEvent = new RoomJoinEvent({ name: "John", roomId: roomId });
+
+                        let newClient = ioClient.connect(socketUrl, options);
+                        let status: "room-join" | "room-disconnect" = "room-join";
+                        newClient.on("connect", () => {
+                            newClient.on(RoomShowAllEvent.eventName, (users: UserRole[]) => {
+                                if (status === "room-join") {
+                                    assert.equal(users.length, 2);
+                                    let john = users.find(u => u.id === newClient.id);
+                                    assert.equal(john.name, "John");
+                                    assert.equal(john.role.name, "guest");
+                                }
+                                else if (status === "room-disconnect") {
+                                    assert.equal(users.length, 1);
+                                    assert.equal(users[0].name, "George");
+                                    assert.equal(users[0].role.name, "moderator");
+                                }
+                            });
+
+                            newClient.on(RoomsAllEvent.eventName, (rooms: number) => {
+                                assert.equal(rooms, 1);
+                            });
+
+                            newClient.on(UsersAllEvent.eventName, (users: number) => {
+                                if (status === "room-join") {
+                                    assert.equal(users, 2);
+                                }
+                                else if (status === "room-disconnect") {
+                                    assert.equal(users, 1);
+                                    newClient.disconnect();
+                                    done();
+                                }
+                            });
+
+
+                            newClient.on(UserDisconnectedEvent.eventName, (data) => {
+                                status = "room-disconnect";
+                                assert.equal(data, roomId);
+                            });
+
+                            newClient.emit(RoomJoinEvent.eventName, roomJoinEvent.data, ($disconnect: { access: boolean }) => {
+                                assert.isTrue($disconnect.access);
+                                let roomDisconnectedEvent = new RoomDisconnectEvent({ roomId: roomId, userId: newClient.id });
+                                newClient.emit(RoomDisconnectEvent.eventName, roomDisconnectedEvent.data, () => { })
+                            });
+                        });
+                    });
+                });
+            });
+
+            it("should remove last user and room from list of rooms", (done) => {
+                // arrange
+                let room: string;
+                let rooms = server.sockets.adapter.rooms;
+                let roomCreateEventArgs: { name: string } = { name: "George" };
+                let roomCreateEvent = new RoomCreateEvent(roomCreateEventArgs);
+                let status: "room-create" | "room-disconnect" = "room-create";
+                client.on("connect", () => {
+                    // assert
+                    client.on(UserDisconnectedEvent.eventName, (roomId) => {
+                        status = "room-disconnect";
+                        assert.equal(roomId, room);
+                    });
+
+                    client.on(RoomShowAllEvent.eventName, (users: UserRole[]) => {
+                        if (status === "room-create") {
+                            assert.equal(1, users.length);
+                            assert.equal(users[0].id, client.id);
+                            assert.equal(users[0].name, "George");
+                            assert.equal(users[0].role.name, "moderator");
+                        } else if (status === "room-disconnect") {
+                            assert.equal(0, users.length);
+                        }
+                    });
+
+                    client.on(RoomsAllEvent.eventName, (rooms: number) => {
+                        if (status === "room-create") {
+                            assert.equal(1, rooms);
+                        } else if (status === "room-disconnect") {
+                            assert.equal(0, rooms);
+                        }
+                    });
+
+                    client.on(UsersAllEvent.eventName, (users: number) => {
+                        if (status === "room-create") {
+                            assert.equal(1, users);
+                        } else if (status === "room-disconnect") {
+                            assert.equal(0, users);
+                            done();
+                        }
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+                        room = $create.roomId;
+                        let roomDisconnectEvent = new RoomDisconnectEvent({ roomId: room, userId: client.id });
+                        client.emit(RoomDisconnectEvent.eventName, roomDisconnectEvent.data, () => { });
+                    });
+                });
+            });
+
+            it("should remove all users and the room from list of rooms when moderator disconnects", (done) => {
+                // arrange
+                let newClient: SocketIOClient.Socket;
+                let room: string;
+                let status: "room-create" | "room-join" | "room-disconnect" = "room-create";
+                let rooms = server.sockets.adapter.rooms;
+                let roomCreateEventArgs: { name: string } = { name: "George" };
+                let roomCreateEvent = new RoomCreateEvent(roomCreateEventArgs);
+                client.on("connect", () => {
+                    // act
+                    client.on(UserDisconnectedEvent.eventName, (roomId) => {
+                        status = "room-disconnect";
+                        assert.equal(roomId, room);
+                    });
+
+                    client.on(RoomsAllEvent.eventName, (rooms: number) => {
+                        if (status === "room-create") {
+                            assert.equal(1, rooms);
+                        } else if (status === "room-join") {
+                            assert.equal(1, rooms);
+                        } else if (status === "room-disconnect") {
+                            assert.equal(0, rooms);
+                        }
+                    });
+
+                    client.on(UsersAllEvent.eventName, (users: number) => {
+                        if (status === "room-create") {
+                            assert.equal(1, users);
+                        } else if (status === "room-join") {
+                            assert.equal(2, users);
+                        } else if (status === "room-disconnect") {
+                            assert.equal(0, users);
+                            newClient.disconnect();
+                            done();
+                        }
+                    });
+
+
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+                        room = $create.roomId;
+                        let roomJoinEvent = new RoomJoinEvent({ name: "John", roomId: room });
+
+                        newClient = ioClient.connect(socketUrl, options);
+                        newClient.on("connect", () => {
+                            status = "room-join";
+                            newClient.emit(RoomJoinEvent.eventName, roomJoinEvent.data, ($disconnect: { access: boolean }) => {
+                                assert.isTrue($disconnect.access);
+                                // disconnecting moderator
+                                let roomDisconnectedEvent = new RoomDisconnectEvent({ roomId: room, userId: client.id });
+                                client.emit(RoomDisconnectEvent.eventName, roomDisconnectedEvent.data, () => { })
+                            });
+                        });
+                    });
+                });
+            });
+        });
 
         describe("ban", () => { });
 
@@ -426,7 +667,7 @@ describe("Server", () => {
                     // assert
                     client.once(InternalServerErrorEvent.eventName, (error) => {
                         assert.isDefined(error.id);
-                        assert.equal("Parameter <Object>.roomId is required", error.message);
+                        assert.equal("Parameter data is required", error.message);
                         assert.equal("Error", error.name);
                         done();
                     });
@@ -480,8 +721,7 @@ describe("Server", () => {
                     });
 
                     // act
-                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, () => {
-                        roomId = getFirstRoomThatMatchesGuidPattern(rooms);
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
                         roomGetAllEventArgs = { roomId: roomId };
                         roomGetAllEvent = new RoomGetAllEvent(roomGetAllEventArgs);
 
@@ -532,6 +772,7 @@ describe("Server", () => {
                 let roomCreateEventArgs: { name: string } = { name: "George" };
                 let roomCreateEvent = new RoomCreateEvent(roomCreateEventArgs);
                 let status: "before:new-room-created" | "after:new-room-created" = "before:new-room-created";
+                let newClient: SocketIOClient.Socket;
 
                 client.on("connect", () => {
                     // assert
@@ -540,13 +781,14 @@ describe("Server", () => {
                             assert.equal(1, rooms);
                         } else if (status === "after:new-room-created") {
                             assert.equal(2, rooms);
+                            newClient.disconnect();
                             done();
                         }
                     });
 
                     // act
                     client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, () => {
-                        let newClient = ioClient.connect(socketUrl, options);
+                        newClient = ioClient.connect(socketUrl, options);
                         newClient.on("connect", () => {
                             status = "after:new-room-created";
                             newClient.emit(RoomCreateEvent.eventName, roomCreateEvent.data, () => { });
@@ -557,7 +799,7 @@ describe("Server", () => {
             });
         });
 
-        describe("rooms-all", () => {
+        describe("users-all", () => {
             it("should return 0 users when no room is created", (done) => {
                 client.on("connect", () => {
                     client.on(UsersAllEvent.eventName, (users: number) => {
@@ -588,13 +830,15 @@ describe("Server", () => {
                     });
 
                     // act
-                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, () => { });
-                    client.emit(RequestAllUsersEvent.eventName);
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, () => {
+                        client.emit(RequestAllUsersEvent.eventName);
+                    });
                 });
             });
 
             it("should return total 2 users when two rooms are created", (done) => {
                 // arrange
+                let newClient: SocketIOClient.Socket;
                 let roomCreateEventArgs: { name: string } = { name: "George" };
                 let roomCreateEvent = new RoomCreateEvent(roomCreateEventArgs);
                 let status: "before:new-room-created" | "after:new-room-created" = "before:new-room-created";
@@ -606,24 +850,27 @@ describe("Server", () => {
                             assert.equal(1, users);
                         } else if (status === "after:new-room-created") {
                             assert.equal(2, users);
+                            newClient.disconnect();
                             done();
                         }
                     });
 
                     // act
                     client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, () => {
-                        let newClient = ioClient.connect(socketUrl, options);
+                        newClient = ioClient.connect(socketUrl, options);
                         newClient.on("connect", () => {
                             status = "after:new-room-created";
-                            newClient.emit(RoomCreateEvent.eventName, roomCreateEvent.data, () => { });
+                            newClient.emit(RoomCreateEvent.eventName, roomCreateEvent.data, () => {
+                                client.emit(RequestAllUsersEvent.eventName);
+                            });
                         });
                     });
-                    client.emit(RequestAllUsersEvent.eventName);
                 });
             });
 
             it("should return total 2 users when one room is created and user has joined", (done) => {
                 // arrange
+                let newClient: SocketIOClient.Socket;
                 let roomCreateEventArgs: { name: string } = { name: "George" };
                 let roomCreateEvent = new RoomCreateEvent(roomCreateEventArgs);
                 let rooms = server.sockets.adapter.rooms;
@@ -636,6 +883,7 @@ describe("Server", () => {
                             assert.equal(1, users);
                         } else if (status === "room-join") {
                             assert.equal(2, users);
+                            newClient.disconnect();
                             done();
                         }
                     });
@@ -645,25 +893,129 @@ describe("Server", () => {
                     });
 
                     // act
-                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($value: { access: boolean }) => {
-                        assert.isTrue($value.access);
-                        let roomId = getFirstRoomThatMatchesGuidPattern(rooms);
-                        let roomJoinEvent = new RoomJoinEvent({ name: "John", roomId: roomId });
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+                        let roomJoinEvent = new RoomJoinEvent({ name: "John", roomId: $create.roomId });
 
-                        let newClient = ioClient.connect(socketUrl, options);
+                        newClient = ioClient.connect(socketUrl, options);
                         newClient.on("connect", () => {
                             status = "room-join";
-                            newClient.emit(RoomJoinEvent.eventName, roomJoinEvent.data, ($value: { access: boolean }) => {
-                                assert.isTrue($value.access);
+                            newClient.emit(RoomJoinEvent.eventName, roomJoinEvent.data, ($join: { access: boolean }) => {
+                                assert.isTrue($join.access);
+                                client.emit(RequestAllUsersEvent.eventName);
                             });
                         });
                     });
-                    client.emit(RequestAllUsersEvent.eventName);
                 });
             });
         });
 
-        describe("users-all", () => { });
+        describe("rooms-all", () => {
+            it("should return 0 rooms when no room is created", (done) => {
+                client.on("connect", () => {
+                    client.on(RoomsAllEvent.eventName, (users: number) => {
+                        assert.equal(0, users);
+                        done();
+                    });
+
+                    client.emit(RequestAllRoomsEvent.eventName);
+                });
+            });
+
+            it("should return total 1 room when one room is created", (done) => {
+                // arrange
+                let roomCreateEventArgs: { name: string } = { name: "George" };
+                let roomCreateEvent = new RoomCreateEvent(roomCreateEventArgs);
+                let status: "before:room-created" | "after:room-created" = "before:room-created";
+
+                client.on("connect", () => {
+                    // assert
+                    client.on(RoomsAllEvent.eventName, (rooms: number) => {
+                        assert.equal(1, rooms);
+
+                        if (status === "after:room-created") {
+                            done();
+                        }
+
+                        status = "after:room-created";
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, () => {
+                        client.emit(RequestAllRoomsEvent.eventName);
+                    });
+                });
+            });
+
+            it("should return total 2 rooms when two rooms are created", (done) => {
+                // arrange
+                let newClient: SocketIOClient.Socket;
+                let roomCreateEventArgs: { name: string } = { name: "George" };
+                let roomCreateEvent = new RoomCreateEvent(roomCreateEventArgs);
+                let status: "before:new-room-created" | "after:new-room-created" = "before:new-room-created";
+
+                client.on("connect", () => {
+                    // assert
+                    client.on(RoomsAllEvent.eventName, (rooms: number) => {
+                        if (status === "before:new-room-created") {
+                            assert.equal(1, rooms);
+                        } else if (status === "after:new-room-created") {
+                            assert.equal(2, rooms);
+                            newClient.disconnect();
+                            done();
+                        }
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, () => {
+                        newClient = ioClient.connect(socketUrl, options);
+                        newClient.on("connect", () => {
+                            status = "after:new-room-created";
+                            newClient.emit(RoomCreateEvent.eventName, roomCreateEvent.data, () => {
+                                client.emit(RequestAllRoomsEvent.eventName);
+                            });
+                        });
+                    });
+                });
+            });
+
+            it("should return total 1 rooms when one room is created and another user has joined", (done) => {
+                // arrange
+                let newClient: SocketIOClient.Socket;
+                let roomCreateEventArgs: { name: string } = { name: "George" };
+                let roomCreateEvent = new RoomCreateEvent(roomCreateEventArgs);
+                let rooms = server.sockets.adapter.rooms;
+                let status: "room-create" | "room-join" = "room-create";
+
+                client.on("connect", () => {
+                    // assert
+                    client.on(RoomsAllEvent.eventName, (rooms: number) => {
+                        if (status === "room-create") {
+                            assert.equal(1, rooms);
+                        } else if (status === "room-join") {
+                            assert.equal(1, rooms);
+                            newClient.disconnect();
+                            done();
+                        }
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access, "Not allowed to create room");
+                        let roomJoinEvent = new RoomJoinEvent({ name: "John", roomId: $create.roomId });
+
+                        newClient = ioClient.connect(socketUrl, options);
+                        newClient.on("connect", () => {
+                            status = "room-join";
+                            newClient.emit(RoomJoinEvent.eventName, roomJoinEvent.data, ($join: { access: boolean }) => {
+                                assert.isTrue($join.access, "Not allowed to join room");
+                                client.emit(RequestAllRoomsEvent.eventName);
+                            });
+                        });
+                    });
+                });
+            });
+        });
 
         describe("room-busy", () => { });
 

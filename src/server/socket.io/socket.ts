@@ -1,13 +1,29 @@
 import * as uuidV1 from "uuid/v1";
 
 import { getFirst, filter } from "../../shared/index";
-import { Room, User } from "../../domain/index";
+import { Room, User, Moderator } from "../../domain/index";
 import {
     InternalServerErrorEvent, RoomsFullEvent, RoomShowAllEvent,
     RoomNotFoundEvent, UserBannedEvent, UserDisconnectedEvent
 } from "../../domain/events/index";
 const max: number = (<ServerAppConfig.ServerConfiguration>require("../server.config.json")).socketio.maxRoomsAllowed;
 
+const isUndefined = (data: {}): boolean => {
+    return typeof data === "undefined" || data === null;
+}
+class Guard {
+    static throwIfObjectUndefined(data: {}, message: string) {
+        if (isUndefined(data)) {
+            throw new Error(message);
+        }
+    }
+
+    static throwIfStringNotDefinedOrEmpty(value: string, message: string) {
+        if (!value) {
+            throw new Error(message);
+        }
+    }
+}
 
 export class Socket {
     private rooms: Room[] = [];
@@ -47,35 +63,43 @@ export class Socket {
                 this.emitUsersAllEventWithTotalUsersInAllRooms();
             }
 
-            socket.on("room-disconnect", (data, callback) => {
+            socket.on("room-disconnect", (data, callback: Function) => {
                 try {
                     disconnect(data, callback);
-                    this.io.emit("rooms-all", this.rooms.length);
-                    if (this.rooms.length) {
-                        this.io.emit("users-all", this.rooms.map(x => x.users.length).reduce((p, c, ) => p + c));
-                    }
                 } catch (error) {
-                    socket.emit(InternalServerErrorEvent.eventName, error);
+                    callback();
+                    this.emitInternalServerError(socket, error);
                 }
             });
 
             let disconnect = (data, callback) => {
-                let room: Room = this.rooms.filter(r => r.id == data.roomId)[0];
+                Guard.throwIfObjectUndefined(data, "Parameter data is required");
+                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, "Parameter <Object>.roomId is required");
+                Guard.throwIfStringNotDefinedOrEmpty(data.userId, "Parameter <Object>.userId is required");
 
-                if (room) {
+                let room: Room = this.getRoomOrThrowCouldNotFind(data.roomId);
+                let userDisconnectedEvent = new UserDisconnectedEvent(room.id);
+                let user = room.getUser(data.userId);
+                if (user.role.name === "moderator") {
+                    room.users.forEach(u => room.removeUser(u.id));
+                    socket.broadcast.to(room.id).emit(UserDisconnectedEvent.eventName, userDisconnectedEvent.roomId);
+                    socket.emit(UserDisconnectedEvent.eventName, userDisconnectedEvent.roomId);
+                } else {
                     room.removeUser(data.userId);
-                    let roomShowAllEvent = new RoomShowAllEvent(room.users);
-                    socket.server.to(room.id).emit(RoomShowAllEvent.eventName, roomShowAllEvent.users);
-
-                    let userDisconnectedEvent = new UserDisconnectedEvent(room.id);
                     socket.emit(UserDisconnectedEvent.eventName, userDisconnectedEvent.roomId);
 
-                    if (this.isRoomEmpty(room)) {
-                        this.removeRoomFromList(room);
-                    }
-
-                    callback();
+                    let roomShowAllEvent = new RoomShowAllEvent(room.users);
+                    socket.server.to(room.id).emit(RoomShowAllEvent.eventName, roomShowAllEvent.users);
                 }
+
+                if (this.isRoomEmpty(room)) {
+                    this.removeRoomFromList(room);
+                }
+
+                callback();
+
+                this.emitRoomsAllEventWithTotalRooms();
+                this.emitUsersAllEventWithTotalUsersInAllRooms();
             }
 
             socket.on("room-join", (data, callback) => {
@@ -88,20 +112,12 @@ export class Socket {
             });
 
             let roomJoin = (data, callback) => {
-                if (this.isUndefined(data)) {
-                    throw new Error("Parameter data is required");
-                }
+                Guard.throwIfObjectUndefined(data, "Parameter data is required");
+                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, "Parameter <Object>.roomId is required");
+                Guard.throwIfStringNotDefinedOrEmpty(data.name, "Parameter <Object>.name is required");
 
-                if (!data.roomId) {
-                    throw new Error("Parameter <Object>.roomId is required");
-                }
-
-                if (!data.name) {
-                    throw new Error("Parameter <Object>.name is required");
-                }
-
-                let room = getFirst(filter<Room>(r => r.id === data.roomId)(this.rooms));
-                if (this.isUndefined(room)) {
+                let room: Room = this.getSingleRoomBy(r => r.id === data.roomId);
+                if (isUndefined(room)) {
                     callback({ access: false });
                     socket.emit(RoomNotFoundEvent.eventName);
                     return;
@@ -175,21 +191,14 @@ export class Socket {
             });
 
             let roomGetAll = (data) => {
-                if (this.isUndefined(data)) {
-                    throw new Error("Parameter <Object>.roomId is required");
-                }
+                Guard.throwIfObjectUndefined(data, "Parameter data is required");
 
-                let room = getFirst(filter<Room>(r => r.id === data.roomId)(this.rooms));
-                if (this.isUndefined(room)) {
-                    throw new Error(`Could not find room '${data.roomId}'`);
-                }
-
+                let room: Room = this.getRoomOrThrowCouldNotFind(data.roomId);
                 let roomShowAllEvent = new RoomShowAllEvent(room.users);
                 socket.server.to(room.id).emit(RoomShowAllEvent.eventName, roomShowAllEvent.users);
             }
 
             socket.on("request-all-rooms", () => this.emitRoomsAllEventWithTotalRooms());
-
             socket.on("request-all-users", () => this.emitUsersAllEventWithTotalUsersInAllRooms());
         });
     }
@@ -200,10 +209,6 @@ export class Socket {
 
     private emitUsersAllEventWithTotalUsersInAllRooms() {
         this.io.emit("users-all", this.rooms.length ? this.rooms.map(x => x.users.length).reduce((p, c, ) => p + c) : 0);
-    }
-
-    private isUndefined = (data: {}): boolean => {
-        return typeof data === "undefined" || data === null;
     }
 
     private emitInternalServerError(socket: ISocket, error: any) {
@@ -224,7 +229,7 @@ export class Socket {
         return room.users.length === 0;
     }
 
-    private removeRoomFromList = (room: Room) => {
+    private removeRoomFromList(room: Room) {
         let index = this.rooms.findIndex((value) => value.id === room.id);
         this.rooms.splice(index, 1);
     }
@@ -246,5 +251,17 @@ export class Socket {
                 }
             }
         }
+    }
+
+    private getSingleRoomBy(predicate: Predicate<Room>) {
+        return getFirst(filter<Room>(predicate)(this.rooms));
+    }
+
+    private getRoomOrThrowCouldNotFind(roomId) {
+        let room: Room = this.getSingleRoomBy(r => r.id === roomId);
+        if (isUndefined(room)) {
+            throw new Error(`Could not find room '${roomId}'`);
+        }
+        return room;
     }
 }
