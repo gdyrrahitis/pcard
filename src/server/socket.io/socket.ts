@@ -1,35 +1,12 @@
 import * as uuidV1 from "uuid/v1";
 
-import { getFirst, filter } from "../../shared/index";
+import { getFirst, filter,isUndefined, Guard } from "../../shared/index";
 import { Room, User, UserRole } from "../../domain/index";
 import {
     InternalServerErrorEvent, RoomsFullEvent, RoomShowAllEvent,
     RoomNotFoundEvent, UserBannedEvent, UserDisconnectedEvent
 } from "../../domain/events/index";
 const max: number = (<ServerAppConfig.ServerConfiguration>require("../server.config.json")).socketio.maxRoomsAllowed;
-
-const isUndefined = (data: {}): boolean => {
-    return typeof data === "undefined" || data === null;
-}
-class Guard {
-    static throwIfObjectUndefined(data: {}, message: string) {
-        this.throwIfConditionIsTruthy(isUndefined(data), message);
-    }
-
-    private static throwIfConditionIsTruthy(condition: boolean, message: string) {
-        if (condition) {
-            throw new Error(message);
-        }
-    }
-
-    static throwIfStringNotDefinedOrEmpty(value: string, message: string) {
-        this.throwIfConditionIsTruthy(!value, message);
-    }
-
-    static validate(condition: boolean, message: string) {
-        this.throwIfConditionIsTruthy(condition, message);
-    }
-}
 
 export class Socket {
     private rooms: Room[] = [];

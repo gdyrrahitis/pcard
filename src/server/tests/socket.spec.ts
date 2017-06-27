@@ -1,6 +1,7 @@
 import * as ioClient from "socket.io-client";
 import * as io from "socket.io";
 import * as chai from "chai";
+
 import { Socket } from "../socket.io/socket";
 import { UserRole } from "../../domain/index";
 import {
@@ -15,17 +16,6 @@ const options: SocketIOClient.ConnectOpts = {
     transports: ['websocket'],
     'force new connection': true
 };
-const isGuid = (data: string) => /^[{]?[0-9a-fA-F]{8}[-]?([0-9a-fA-F]{4}[-]?){3}[0-9a-fA-F]{12}[}]?$/.test(data);
-const getFirstRoomThatMatchesGuidPattern = (rooms: { [room: string]: { sockets: { [id: string]: boolean }, length: number } }) => {
-    // TODO: Remove
-    for (var room in rooms) {
-        if (!rooms[room].hasOwnProperty(room)) {
-            if (isGuid(room)) {
-                return room;
-            }
-        }
-    }
-}
 
 describe("Server", () => {
     describe("Socket", () => {
@@ -1481,7 +1471,7 @@ describe("Server", () => {
                     });
 
                     // act
-                    client.emit("room-deck-lock", { roomId: undefined });
+                    client.emit("room-deck-lock", { roomId: "" });
                 });
             });
 
@@ -1626,7 +1616,7 @@ describe("Server", () => {
                     });
 
                     // act
-                    client.emit("room-deck-unlock", { roomId: undefined });
+                    client.emit("room-deck-unlock", { roomId: "" });
                 });
             });
 
@@ -1759,7 +1749,7 @@ describe("Server", () => {
                 });
             });
 
-            it("should emit 'internal-server-error' for roomId not defined", (done) => {
+            it("should emit 'internal-server-error' for roomId empty", (done) => {
                 // arrange
                 client.on("connect", () => {
                     // assert
@@ -1771,7 +1761,7 @@ describe("Server", () => {
                     });
 
                     // act
-                    client.emit("room-deck-reset", { roomId: undefined });
+                    client.emit("room-deck-reset", { roomId: "" });
                 });
             });
 
@@ -1834,7 +1824,6 @@ describe("Server", () => {
                         assert.isTrue(true);
 
                         client.emit("room-deck-card-associate", { roomId: roomId, userId: client.id, cardId: "zero" }, ($data: { associated: boolean }) => {
-                            console.log($data)
                             assert.isTrue($data.associated);
                             done();
                         });
@@ -2073,7 +2062,6 @@ describe("Server", () => {
             });
         });
 
-        // TODO: Logic for user not associated with card but attempt to disassociate
         describe("room-deck-card-disassociate", () => {
             it("should emit 'internal-server-error' when data is undefined", (done) => {
                 // arrange

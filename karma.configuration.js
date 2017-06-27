@@ -19,7 +19,8 @@ var karmaConfig = {
       "node_modules/angular-ui-bootstrap/dist/ui-bootstrap.js",
       { pattern: "src/client/client.config.json", watched: true, included: false, served: true },
       "src/client/**/*.js",
-      "src/domain/**/*.js"
+      "src/domain/**/*.js",
+      "src/shared/**/*.js"
     ],
     
     // preprocess matching files before serving them to the browser
