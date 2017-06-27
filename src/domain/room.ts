@@ -5,6 +5,8 @@ import { Card } from "./card";
 export class Room {
     private _users: UserRole[] = [];
     private _deck: Deck;
+    private _lock: boolean;
+
     constructor(public id: string) {
         if (!id) {
             throw new Error("Parameter id is required");
@@ -13,10 +15,14 @@ export class Room {
         this._deck = new Deck();
     }
 
+    public get lock(): boolean {
+        return this._lock;
+    };
+
     public get deck(): Deck {
         return this._deck;
     }
-    
+
     public get users(): UserRole[] {
         return JSON.parse(JSON.stringify(this._users));
     }
@@ -28,6 +34,10 @@ export class Room {
     public addUser(user: User) {
         if (this.getUser(user.id)) {
             throw new Error("Cannot add user with same id");
+        }
+
+        if (this.lock) {
+            throw new Error("Room is locked. Users are not permitted to enter while in planning session.");
         }
 
         this._users.push(this.IsAnyUser() ?
@@ -51,6 +61,10 @@ export class Room {
             throw new Error(`User with id '${id}' does not exist`);
         }
 
+        if (this._deck.lock) {
+            return (name) => { };
+        }
+
         return (name) => {
             this._deck.getCard(name).with(id);
         };
@@ -60,9 +74,17 @@ export class Room {
         if (!this.getUser(id)) {
             throw new Error(`User with id '${id}' does not exist`);
         }
+        
+        if (this._deck.lock) {
+            return (name) => { };
+        }
 
         return (name) => {
             this._deck.getCard(name).from(id);
         };
+    }
+
+    public setLock(condition: boolean) {
+        this._lock = condition;
     }
 }

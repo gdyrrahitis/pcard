@@ -81,6 +81,20 @@ describe("Model", () => {
                 // act | assert
                 expect(() => room.addUser(userCopy)).toThrowError("Cannot add user with same id");
             });
+
+            it("should throw an error when room is locked and user is attempted to enter", () => {
+                // arrange
+                let room = new Room("1234");
+                let user: User = { id: "user1", name: "George" };
+                room.addUser(user);
+                let guest: User = { id: "user2", name: "Chris" };
+
+                // act
+                room.setLock(true);
+
+                // assert
+                expect(() => room.addUser(guest)).toThrowError("Room is locked. Users are not permitted to enter while in planning session.");
+            });
         });
 
         describe("removeUser", () => {
@@ -200,6 +214,21 @@ describe("Model", () => {
                 // act | assert
                 expect(() => room.associate(user.id)("fake")).toThrowError("Card 'fake' does not exist");
             });
+
+            it("should not associate user with card when deck is locked", () => {
+                // arrange
+                let room = new Room(roomId);
+                let user: User = { id: "user1", name: "George" };
+                room.addUser(user);
+                room.deck.setLocked(true);
+
+                // act
+                room.associate(user.id)("one");
+                let card = room.deck.getCard("one");
+
+                // assert
+                expect(card.users.length).toBe(0);
+            });
         });
 
         describe("disassociate", () => {
@@ -237,6 +266,23 @@ describe("Model", () => {
                 // act | assert
                 expect(() => room.disassociate(user.id)("fake")).toThrowError("Card 'fake' does not exist");
             });
+
+            it("should not disassociate user with card when deck is locked", () => {
+                // arrange
+                let room = new Room(roomId);
+                let user: User = { id: "user1", name: "George" };
+                room.addUser(user);
+                room.associate(user.id)("one");
+                room.deck.setLocked(true);
+
+                // act
+                room.disassociate(user.id)("one");
+                let card = room.deck.getCard("one");
+
+                // assert
+                expect(card.users.length).toBe(1);
+                expect(card.users[0]).toBe(user.id);
+            });
         });
 
         describe("users", () => {
@@ -271,7 +317,7 @@ describe("Model", () => {
                 let result = room.users;
                 result[0].id = "user3";
                 let array = room.users;
-            
+
                 // assert
                 expect(result.length).toBe(2);
                 expect(result[0].id).toBe("user3");
@@ -279,6 +325,38 @@ describe("Model", () => {
                 expect(result[1].id).toBe("user2");
                 expect(result[1].name).toBe("John");
                 expect(array[0].id).toBe("user1");
+            });
+        });
+
+        describe("toggleLock", () => {
+            it("should be unlocked by default", () => {
+                // arrange
+                let room = new Room("1234");
+
+                // act | assert
+                expect(room.lock).toBeFalsy();
+            });
+
+            it("should lock room", () => {
+                // arrange
+                let room = new Room("1234");
+
+                // act
+                room.setLock(true);
+
+                // assert
+                expect(room.lock).toBeTruthy();
+            });
+
+            it("should unlock room", () => {
+                // arrange
+                let room = new Room("1234");
+
+                // act
+                room.setLock(false);
+
+                // assert
+                expect(room.lock).toBeFalsy();
             });
         });
     });

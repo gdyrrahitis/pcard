@@ -16,6 +16,11 @@ export class Deck {
         new Card("coffee"),
         new Card("question")
     ];
+    private _lock: boolean;
+
+    public get lock(): boolean {
+        return this._lock;
+    }
 
     public get cards(): Card[] {
         return this._cards;
@@ -32,5 +37,9 @@ export class Deck {
 
     public reset() {
         this._cards.forEach(c => c.clean());
+    }
+
+    public setLocked(condition: boolean) {
+        this._lock = condition;
     }
 }

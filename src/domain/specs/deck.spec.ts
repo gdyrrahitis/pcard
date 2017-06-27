@@ -39,5 +39,38 @@ describe("Model", () => {
                 }
             });
         });
+
+        describe("toggleLock", () => {
+            it("should be unlocked by default", () => {
+                // arrange
+                let deck = new Deck();
+
+                // act | assert
+                expect(deck.lock).toBeFalsy();
+            });
+
+            it("should set deck to locked", () => {
+                // arrange
+                let deck = new Deck();
+
+                // act
+                deck.setLocked(true);
+
+                // assert
+                expect(deck.lock).toBeTruthy();
+            });
+
+            it("should set deck to unlocked", () => {
+                // arrange
+                let deck = new Deck();
+                deck.setLocked(true);
+
+                // act
+                deck.setLocked(false);
+
+                // assert
+                expect(deck.lock).toBeFalsy();
+            });
+        });
     });
 });

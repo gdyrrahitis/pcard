@@ -6,7 +6,7 @@ import { UserRole } from "../../domain/index";
 import {
     RoomCreateEvent, RoomGetAllEvent, InternalServerErrorEvent, RoomShowAllEvent,
     RoomsAllEvent, UsersAllEvent, RoomNotFoundEvent, RoomJoinEvent, RequestAllRoomsEvent,
-    RequestAllUsersEvent, RoomDisconnectEvent, UserDisconnectedEvent
+    RequestAllUsersEvent, RoomDisconnectEvent, UserDisconnectedEvent, BanEvent, UserBannedEvent
 } from "../../domain/events/index";
 
 const assert = chai.assert;
@@ -28,7 +28,6 @@ const getFirstRoomThatMatchesGuidPattern = (rooms: { [room: string]: { sockets: 
 }
 
 describe("Server", () => {
-
     describe("Socket", () => {
         let server: SocketIO.Server;
         let socket: Socket;
@@ -57,6 +56,27 @@ describe("Server", () => {
         });
 
         describe("room-create", () => {
+            it("should emit internal-server-error event for undefined data", (done) => {
+                // arrange
+                let expectedParameter: string = "name";
+
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(`Parameter data is required`, error.message);
+                        assert.equal("Error", error.name);
+                        done();
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, undefined, ($value: { access: boolean, roomId: string }) => {
+                        assert.equal(false, $value.access);
+                        assert.isUndefined($value.roomId);
+                    });
+                });
+            });
+
             it("should emit internal-server-error event for empty name and access should be false", (done) => {
                 // arrange
                 let expectedParameter: string = "name";
@@ -117,6 +137,7 @@ describe("Server", () => {
                 let john: string = "John";
                 let georgeCreateRoomEvent = new RoomCreateEvent({ name: george });
                 let johnCreateRoomEvent = new RoomCreateEvent({ name: john });
+                let newClient: SocketIOClient.Socket = ioClient(socketUrl, options);
 
                 client.on("connect", () => {
                     // assert
@@ -140,6 +161,7 @@ describe("Server", () => {
                             assert.equal(1, users);
                         } else if (event === "room-create-2") {
                             assert.equal(2, users);
+                            newClient.disconnect();
                             done();
                         }
                     });
@@ -149,12 +171,41 @@ describe("Server", () => {
                         event = "room-create-1";
                         assert.equal(true, $value.access);
                         assert.isDefined($value.roomId);
+
+                        newClient.emit(RoomCreateEvent.eventName, johnCreateRoomEvent.data, ($value: { access: boolean, roomId: string }) => {
+                            event = "room-create-2";
+                            assert.equal(true, $value.access);
+                            assert.isDefined($value.roomId);
+                        });
+                    });
+                });
+            });
+
+            it("should emit 'internal-server-error' when same socket tries to create another rooom", (done) => {
+                // arrange
+                let george: string = "George";
+                let john: string = "John";
+                let georgeCreateRoomEvent = new RoomCreateEvent({ name: george });
+                let johnCreateRoomEvent = new RoomCreateEvent({ name: john });
+
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "You are already in another room");
+                        assert.equal(error.name, "Error");
+                        done();
                     });
 
-                    client.emit(RoomCreateEvent.eventName, johnCreateRoomEvent.data, ($value: { access: boolean, roomId: string }) => {
-                        event = "room-create-2";
-                        assert.equal(true, $value.access);
+                    // act
+                    client.emit(RoomCreateEvent.eventName, georgeCreateRoomEvent.data, ($value: { access: boolean, roomId: string }) => {
+                        assert.isTrue($value.access);
                         assert.isDefined($value.roomId);
+
+                        client.emit(RoomCreateEvent.eventName, johnCreateRoomEvent.data, ($value: { access: boolean, roomId: string }) => {
+                            assert.isFalse($value.access);
+                            assert.isUndefined($value.roomId);
+                        });
                     });
                 });
             });
@@ -209,7 +260,7 @@ describe("Server", () => {
                 });
             });
 
-            it("should emit 'internal-server-error' when data is not defined for room-create event", (done) => {
+            it("should emit 'internal-server-error' when data is not defined for room-join event", (done) => {
                 client.on("connect", () => {
                     // assert
                     let rooms = server.sockets.adapter.rooms;
@@ -234,7 +285,7 @@ describe("Server", () => {
                 });
             });
 
-            it("should emit 'internal-server-error' when data is null for room-create event", (done) => {
+            it("should emit 'internal-server-error' when data is null for room-join event", (done) => {
                 client.on("connect", () => {
                     // assert
                     let rooms = server.sockets.adapter.rooms;
@@ -638,7 +689,162 @@ describe("Server", () => {
             });
         });
 
-        describe("ban", () => { });
+        describe("ban", () => {
+            it("should emit 'internal-server-error' for undefined data", (done) => {
+                // arrange
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter data is required");
+                        assert.equal("Error", error.name);
+                        done();
+                    });
+
+                    // act
+                    client.emit(BanEvent.eventName, undefined);
+                });
+            });
+
+            it("should emit 'internal-server-error' for undefined or empty roomId", (done) => {
+                // arrange
+                let banEvent = new BanEvent({ roomId: "", userId: "user1" })
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter <Object>.roomId is required");
+                        assert.equal("Error", error.name);
+                        done();
+                    });
+
+                    // act
+                    client.emit(BanEvent.eventName, banEvent.data);
+                });
+            });
+
+            it("should emit 'internal-server-error' for undefined or empty userId", (done) => {
+                // arrange
+                let banEvent = new BanEvent({ roomId: "1234", userId: "" })
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter <Object>.userId is required");
+                        assert.equal("Error", error.name);
+                        done();
+                    });
+
+                    // act
+                    client.emit(BanEvent.eventName, banEvent.data);
+                });
+            });
+
+            it("should emit 'internal-server-error' for non existent room", (done) => {
+                // arrange
+                let roomId: string = "1234";
+                let banEvent = new BanEvent({ roomId: "1234", userId: "user1" })
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, `Could not find room '${roomId}'`);
+                        assert.equal("Error", error.name);
+                        done();
+                    });
+
+                    // act
+                    client.emit(BanEvent.eventName, banEvent.data);
+                });
+            });
+
+            it("should not be able to ban self, emitting internal-server-error", (done) => {
+                // arrange
+                let roomId: string = "1234";
+                let roomCreateEvent = new RoomCreateEvent({ name: "George" });
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, `You cannot ban yourself`);
+                        assert.equal("Error", error.name);
+                        done();
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($value: { access: boolean, roomId: string }) => {
+                        assert.isTrue($value.access);
+                        let banEvent = new BanEvent({ roomId: $value.roomId, userId: client.id });
+                        client.emit(BanEvent.eventName, banEvent.data);
+                    });
+                });
+            });
+
+            it("should ban guest user", (done) => {
+                // arrange
+                let newClient: SocketIOClient.Socket;
+                let status: "room-create" | "room-join" | "ban" = "room-create";
+                let roomCreateEvent = new RoomCreateEvent({ name: "George" });
+                client.on("connect", () => {
+                    // assert
+                    client.on(RoomShowAllEvent.eventName, (users: UserRole[]) => {
+                        if (status === "room-create") {
+                            assert.equal(users.length, 1);
+                            assert.equal(users[0].id, client.id);
+                            assert.equal(users[0].name, "George");
+                            assert.equal(users[0].role.name, "moderator");
+                        } else if (status === "room-join") {
+                            assert.equal(users.length, 2);
+                            let george = users.find(u => u.name === "George");
+                            assert.equal(george.id, client.id);
+                            assert.equal(george.name, "George");
+                            assert.equal(george.role.name, "moderator");
+                            let john = users.find(u => u.name === "John");
+                            assert.equal(john.id, newClient.id);
+                            assert.equal(john.name, "John");
+                            assert.equal(john.role.name, "guest");
+                        } else if (status === "ban") {
+                            assert.equal(users.length, 1);
+                            assert.equal(users[0].id, client.id);
+                            assert.equal(users[0].name, "George");
+                            assert.equal(users[0].role.name, "moderator");
+                        }
+                    });
+
+                    client.on(UsersAllEvent.eventName, (users: number) => {
+                        if (status === "room-create") {
+                            assert.equal(users, 1);
+                        } else if (status === "room-join") {
+                            assert.equal(users, 2);
+                        } else if (status === "ban") {
+                            assert.equal(users, 1);
+                            newClient.disconnect();
+                            done();
+                        }
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+
+                        let roomJoinEvent = new RoomJoinEvent({ name: "John", roomId: $create.roomId });
+                        newClient = ioClient.connect(socketUrl, options);
+                        newClient.on("connect", () => {
+                            status = "room-join";
+                            newClient.on(UserBannedEvent.eventName, () => {
+                                status = "ban";
+                            });
+
+                            newClient.emit(RoomJoinEvent.eventName, roomJoinEvent.data, ($join: { access: boolean }) => {
+                                assert.isTrue($join.access);
+                                let banEvent = new BanEvent({ roomId: $create.roomId, userId: newClient.id });
+                                client.emit(BanEvent.eventName, banEvent.data);
+                            });
+                        });
+                    });
+                });
+            });
+        });
 
         describe("room-get-all", () => {
             it("should emit internal server error no rooms have been created", (done) => {
@@ -967,11 +1173,13 @@ describe("Server", () => {
                     });
 
                     // act
-                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, () => {
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean }) => {
+                        assert.isTrue($create.access);
                         newClient = ioClient.connect(socketUrl, options);
                         newClient.on("connect", () => {
-                            status = "after:new-room-created";
-                            newClient.emit(RoomCreateEvent.eventName, roomCreateEvent.data, () => {
+                            newClient.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($data: { access: boolean }) => {
+                                assert.isTrue($data.access);
+                                status = "after:new-room-created";
                                 client.emit(RequestAllRoomsEvent.eventName);
                             });
                         });
@@ -1017,18 +1225,1078 @@ describe("Server", () => {
             });
         });
 
-        describe("room-busy", () => { });
+        describe("room-busy", () => {
+            it("should emit 'internal-server-error' when data is undefined", (done) => {
+                client.on("connect", () => {
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter data is required");
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
 
-        describe("room-free", () => { });
+                    client.emit("room-busy", undefined);
+                });
+            });
 
-        describe("room-deck-lock", () => { });
+            it("should emit 'internal-server-error' when roomId is not defined or empty", (done) => {
+                client.on("connect", () => {
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter <Object>.roomId is required");
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
 
-        describe("room-deck-unlock", () => { });
+                    client.emit("room-busy", { roomId: "" });
+                });
+            });
 
-        describe("room-deck-reset", () => { });
+            it("should emit 'internal-server-error' room is not found", (done) => {
+                // arrange
+                let room: string = "1234";
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, `Could not find room '${room}'`);
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
 
-        describe("room-deck-card-associate", () => { });
+                    // act
+                    client.emit("room-busy", { roomId: room });
+                });
+            });
 
-        describe("room-deck-card-disassociate", () => { });
+            it("should emit 'internal-server-error' when lock is attempted by non-moderator user", (done) => {
+                // arrange
+                let room: string;
+                let newClient: SocketIOClient.Socket;
+                let roomCreateEvent = new RoomCreateEvent({ name: "George" });
+                client.on("connect", () => {
+                    // act
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+                        room = $create.roomId;
+
+                        newClient = ioClient.connect(socketUrl, options);
+                        newClient.on("connect", () => {
+                            // assert
+                            newClient.on(InternalServerErrorEvent.eventName, (error) => {
+                                assert.isDefined(error.id);
+                                assert.equal(error.message, `You do not have permission to lock room ${room}`);
+                                assert.equal(error.name, "Error");
+                                newClient.disconnect();
+                                done();
+                            });
+
+                            let roomJoinEvent = new RoomJoinEvent({ name: "John", roomId: room });
+                            newClient.emit(RoomJoinEvent.eventName, roomJoinEvent.data, ($join: { access: boolean }) => {
+                                assert.isTrue($join.access);
+                                newClient.emit("room-busy", { roomId: room });
+                            });
+                        });
+                    });
+                });
+            });
+
+            it("should lock room preventing new users to join", (done) => {
+                // arrange
+                let newClient: SocketIOClient.Socket;
+                let roomCreateEvent = new RoomCreateEvent({ name: "George" });
+                client.on("connect", () => {
+                    // act
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+
+                        newClient = ioClient.connect(socketUrl, options);
+                        newClient.on("connect", () => {
+                            // assert
+                            newClient.on(InternalServerErrorEvent.eventName, (error) => {
+                                assert.isDefined(error.id);
+                                assert.equal(error.message, "Room is locked. Users are not permitted to enter while in planning session.");
+                                assert.equal(error.name, "Error");
+                                newClient.disconnect();
+                                done();
+                            });
+
+                            client.emit("room-busy", { roomId: $create.roomId }, () => {
+                                let roomJoinEvent = new RoomJoinEvent({ name: "John", roomId: $create.roomId });
+                                newClient.emit(RoomJoinEvent.eventName, roomJoinEvent.data, ($join: { access: boolean }) => {
+                                    assert.isFalse($join.access);
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        describe("room-free", () => {
+            it("should emit 'internal-server-error' when data is undefined", (done) => {
+                client.on("connect", () => {
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter data is required");
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    client.emit("room-free", undefined);
+                });
+            });
+
+            it("should emit 'internal-server-error' when roomId is not defined or empty", (done) => {
+                client.on("connect", () => {
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter <Object>.roomId is required");
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    client.emit("room-free", { roomId: "" });
+                });
+            });
+
+            it("should emit 'internal-server-error' room is not found", (done) => {
+                // arrange
+                let room: string = "1234";
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, `Could not find room '${room}'`);
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-free", { roomId: room });
+                });
+            });
+
+            it("should emit 'internal-server-error' unlock is attempted by non-moderator user", (done) => {
+                // arrange
+                let room: string;
+                let newClient: SocketIOClient.Socket;
+                let roomCreateEvent = new RoomCreateEvent({ name: "George" });
+                client.on("connect", () => {
+                    // act
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+                        room = $create.roomId;
+
+                        newClient = ioClient.connect(socketUrl, options);
+                        newClient.on("connect", () => {
+                            // assert
+                            newClient.on(InternalServerErrorEvent.eventName, (error) => {
+                                assert.isDefined(error.id);
+                                assert.equal(error.message, `You do not have permission to lock room ${room}`);
+                                assert.equal(error.name, "Error");
+                                newClient.disconnect();
+                                done();
+                            });
+
+                            let roomJoinEvent = new RoomJoinEvent({ name: "John", roomId: room });
+                            newClient.emit(RoomJoinEvent.eventName, roomJoinEvent.data, ($join: { access: boolean }) => {
+                                assert.isTrue($join.access);
+                                newClient.emit("room-free", { roomId: room });
+                            });
+                        });
+                    });
+                });
+            });
+
+            it("should unlock room allowing new users to join", (done) => {
+                // arrange
+                let newClient: SocketIOClient.Socket;
+                let roomCreateEvent = new RoomCreateEvent({ name: "George" });
+                client.on("connect", () => {
+                    // act
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+
+                        newClient = ioClient.connect(socketUrl, options);
+                        newClient.on("connect", () => {
+                            // assert
+                            newClient.on(RoomShowAllEvent.eventName, (users: UserRole[]) => {
+                                // when he joins, room will have two users, including him
+                                assert.equal(2, users.length);
+                                let userGeorge: UserRole = users.find(u => u.name === "George");
+                                assert.equal(userGeorge.name, "George");
+                                assert.equal(userGeorge.role.name, "moderator");
+                                let userJohn: UserRole = users.find(u => u.name === "John");
+                                assert.equal(userJohn.name, "John");
+                                assert.equal(userJohn.role.name, "guest");
+                            });
+
+                            newClient.on(UsersAllEvent.eventName, (users: number) => {
+                                assert.equal(2, users);
+                                newClient.disconnect();
+                                done();
+                            });
+
+                            client.emit("room-busy", { roomId: $create.roomId }, () => {
+                                client.emit("room-free", { roomId: $create.roomId }, () => {
+                                    let roomJoinEvent = new RoomJoinEvent({ name: "John", roomId: $create.roomId });
+                                    newClient.emit(RoomJoinEvent.eventName, roomJoinEvent.data, ($join: { access: boolean }) => {
+                                        assert.isTrue($join.access);
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        describe("room-deck-lock", () => {
+            it("should emit 'internal-server-error' for undefined data", (done) => {
+                // arrange
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter data is required");
+                        assert.equal("Error", error.name);
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-lock", undefined);
+                });
+            });
+
+            it("should emit 'internal-server-error' for roomId not defined", (done) => {
+                // arrange
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter <Object>.roomId is required");
+                        assert.equal("Error", error.name);
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-lock", { roomId: undefined });
+                });
+            });
+
+            it("should emit 'internal-server-error' for not found room", (done) => {
+                // arrange
+                let roomId: string = "1234";
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, `Could not find room '${roomId}'`);
+                        assert.equal("Error", error.name);
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-lock", { roomId: roomId });
+                });
+            });
+
+            it("should emit 'room-hand-lock' when deck is locked", (done) => {
+                // arrange
+                client.on("connect", () => {
+                    // assert
+                    client.on("room-hand-lock", () => {
+                        assert.isTrue(true);
+                        done();
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, { name: "George" }, ($create: { access: boolean, roomId: string }) => {
+                        client.emit("room-deck-lock", { roomId: $create.roomId });
+                    });
+                });
+            });
+
+            it("should emit 'room-hand-lock' when deck is locked and prevent further associations with cards", (done) => {
+                // arrange
+                let roomId: string;
+                client.on("connect", () => {
+                    // assert
+                    client.on("room-hand-lock", () => {
+                        assert.isTrue(true);
+
+                        client.emit("room-deck-card-associate", { roomId: roomId, userId: client.id, cardId: "zero" }, ($data: { associated: boolean }) => {
+                            assert.isFalse($data.associated);
+                            done();
+                        });
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, { name: "George" }, ($create: { access: boolean, roomId: string }) => {
+                        roomId = $create.roomId;
+                        client.emit("room-deck-lock", { roomId: $create.roomId });
+                    });
+                });
+            });
+
+            it("should emit 'room-hand-lock' when deck is locked and prevent further disassociations with cards", (done) => {
+                // arrange
+                let roomId: string;
+                client.on("connect", () => {
+                    // assert
+                    client.on("room-hand-lock", () => {
+                        assert.isTrue(true);
+
+                        client.emit("room-deck-card-disassociate", { roomId: roomId, userId: client.id, cardId: "zero" }, ($data: { disassociated: boolean }) => {
+                            assert.isFalse($data.disassociated);
+                            done();
+                        });
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, { name: "George" }, ($create: { access: boolean, roomId: string }) => {
+                        roomId = $create.roomId;
+                        client.emit("room-deck-card-associate", { roomId: roomId, userId: client.id, cardId: "zero" }, ($data: { associated: boolean }) => {
+                            assert.isTrue($data.associated);
+                            client.emit("room-deck-lock", { roomId: $create.roomId });
+                        });
+                    });
+                });
+            });
+
+            it("should emit the 'internal-server-error' if other than moderator attempts to lock deck", (done) => {
+                // arrange
+                let newClient: SocketIOClient.Socket;
+                let roomCreateEvent = new RoomCreateEvent({ name: "George" });
+                client.on("connect", () => {
+                    // act
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        newClient = ioClient.connect(socketUrl, options);
+                        newClient.on("connect", () => {
+                            // assert
+                            newClient.on("internal-server-error", (error) => {
+                                assert.isDefined(error.id);
+                                assert.equal(error.message, "User does not have permission to lock deck");
+                                assert.equal("Error", error.name);
+                                newClient.disconnect();
+                                done();
+                            });
+
+                            let roomJoinEvent = new RoomJoinEvent({ name: "John", roomId: $create.roomId });
+                            newClient.emit(RoomJoinEvent.eventName, roomJoinEvent.data, ($join: { access: boolean, roomId: string }) => {
+                                client.emit("room-deck-card-associate", { roomId: $create.roomId, userId: client.id, cardId: "zero" }, ($clientData: { associate: boolean }) => {
+                                    newClient.emit("room-deck-card-associate", { roomId: $create.roomId, userId: newClient.id, cardId: "zero" }, ($newClientData: { associate: boolean }) => {
+                                        newClient.emit("room-deck-lock", { roomId: $create.roomId });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        describe("room-deck-unlock", () => {
+            it("should emit 'internal-server-error' for undefined data", (done) => {
+                // arrange
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter data is required");
+                        assert.equal("Error", error.name);
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-unlock", undefined);
+                });
+            });
+
+            it("should emit 'internal-server-error' for roomId not defined", (done) => {
+                // arrange
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter <Object>.roomId is required");
+                        assert.equal("Error", error.name);
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-unlock", { roomId: undefined });
+                });
+            });
+
+            it("should emit 'internal-server-error' for not found room", (done) => {
+                // arrange
+                let roomId: string = "1234";
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, `Could not find room '${roomId}'`);
+                        assert.equal("Error", error.name);
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-unlock", { roomId: roomId });
+                });
+            });
+
+            it("should emit 'room-hand-unlock' when deck is unlocked", (done) => {
+                // arrange
+                client.on("connect", () => {
+                    // assert
+                    client.on("room-hand-unlock", () => {
+                        assert.isTrue(true);
+                        done();
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, { name: "George" }, ($create: { access: boolean, roomId: string }) => {
+                        client.emit("room-deck-unlock", { roomId: $create.roomId });
+                    });
+                });
+            });
+
+            it("should emit 'room-hand-unlock' when deck is locked and allow further associations with cards", (done) => {
+                // arrange
+                let roomId: string;
+                client.on("connect", () => {
+                    // assert
+                    client.on("room-hand-unlock", () => {
+                        assert.isTrue(true);
+
+                        client.emit("room-deck-card-associate", { roomId: roomId, userId: client.id, cardId: "zero" }, ($data: { associated: boolean }) => {
+                            assert.isTrue($data.associated);
+                            done();
+                        });
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, { name: "George" }, ($create: { access: boolean, roomId: string }) => {
+                        roomId = $create.roomId;
+                        client.emit("room-deck-unlock", { roomId: $create.roomId });
+                    });
+                });
+            });
+
+            it("should emit 'room-hand-unlock' when deck is locked and allow further disassociations with cards", (done) => {
+                // arrange
+                let roomId: string;
+                client.on("connect", () => {
+                    // assert
+                    client.on("room-hand-unlock", () => {
+                        assert.isTrue(true);
+
+                        client.emit("room-deck-card-disassociate", { roomId: roomId, userId: client.id, cardId: "zero" }, ($data: { disassociated: boolean }) => {
+                            assert.isTrue($data.disassociated);
+                            done();
+                        });
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, { name: "George" }, ($create: { access: boolean, roomId: string }) => {
+                        roomId = $create.roomId;
+                        client.emit("room-deck-card-associate", { roomId: roomId, userId: client.id, cardId: "zero" }, ($data: { associated: boolean }) => {
+                            assert.isTrue($data.associated);
+                            client.emit("room-deck-unlock", { roomId: $create.roomId });
+                        });
+                    });
+                });
+            });
+
+            it("should emit the 'internal-server-error' if other than moderator attempts to unlock deck", (done) => {
+                // arrange
+                let newClient: SocketIOClient.Socket;
+                let roomCreateEvent = new RoomCreateEvent({ name: "George" });
+                client.on("connect", () => {
+                    // act
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        newClient = ioClient.connect(socketUrl, options);
+                        newClient.on("connect", () => {
+                            // assert
+                            newClient.on("internal-server-error", (error) => {
+                                assert.isDefined(error.id);
+                                assert.equal(error.message, "User does not have permission to lock deck");
+                                assert.equal("Error", error.name);
+                                newClient.disconnect();
+                                done();
+                            });
+
+                            let roomJoinEvent = new RoomJoinEvent({ name: "John", roomId: $create.roomId });
+                            newClient.emit(RoomJoinEvent.eventName, roomJoinEvent.data, ($join: { access: boolean, roomId: string }) => {
+                                client.emit("room-deck-card-associate", { roomId: $create.roomId, userId: client.id, cardId: "zero" }, ($clientData: { associate: boolean }) => {
+                                    newClient.emit("room-deck-card-associate", { roomId: $create.roomId, userId: newClient.id, cardId: "zero" }, ($newClientData: { associate: boolean }) => {
+                                        newClient.emit("room-deck-unlock", { roomId: $create.roomId });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        describe("room-deck-reset", () => {
+            it("should emit 'internal-server-error' for undefined data", (done) => {
+                // arrange
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter data is required");
+                        assert.equal("Error", error.name);
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-reset", undefined);
+                });
+            });
+
+            it("should emit 'internal-server-error' for roomId not defined", (done) => {
+                // arrange
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter <Object>.roomId is required");
+                        assert.equal("Error", error.name);
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-reset", { roomId: undefined });
+                });
+            });
+
+            it("should emit 'internal-server-error' for not found room", (done) => {
+                // arrange
+                let roomId: string = "1234";
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, `Could not find room '${roomId}'`);
+                        assert.equal("Error", error.name);
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-reset", { roomId: roomId });
+                });
+            });
+
+            it("should emit the 'room-deck-card-disassociate' event for each connected client", (done) => {
+                // arrange
+                let newClient: SocketIOClient.Socket;
+                let roomCreateEvent = new RoomCreateEvent({ name: "George" });
+                client.on("connect", () => {
+                    // assert
+                    client.on("room-deck-card-disassociate", ($data: { disassociated: boolean }) => {
+                        assert.isTrue($data.disassociated);
+                        newClient.disconnect();
+                        done();
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        newClient = ioClient.connect(socketUrl, options);
+                        newClient.on("connect", () => {
+                            newClient.on("room-deck-card-disassociate", ($data: { disassociated: boolean }) => {
+                                assert.isTrue($data.disassociated);
+                            });
+
+                            let roomJoinEvent = new RoomJoinEvent({ name: "John", roomId: $create.roomId });
+                            newClient.emit(RoomJoinEvent.eventName, roomJoinEvent.data, ($join: { access: boolean, roomId: string }) => {
+                                client.emit("room-deck-card-associate", { roomId: $create.roomId, userId: client.id, cardId: "zero" }, ($clientData: { associate: boolean }) => {
+                                    newClient.emit("room-deck-card-associate", { roomId: $create.roomId, userId: newClient.id, cardId: "zero" }, ($newClientData: { associate: boolean }) => {
+                                        client.emit("room-deck-reset", { roomId: $create.roomId });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+
+            it("should unlock the deck if previous locked", (done) => {
+                // arrange
+                let roomId: string;
+                client.on("connect", () => {
+                    // assert
+                    client.on("room-hand-unlock", () => {
+                        assert.isTrue(true);
+
+                        client.emit("room-deck-card-associate", { roomId: roomId, userId: client.id, cardId: "zero" }, ($data: { associated: boolean }) => {
+                            console.log($data)
+                            assert.isTrue($data.associated);
+                            done();
+                        });
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, { name: "George" }, ($create: { access: boolean, roomId: string }) => {
+                        roomId = $create.roomId;
+                        client.emit("room-deck-lock", { roomId: roomId }, () => {
+                            client.emit("room-deck-reset", { roomId: $create.roomId });
+                        });
+                    });
+                });
+            });
+
+            it("should emit the 'internal-server-error' if other than moderator attempts to reset deck", (done) => {
+                // arrange
+                let newClient: SocketIOClient.Socket;
+                let roomCreateEvent = new RoomCreateEvent({ name: "George" });
+                client.on("connect", () => {
+                    // act
+                    client.emit(RoomCreateEvent.eventName, roomCreateEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        newClient = ioClient.connect(socketUrl, options);
+                        newClient.on("connect", () => {
+                            // assert
+                            newClient.on("internal-server-error", (error) => {
+                                assert.isDefined(error.id);
+                                assert.equal(error.message, "User does not have permission to reset deck");
+                                assert.equal("Error", error.name);
+                                newClient.disconnect();
+                                done();
+                            });
+
+                            let roomJoinEvent = new RoomJoinEvent({ name: "John", roomId: $create.roomId });
+                            newClient.emit(RoomJoinEvent.eventName, roomJoinEvent.data, ($join: { access: boolean, roomId: string }) => {
+                                client.emit("room-deck-card-associate", { roomId: $create.roomId, userId: client.id, cardId: "zero" }, ($clientData: { associate: boolean }) => {
+                                    newClient.emit("room-deck-card-associate", { roomId: $create.roomId, userId: newClient.id, cardId: "zero" }, ($newClientData: { associate: boolean }) => {
+                                        newClient.emit("room-deck-reset", { roomId: $create.roomId });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        describe("room-deck-card-associate", () => {
+            it("should emit 'internal-server-error' when data is undefined", (done) => {
+                // arrange
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter data is required");
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-card-associate", undefined, ($event: { associated: boolean }) => {
+                        assert.isFalse($event.associated);
+                    });
+                });
+            });
+
+            it("should emit 'internal-server-error' when roomId is undefined", (done) => {
+                // arrange
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter <Object>.roomId is required");
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-card-associate", { roomId: "", userId: "user1", cardId: "card1" }, ($event: { associated: boolean }) => {
+                        assert.isFalse($event.associated);
+                    });
+                });
+            });
+
+            it("should emit 'internal-server-error' when userId is undefined", (done) => {
+                // arrange
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter <Object>.userId is required");
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-card-associate", { roomId: "1234", userId: "", cardId: "card1" }, ($event: { associated: boolean }) => {
+                        assert.isFalse($event.associated);
+                    });
+                });
+            });
+
+            it("should emit 'internal-server-error' when cardId is undefined", (done) => {
+                // arrange
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter <Object>.cardId is required");
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-card-associate", { roomId: "1234", userId: "user1", cardId: "" }, ($event: { associated: boolean }) => {
+                        assert.isFalse($event.associated);
+                    });
+                });
+            });
+
+            it("should emit 'internal-server-error' when room is not found", (done) => {
+                // arrange
+                let roomId: string = "1234";
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, `Could not find room '${roomId}'`);
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-card-associate", { roomId: roomId, userId: "user1", cardId: "card1" }, ($event: { associated: boolean }) => {
+                        assert.isFalse($event.associated);
+                    });
+                });
+            });
+
+            it("should emit 'internal-server-error' when user is not found", (done) => {
+                client.on("connect", () => {
+                    // arrange
+                    let roomId: string;
+                    let userId: string = "non-existent";
+                    let cardId: string = "card1";
+                    let createRoomEvent = new RoomCreateEvent({ name: "George" });
+
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, `Could not find user '${userId}' to associate with card '${cardId}'`);
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, createRoomEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+                        roomId = $create.roomId;
+                        client.emit("room-deck-card-associate", { roomId: roomId, userId: userId, cardId: cardId }, ($event: { associated: boolean }) => {
+                            assert.isFalse($event.associated);
+                        });
+                    });
+                });
+            });
+
+            it("should emit 'internal-server-error' when user is not found", (done) => {
+                client.on("connect", () => {
+                    // arrange
+                    let roomId: string;
+                    let userId: string = client.id;
+                    let cardId: string = "non-existent";
+                    let createRoomEvent = new RoomCreateEvent({ name: "George" });
+
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, `Card '${cardId}' does not exist`);
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, createRoomEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+                        roomId = $create.roomId;
+                        client.emit("room-deck-card-associate", { roomId: roomId, userId: userId, cardId: cardId }, ($event: { associated: boolean }) => {
+                            assert.isFalse($event.associated);
+                        });
+                    });
+                });
+            });
+
+            it("should associate card with user", (done) => {
+                client.on("connect", () => {
+                    // arrange
+                    let roomId: string;
+                    let userId: string = client.id;
+                    let cardId: string = "zero";
+                    let createRoomEvent = new RoomCreateEvent({ name: "George" });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, createRoomEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+                        roomId = $create.roomId;
+                        client.emit("room-deck-card-associate", { roomId: roomId, userId: userId, cardId: cardId }, ($event: { associated: boolean }) => {
+                            // assert
+                            assert.isTrue($event.associated);
+                            done();
+                        });
+                    });
+                });
+            });
+
+            it("should not associate card with user when deck is locked", (done) => {
+                client.on("connect", () => {
+                    // arrange
+                    let roomId: string;
+                    let userId: string = client.id;
+                    let cardId: string = "zero";
+                    let createRoomEvent = new RoomCreateEvent({ name: "George" });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, createRoomEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+                        roomId = $create.roomId;
+                        client.emit("room-deck-lock", { roomId: roomId }, () => {
+                            client.emit("room-deck-card-associate", { roomId: roomId, userId: userId, cardId: cardId }, ($event: { associated: boolean }) => {
+                                // assert
+                                assert.isFalse($event.associated);
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+
+        // TODO: Logic for user not associated with card but attempt to disassociate
+        describe("room-deck-card-disassociate", () => {
+            it("should emit 'internal-server-error' when data is undefined", (done) => {
+                // arrange
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter data is required");
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-card-disassociate", undefined, ($event: { disassociated: boolean }) => {
+                        assert.isFalse($event.disassociated);
+                    });
+                });
+            });
+
+            it("should emit 'internal-server-error' when roomId is undefined", (done) => {
+                // arrange
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter <Object>.roomId is required");
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-card-disassociate", { roomId: "", userId: "user1", cardId: "card1" }, ($event: { disassociated: boolean }) => {
+                        assert.isFalse($event.disassociated);
+                    });
+                });
+            });
+
+            it("should emit 'internal-server-error' when userId is undefined", (done) => {
+                // arrange
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter <Object>.userId is required");
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-card-disassociate", { roomId: "1234", userId: "", cardId: "card1" }, ($event: { disassociated: boolean }) => {
+                        assert.isFalse($event.disassociated);
+                    });
+                });
+            });
+
+            it("should emit 'internal-server-error' when cardId is undefined", (done) => {
+                // arrange
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, "Parameter <Object>.cardId is required");
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-card-disassociate", { roomId: "1234", userId: "user1", cardId: "" }, ($event: { disassociated: boolean }) => {
+                        assert.isFalse($event.disassociated);
+                    });
+                });
+            });
+
+            it("should emit 'internal-server-error' when room is not found", (done) => {
+                // arrange
+                let roomId: string = "1234";
+                client.on("connect", () => {
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, `Could not find room '${roomId}'`);
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit("room-deck-card-disassociate", { roomId: roomId, userId: "user1", cardId: "card1" }, ($event: { disassociated: boolean }) => {
+                        assert.isFalse($event.disassociated);
+                    });
+                });
+            });
+
+            it("should emit 'internal-server-error' when user is not found", (done) => {
+                client.on("connect", () => {
+                    // arrange
+                    let roomId: string;
+                    let userId: string = "non-existent";
+                    let cardId: string = "card1";
+                    let createRoomEvent = new RoomCreateEvent({ name: "George" });
+
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, `Could not find user '${userId}' to disassociate with card '${cardId}'`);
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, createRoomEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+                        roomId = $create.roomId;
+                        client.emit("room-deck-card-disassociate", { roomId: roomId, userId: userId, cardId: cardId }, ($event: { disassociated: boolean }) => {
+                            assert.isFalse($event.disassociated);
+                        });
+                    });
+                });
+            });
+
+            it("should emit 'internal-server-error' when user is not found", (done) => {
+                client.on("connect", () => {
+                    // arrange
+                    let roomId: string;
+                    let userId: string = client.id;
+                    let cardId: string = "non-existent";
+                    let createRoomEvent = new RoomCreateEvent({ name: "George" });
+
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, `Card '${cardId}' does not exist`);
+                        assert.equal(error.name, "Error");
+                        done();
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, createRoomEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+                        roomId = $create.roomId;
+                        client.emit("room-deck-card-disassociate", { roomId: roomId, userId: userId, cardId: cardId }, ($event: { disassociated: boolean }) => {
+                            assert.isFalse($event.disassociated);
+                        });
+                    });
+                });
+            });
+
+            it("should disassociate card from user", (done) => {
+                client.on("connect", () => {
+                    // arrange
+                    let roomId: string;
+                    let userId: string = client.id;
+                    let cardId: string = "zero";
+                    let createRoomEvent = new RoomCreateEvent({ name: "George" });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, createRoomEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+                        roomId = $create.roomId;
+                        client.emit("room-deck-card-associate", { roomId: roomId, userId: userId, cardId: cardId }, ($event: { associated: boolean }) => {
+                            assert.isTrue($event.associated);
+                            client.emit("room-deck-card-disassociate", { roomId: roomId, userId: userId, cardId: cardId }, ($event: { disassociated: boolean }) => {
+                                // assert
+                                assert.isTrue($event.disassociated);
+                                done();
+                            });
+                        });
+                    });
+                });
+            });
+
+            it("should not disassociate card from user when user is not associated in first place", (done) => {
+                client.on("connect", () => {
+                    // arrange
+                    let roomId: string;
+                    let userId: string = client.id;
+                    let cardId: string = "zero";
+                    let createRoomEvent = new RoomCreateEvent({ name: "George" });
+
+                    // assert
+                    client.on(InternalServerErrorEvent.eventName, (error) => {
+                        assert.isDefined(error.id);
+                        assert.equal(error.message, `User with id '${userId}' is not associated with card '${cardId}'`);
+                        done();
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, createRoomEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+                        roomId = $create.roomId;
+                        client.emit("room-deck-card-disassociate", { roomId: roomId, userId: userId, cardId: cardId }, ($event: { disassociated: boolean }) => {
+                            assert.isFalse($event.disassociated);
+                        });
+                    });
+                });
+            });
+
+            it("should not disassociate card with user when deck is locked", (done) => {
+                client.on("connect", () => {
+                    // arrange
+                    let roomId: string;
+                    let userId: string = client.id;
+                    let cardId: string = "zero";
+                    let createRoomEvent = new RoomCreateEvent({ name: "George" });
+
+                    // assert
+                    client.on("room-hand-lock", () => {
+                        client.emit("room-deck-card-disassociate", { roomId: roomId, userId: userId, cardId: cardId }, ($event: { disassociated: boolean }) => {
+                            assert.isFalse($event.disassociated);
+                            done();
+                        });
+                    });
+
+                    // act
+                    client.emit(RoomCreateEvent.eventName, createRoomEvent.data, ($create: { access: boolean, roomId: string }) => {
+                        assert.isTrue($create.access);
+                        roomId = $create.roomId;
+                        client.emit("room-deck-card-associate", { roomId: roomId, userId: userId, cardId: cardId }, ($data: { associated }) => {
+                            assert.isTrue($data.associated);
+                            client.emit("room-deck-lock", { roomId: roomId });
+                        });
+                    });
+                });
+            });
+        });
     });
 });
