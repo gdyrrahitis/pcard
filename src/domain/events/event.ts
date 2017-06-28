@@ -1,4 +1,5 @@
 export class Event {
+    static readonly Connection = "connection";
     static readonly InternalServerError = "internal-server-error";
     static readonly RoomNotFound = "room-not-found";
     static readonly RoomsFull = "rooms-full";

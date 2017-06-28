@@ -5,3 +5,8 @@ export class Role {
         }
     }
 }
+
+export enum Roles {
+    Moderator = <any>"moderator",
+    Guest = <any>"guest"
+}

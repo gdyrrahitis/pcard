@@ -1,10 +1,13 @@
 import * as uuidV1 from "uuid/v1";
 
-import { getFirst, filter,isUndefined, Guard } from "../../shared/index";
-import { Room, User, UserRole } from "../../domain/index";
+import { Constants } from "./constants";
+import { getFirst, filter, isUndefined, Guard } from "../../shared/index";
+import { Room, User, UserRole, Roles } from "../../domain/index";
 import {
-    InternalServerErrorEvent, RoomsFullEvent, RoomShowAllEvent,
-    RoomNotFoundEvent, UserBannedEvent, UserDisconnectedEvent
+    InternalServerErrorEvent, RoomsFullEvent, RoomShowAllEvent, RoomDisconnectEvent,
+    RoomNotFoundEvent, UserBannedEvent, UserDisconnectedEvent, RoomCreateEvent,
+    BanEvent, RequestAllRoomsEvent, RequestAllUsersEvent, RoomGetAllEvent,
+    RoomJoinEvent, RoomsAllEvent, UsersAllEvent, ConnectionEvent
 } from "../../domain/events/index";
 const max: number = (<ServerAppConfig.ServerConfiguration>require("../server.config.json")).socketio.maxRoomsAllowed;
 
@@ -13,8 +16,8 @@ export class Socket {
     constructor(private io: SocketIO.Server) { }
 
     public connect() {
-        this.io.on("connection", (socket: ISocket) => {
-            socket.on("room-create", (data, callback) => {
+        this.io.on(ConnectionEvent.eventName, (socket: ISocket) => {
+            socket.on(RoomCreateEvent.eventName, (data: CreateRoomEventArgs, callback: CreateRoomEventCallback) => {
                 try {
                     createRoom(data, callback);
                 } catch (error) {
@@ -23,12 +26,12 @@ export class Socket {
                 }
             });
 
-            let createRoom = (data, callback) => {
-                Guard.throwIfObjectUndefined(data, "Parameter data is required");
-                Guard.throwIfStringNotDefinedOrEmpty(data.name, "Parameter name is required");
+            let createRoom = (data: CreateRoomEventArgs, callback: CreateRoomEventCallback) => {
+                Guard.throwIfObjectUndefined(data, Constants.dataIsRequired);
+                Guard.throwIfStringNotDefinedOrEmpty(data.name, Constants.dataNameIsRequired);
 
                 let isCurrentUserInAnyOtherRoom = this.rooms.filter(r => !!r.getUser(socket.id)).length > 0;
-                Guard.validate(isCurrentUserInAnyOtherRoom, "You are already in another room");
+                Guard.validate(isCurrentUserInAnyOtherRoom, Constants.youAreAlreadyInAnotherRoom);
 
                 if (this.hasRoomsReachedMaxLimit()) {
                     callback({ access: false });
@@ -51,7 +54,7 @@ export class Socket {
                 this.emitUsersAllEventWithTotalUsersInAllRooms();
             }
 
-            socket.on("room-disconnect", (data, callback: Function) => {
+            socket.on(RoomDisconnectEvent.eventName, (data: RoomDisconnectEventArgs, callback: Function) => {
                 try {
                     disconnect(data, callback);
                 } catch (error) {
@@ -59,15 +62,15 @@ export class Socket {
                 }
             });
 
-            let disconnect = (data, callback) => {
-                Guard.throwIfObjectUndefined(data, "Parameter data is required");
-                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, "Parameter <Object>.roomId is required");
-                Guard.throwIfStringNotDefinedOrEmpty(data.userId, "Parameter <Object>.userId is required");
+            let disconnect = (data: RoomDisconnectEventArgs, callback: Function) => {
+                Guard.throwIfObjectUndefined(data, Constants.dataIsRequired);
+                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, Constants.dataRoomIdIsRequired);
+                Guard.throwIfStringNotDefinedOrEmpty(data.userId, Constants.dataUserIdIsRequired);
 
                 let room: Room = this.getRoomOrThrowCouldNotFind(data.roomId);
                 let userDisconnectedEvent = new UserDisconnectedEvent(room.id);
                 let user = room.getUser(data.userId);
-                if (user.role.name === "moderator") {
+                if (user.role.name === Roles.Moderator.toString()) {
                     room.users.forEach(u => room.removeUser(u.id));
                     socket.broadcast.to(room.id).emit(UserDisconnectedEvent.eventName, userDisconnectedEvent.roomId);
                     socket.emit(UserDisconnectedEvent.eventName, userDisconnectedEvent.roomId);
@@ -87,7 +90,7 @@ export class Socket {
                 this.emitUsersAllEventWithTotalUsersInAllRooms();
             }
 
-            socket.on("room-join", (data, callback) => {
+            socket.on(RoomJoinEvent.eventName, (data: RoomJoinEventArgs, callback: RoomJoinCallback) => {
                 try {
                     roomJoin(data, callback);
                 } catch (error) {
@@ -96,10 +99,10 @@ export class Socket {
                 }
             });
 
-            let roomJoin = (data, callback) => {
-                Guard.throwIfObjectUndefined(data, "Parameter data is required");
-                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, "Parameter <Object>.roomId is required");
-                Guard.throwIfStringNotDefinedOrEmpty(data.name, "Parameter <Object>.name is required");
+            let roomJoin = (data: RoomJoinEventArgs, callback: RoomJoinCallback) => {
+                Guard.throwIfObjectUndefined(data, Constants.dataIsRequired);
+                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, Constants.dataRoomIdIsRequired);
+                Guard.throwIfStringNotDefinedOrEmpty(data.name, Constants.dataNameIsRequired);
 
                 let room: Room = this.getSingleRoomBy(r => r.id === data.roomId);
                 if (isUndefined(room)) {
@@ -119,7 +122,7 @@ export class Socket {
                 this.emitUsersAllEventWithTotalUsersInAllRooms();
             }
 
-            socket.on("ban", (data) => {
+            socket.on(BanEvent.eventName, (data: BanEventArgs) => {
                 try {
                     ban(data);
                 } catch (error) {
@@ -127,11 +130,11 @@ export class Socket {
                 }
             });
 
-            let ban = (data) => {
-                Guard.throwIfObjectUndefined(data, "Parameter data is required");
-                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, "Parameter <Object>.roomId is required");
-                Guard.throwIfStringNotDefinedOrEmpty(data.userId, "Parameter <Object>.userId is required");
-                Guard.validate(data.userId === socket.id, "You cannot ban yourself");
+            let ban = (data: BanEventArgs) => {
+                Guard.throwIfObjectUndefined(data, Constants.dataIsRequired);
+                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, Constants.dataRoomIdIsRequired);
+                Guard.throwIfStringNotDefinedOrEmpty(data.userId, Constants.dataUserIdIsRequired);
+                Guard.validate(data.userId === socket.id, Constants.youCannotBanYourself);
 
                 let room = this.getRoomOrThrowCouldNotFind(data.roomId);
                 room.removeUser(data.userId);
@@ -140,7 +143,7 @@ export class Socket {
                 this.emitUsersAllEventWithTotalUsersInAllRooms();
             }
 
-            socket.on("room-get-all", (data) => {
+            socket.on(RoomGetAllEvent.eventName, (data: RoomGetAllEventArgs) => {
                 try {
                     roomGetAll(data);
                 } catch (error) {
@@ -148,17 +151,17 @@ export class Socket {
                 }
             });
 
-            let roomGetAll = (data) => {
-                Guard.throwIfObjectUndefined(data, "Parameter data is required");
+            let roomGetAll = (data: RoomGetAllEventArgs) => {
+                Guard.throwIfObjectUndefined(data, Constants.dataIsRequired);
 
                 let room: Room = this.getRoomOrThrowCouldNotFind(data.roomId);
                 this.emitLoggedUsersToRoom(socket, room);
             }
 
-            socket.on("request-all-rooms", () => this.emitRoomsAllEventWithTotalRooms());
-            socket.on("request-all-users", () => this.emitUsersAllEventWithTotalUsersInAllRooms());
+            socket.on(RequestAllRoomsEvent.eventName, () => this.emitRoomsAllEventWithTotalRooms());
+            socket.on(RequestAllUsersEvent.eventName, () => this.emitUsersAllEventWithTotalUsersInAllRooms());
 
-            socket.on("room-busy", (data, callback?: Function) => {
+            socket.on("room-busy", (data: RoomBusyEventArgs, callback?: Function) => {
                 try {
                     roomBusy(data, callback);
                 } catch (error) {
@@ -166,18 +169,18 @@ export class Socket {
                 }
             });
 
-            let roomBusy = (data, callback?: Function) => {
+            let roomBusy = (data: RoomBusyEventArgs, callback?: Function) => {
                 toggleRoomAccesibility(data, callback)(true);
             }
 
-            let toggleRoomAccesibility = (data, callback?: Function): (isLocked: boolean) => void => {
+            let toggleRoomAccesibility = (data: RoomBusyEventArgs, callback?: Function): (isLocked: boolean) => void => {
                 return (isLocked: boolean) => {
-                    Guard.throwIfObjectUndefined(data, "Parameter data is required");
-                    Guard.throwIfStringNotDefinedOrEmpty(data.roomId, "Parameter <Object>.roomId is required");
+                    Guard.throwIfObjectUndefined(data, Constants.dataIsRequired);
+                    Guard.throwIfStringNotDefinedOrEmpty(data.roomId, Constants.dataRoomIdIsRequired);
 
                     let room = this.getRoomOrThrowCouldNotFind(data.roomId);
                     let user = room.getUser(socket.id);
-                    Guard.validate(user.role.name === "guest", `You do not have permission to lock room ${room.id}`);
+                    Guard.validate(user.role.name === Roles.Guest.toString(), `You do not have permission to lock room ${room.id}`);
                     room.setLock(isLocked);
 
                     if (callback) {
@@ -186,7 +189,7 @@ export class Socket {
                 }
             }
 
-            socket.on("room-free", (data: any, callback?: Function) => {
+            socket.on("room-free", (data: RoomFreeEventArgs, callback?: Function) => {
                 try {
                     roomFree(data, callback);
                 } catch (error) {
@@ -194,11 +197,11 @@ export class Socket {
                 }
             });
 
-            let roomFree = (data: any, callback?: Function) => {
+            let roomFree = (data: RoomFreeEventArgs, callback?: Function) => {
                 toggleRoomAccesibility(data, callback)(false);
             }
 
-            socket.on("room-deck-card-associate", (data, callback: Function) => {
+            socket.on("room-deck-card-associate", (data: RoomDeckCardAssociateEventArgs, callback: RoomDeckCardAssociateCallback) => {
                 try {
                     roomDeckCardAssociate(data, callback);
                 } catch (error) {
@@ -207,11 +210,11 @@ export class Socket {
                 }
             });
 
-            let roomDeckCardAssociate = (data: any, callback: Function) => {
-                Guard.throwIfObjectUndefined(data, "Parameter data is required");
-                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, "Parameter <Object>.roomId is required");
-                Guard.throwIfStringNotDefinedOrEmpty(data.userId, "Parameter <Object>.userId is required");
-                Guard.throwIfStringNotDefinedOrEmpty(data.cardId, "Parameter <Object>.cardId is required");
+            let roomDeckCardAssociate = (data: RoomDeckCardAssociateEventArgs, callback: RoomDeckCardAssociateCallback) => {
+                Guard.throwIfObjectUndefined(data, Constants.dataIsRequired);
+                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, Constants.dataRoomIdIsRequired);
+                Guard.throwIfStringNotDefinedOrEmpty(data.userId, Constants.dataUserIdIsRequired);
+                Guard.throwIfStringNotDefinedOrEmpty(data.cardId, Constants.dataCardIdIsRequired);
 
                 let room = this.getRoomOrThrowCouldNotFind(data.roomId);
                 let user = room.getUser(data.userId);
@@ -223,7 +226,7 @@ export class Socket {
                 callback({ associated: card.users.some(id => id === user.id) });
             }
 
-            socket.on("room-deck-card-disassociate", (data, callback: Function) => {
+            socket.on("room-deck-card-disassociate", (data: RoomDeckCardDisassociateEventArgs, callback: RoomDeckCardDisassociateCallback) => {
                 try {
                     roomDeckCardDisassociate(data, callback);
                 } catch (error) {
@@ -232,11 +235,11 @@ export class Socket {
                 }
             });
 
-            let roomDeckCardDisassociate = (data: any, callback: Function) => {
-                Guard.throwIfObjectUndefined(data, "Parameter data is required");
-                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, "Parameter <Object>.roomId is required");
-                Guard.throwIfStringNotDefinedOrEmpty(data.userId, "Parameter <Object>.userId is required");
-                Guard.throwIfStringNotDefinedOrEmpty(data.cardId, "Parameter <Object>.cardId is required");
+            let roomDeckCardDisassociate = (data: RoomDeckCardDisassociateEventArgs, callback: RoomDeckCardDisassociateCallback) => {
+                Guard.throwIfObjectUndefined(data, Constants.dataIsRequired);
+                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, Constants.dataRoomIdIsRequired);
+                Guard.throwIfStringNotDefinedOrEmpty(data.userId, Constants.dataUserIdIsRequired);
+                Guard.throwIfStringNotDefinedOrEmpty(data.cardId, Constants.dataCardIdIsRequired);
 
                 let room = this.getRoomOrThrowCouldNotFind(data.roomId);
                 let user = room.getUser(data.userId);
@@ -247,21 +250,20 @@ export class Socket {
                 callback({ disassociated: !card.users.some(id => id === user.id) });
             }
 
-            socket.on("room-deck-reset", (data: any, callback?: Function) => {
+            socket.on("room-deck-reset", (data: RoomDeckResetEventArgs, callback?: Function) => {
                 try {
                     roomDeckReset(data, callback);
                 } catch (error) {
-                    error.id = uuidV1();
                     this.emitInternalServerError(socket, error);
                 }
             });
 
-            let roomDeckReset = (data: any, callback?: Function) => {
-                Guard.throwIfObjectUndefined(data, "Parameter data is required");
-                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, "Parameter <Object>.roomId is required");
+            let roomDeckReset = (data: RoomDeckResetEventArgs, callback?: Function) => {
+                Guard.throwIfObjectUndefined(data, Constants.dataIsRequired);
+                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, Constants.dataRoomIdIsRequired);
 
                 let room = this.getRoomOrThrowCouldNotFind(data.roomId);
-                Guard.validate(room.getUser(socket.id).role.name === "guest", "User does not have permission to reset deck");
+                Guard.validate(room.getUser(socket.id).role.name === Roles.Guest.toString(), Constants.userDoesNotHavePermissionToResetDeck);
 
                 room.deck.reset();
                 this.io.in(room.id).emit("room-deck-card-disassociate", { disassociated: true });
@@ -276,21 +278,20 @@ export class Socket {
                 }
             }
 
-            socket.on("room-deck-lock", (data: any, callback?: Function) => {
+            socket.on("room-deck-lock", (data: RoomDeckLockEventArgs, callback?: Function) => {
                 try {
                     roomDeckLock(data, callback);
                 } catch (error) {
-                    error.id = uuidV1();
                     this.emitInternalServerError(socket, error);
                 }
             });
 
-            let roomDeckLock = (data: any, callback?: Function) => {
-                Guard.throwIfObjectUndefined(data, "Parameter data is required");
-                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, "Parameter <Object>.roomId is required");
+            let roomDeckLock = (data: RoomDeckLockEventArgs, callback?: Function) => {
+                Guard.throwIfObjectUndefined(data, Constants.dataIsRequired);
+                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, Constants.dataRoomIdIsRequired);
 
                 let room = this.getRoomOrThrowCouldNotFind(data.roomId);
-                Guard.validate(room.getUser(socket.id).role.name === "guest", "User does not have permission to lock deck");
+                Guard.validate(room.getUser(socket.id).role.name === Roles.Guest.toString(), Constants.userDoesNotHavePermissionToLockDeck);
 
                 room.deck.setLocked(true);
                 this.io.in(room.id).emit("room-hand-lock");
@@ -300,21 +301,20 @@ export class Socket {
                 }
             }
 
-            socket.on("room-deck-unlock", (data: any, callback?: Function) => {
+            socket.on("room-deck-unlock", (data: RoomDeckUnlockEventArgs, callback?: Function) => {
                 try {
                     roomDeckUnlock(data, callback);
                 } catch (error) {
-                    error.id = uuidV1();
                     this.emitInternalServerError(socket, error);
                 }
             });
 
             let roomDeckUnlock = (data: any, callback?: Function) => {
-                Guard.throwIfObjectUndefined(data, "Parameter data is required");
-                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, "Parameter <Object>.roomId is required");
+                Guard.throwIfObjectUndefined(data, Constants.dataIsRequired);
+                Guard.throwIfStringNotDefinedOrEmpty(data.roomId, Constants.dataRoomIdIsRequired);
 
                 let room = this.getRoomOrThrowCouldNotFind(data.roomId);
-                Guard.validate(room.getUser(socket.id).role.name === "guest", "User does not have permission to lock deck");
+                Guard.validate(room.getUser(socket.id).role.name === Roles.Guest.toString(), Constants.userDoesNotHavePermissionToUnlockDeck);
 
                 room.deck.setLocked(false);
                 this.io.in(room.id).emit("room-hand-unlock");
@@ -327,19 +327,21 @@ export class Socket {
     }
 
     private emitRoomsAllEventWithTotalRooms() {
-        this.io.emit("rooms-all", this.rooms.length);
+        this.io.emit(RoomsAllEvent.eventName, this.rooms.length);
     }
 
     private emitUsersAllEventWithTotalUsersInAllRooms() {
-        this.io.emit("users-all", this.rooms.length ? this.rooms.map(x => x.users.length).reduce((p, c, ) => p + c) : 0);
+        this.io.emit(UsersAllEvent.eventName, this.rooms.length ? this.getAllUsersFromAllRooms() : 0);
     }
+
+    private getAllUsersFromAllRooms = () => this.rooms.map(x => x.users.length).reduce((p, c, ) => p + c);
 
     private emitLoggedUsersToRoom(socket: ISocket, room: Room) {
         let roomShowAllEvent = new RoomShowAllEvent(room.users);
         socket.server.to(room.id).emit(RoomShowAllEvent.eventName, roomShowAllEvent.users);
     }
 
-    private emitInternalServerError(socket: ISocket, error: any) {
+    private emitInternalServerError(socket: ISocket, error: Exception) {
         error.id = new uuidV1();
         let internalServerErrorEvent = new InternalServerErrorEvent(error);
         socket.emit(InternalServerErrorEvent.eventName, {

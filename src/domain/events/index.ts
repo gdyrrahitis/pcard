@@ -18,3 +18,4 @@ export * from "./room.show.all.event";
 export * from "./rooms.all.event";
 export * from "./user.ban.start.event";
 export * from "./users.all.event";
+export * from "./connection.event";

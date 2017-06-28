@@ -9,7 +9,7 @@
     "test:travis": "gulp test:travis",
     "test:e2e:dev": "tsc && protractor src/e2e/conf.js",
     "test:backend:dev": "gulp mocha:dev",
-    "test:backend:travis": "mocha \"./src/server/tests/**/*.js\" --timeout 10000",
+    "test:backend:travis": "gulp mocha:travis",
     "start": "if-env NODE_ENV=production && npm run start:prod || npm run start:dev",
     "start:dev": "gulp app:dev",
     "start:prod": "gulp app:prod && npm run server",
