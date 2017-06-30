@@ -1,6 +1,6 @@
 require('babel-register');
 
-var conf = require("./karma.configuration");
+var conf = require("../../karma.configuration");
 conf.autoWatch = false;
 conf.browsers = ['Chrome_travis_ci'];
 conf.singleRun = true;

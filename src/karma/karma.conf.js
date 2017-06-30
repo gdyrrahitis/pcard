@@ -1,4 +1,4 @@
-var karmaConfig = require("./karma.configuration");
+var karmaConfig = require("../../karma.configuration");
 require('babel-register');
 
 module.exports = function (config) {
