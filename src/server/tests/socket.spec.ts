@@ -1182,7 +1182,6 @@ describe("Server", () => {
                 let newClient: SocketIOClient.Socket;
                 let roomCreateEventArgs: { name: string } = { name: "George" };
                 let roomCreateEvent = new RoomCreateEvent(roomCreateEventArgs);
-                let rooms = server.sockets.adapter.rooms;
                 let status: "room-create" | "room-join" = "room-create";
 
                 client.on("connect", () => {

@@ -1,0 +1,37 @@
+// Poker planning various lists
+$mountain-goat: '0', '1-and-half', '1', '2', '3', '5', '8', '13', '20', '40', '100', 'cup', 'question-mark';
+
+#RoomController {
+    .card {
+        border-radius: .5em;
+        width: 75px;;
+        height: 100px;
+        border: 1px solid #000;
+        margin: 15px;
+        color: #000;
+        font-size: 18px;
+        
+        &.mountain-goat {
+
+        }
+    }
+
+    @each $item in $mountain-goat {
+        .mountain-goat-#{$item} {
+
+        }
+    }
+
+    .card-container {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .card-content {
+
+    }
+}
