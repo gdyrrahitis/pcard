@@ -1,0 +1,18 @@
+@import '../controllers/home.controller/home.controller';
+@import '../controllers/room.controller/room.controller';
+
+.large {
+    font-size: 22px;
+}
+
+.dark {
+    color: #000;
+}
+
+.nav, .pagination, .carousel, .panel-title a { 
+    cursor: pointer; 
+}
+
+.creditor {
+    vertical-align: -webkit-baseline-middle;
+}

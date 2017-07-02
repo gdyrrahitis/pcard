@@ -1,8 +1,3 @@
-// declare module 'server.config.json!json' {
-//     var json: ServerConfiguration;
-//     export = json;
-// }
-
 declare module ServerAppConfig {
 
     interface Directory {

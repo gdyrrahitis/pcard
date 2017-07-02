@@ -1,48 +1,36 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="app">
+<html lang="en">
 
 <head>
     <base href="/" />
-    <title>BNC: Real time poker planning</title>
+    <title>Agile poker planning</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" type="text/css" href="dist/css/libs/bootstrap.css">
-    <link rel="stylesheet" type="text/css" href="dist/css/libs/custom-font-awesome.css">
-    <link href="dist/css/libs/styles/main.css" rel="stylesheet" type="text/css">
+    <script async>
+        window.twttr = (function (d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0],
+                t = window.twttr || {};
+            if (d.getElementById(id)) return t;
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "https://platform.twitter.com/widgets.js";
+            fjs.parentNode.insertBefore(js, fjs);
 
-    <!--Module loader-->
-    <script src="node_modules/systemjs/dist/system.src.js"></script>
-    <script src="systemjs-config.js"></script>
-    <script>
-        System.import("json").then(function() {
-            return System.import("bnc").catch(function(err) { console.log(err); });
-        }).then(null, function(err){
-			console.error("Oh no, error!", err);
-		});
+            t._e = [];
+            t.ready = function (f) {
+                t._e.push(f);
+            };
+
+            return t;
+        }(document, "script", "twitter-wjs"));
     </script>
+    <link href="dist/css/libs/styles/site.css" rel="stylesheet" type="text/css">
+    <script src="dist/src/client/main.js"></script>
 </head>
 
-<body>
-    <div class="container">
-        <header ng-controller="menuController" ng-include="'./src/menu.controller/menu.controller.html'"></header>
-
-        <ng-view></ng-view>
-
-        <hr />
-        <footer>
-            <div class="row">
-                <div class="col-sm-6">George Dyrrahitis</div>
-                <div class="col-sm-6">
-                    <ul class="list-inline">
-                        <li><span>Follow me on:</span></li>
-                        <li> <a href="https://github.com/gdyrrahitis" target="_blank"><i class="fa fa-github large dark"></i></a></li>
-                        <li> <a href="https://twitter.com/gdyrra" target="_blank"><i class="fa fa-twitter large"></i></a></li>
-                    </ul>
-                </div>
-            </div>
-        </footer>
-    </div>
+<body ng-app="pcard" ng-strict-di>
+    <pcard-app></pcard-app>
 </body>
 
 </html>

@@ -1,0 +1,5 @@
+{
+    "client": {
+        "baseUrl": "http://localhost:8000"
+    }
+}

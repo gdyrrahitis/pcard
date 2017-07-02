@@ -1,18 +1,25 @@
 // Place your settings in this file to overwrite the default settings
 {
     "files.exclude": {
-        "common/**/*.js": true,
-        "spec/**/*.js": true,
-        "server/**/*.js": true,
-        "src/**/*.js": true,
+        "src/app/**/*.js": true,
+        "src/app/**/*.js.map": true,
+        "src/e2e/**/*.js": true,
+        "src/e2e/**/*.js.map": true,
+        "src/shared/**/*.js": true,
+        "src/shared/**/*.js.map": true,
         "app.js": true,
         "karma.conf.js": false,
         "**/*.js.map": true,
         "**/.git": true,
         "**/.svn": true,
         "**/.hg": true,
-        "**/.DS_Store": true
-    }
-,
-"typescript.check.workspaceVersion": false
+        "**/.DS_Store": true,
+        "dist": true,
+        "coverage": true,
+        "node_modules": true,
+        "package-lock.json": true,
+        "LICENSE": true
+    },
+    "typescript.check.workspaceVersion": false,
+    "vsicons.presets.angular": false
 }

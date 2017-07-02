@@ -1,25 +1,28 @@
-var config: ServerAppConfig.ServerConfiguration = require("./server/server.config.json");
-import * as express from "express";
+import * as socketIo from "socket.io";
+import * as http from "http";
 import * as path from "path";
-import { registerMiddlewares } from "./server/express.middlewares";
+import * as express from "express";
+import * as bodyParser from "body-parser";
+import { Socket } from "./src/app/server/socket.io/socket";
+import { routes } from "./src/app/server/routes/room.routes";
 
-let app: express.Application = express();
-let middewareActions = [
-    () => express.static(__dirname)
-];
+const config: ServerAppConfig.ServerConfiguration = require("./src/server/server.config.json");
+const port: number = process.env.PORT || 8000;
+const env: string = process.env.NODE_ENV || "development";
+const app: express.Application = express();
 
-config.staticResources.directories
-    .sort((a, b) => {
-        return a.order - b.order;
-    })
-    .forEach((v) => {
-        middewareActions.push(() => express.static(v.path));
-    });
+app.use(bodyParser.json());
+app.use("/rooms", routes.rooms.route);
+app.use(express.static("src"));
+app.use(express.static("node_modules"));
+app.use("/dist", express.static(path.join(__dirname, "/dist")));
+app.use(express.static(__dirname));
 
-registerMiddlewares(app, middewareActions);
-app.all('/*', (req, res, next) => {
-    // Just send the index.html for other files to support HTML5Mode
-    res.sendFile(config.staticResources.entry, { root: __dirname });
-});
+// just send the index.html for other files to support HTML5Mode
+app.all("/*", (req, res, next) => res.sendFile(config.staticResources.entry, { root: __dirname }));
 
-export = app;
+const server = http.createServer(<any>app);
+const io = socketIo(server);
+const socketServer = new Socket(io);
+socketServer.connect();
+server.listen(port);
