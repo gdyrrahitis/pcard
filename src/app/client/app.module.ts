@@ -7,7 +7,6 @@ import { CommonModule } from "./common/index";
 import { ComponentModule } from "./components/index";
 import { NotificationService, SocketService, SharedModule } from "./shared/index";
 import { AppComponent } from "./app.component";
-import { socket } from "./app.socket"; // Connects client socket
 
 const home: string = "/";
 class Messages {
@@ -51,7 +50,8 @@ export const AppModule = angular.module("app", [
     require("angular-ui-bootstrap"),
     require("angular-sanitize"),
     require("ngstorage"),
-    CommonModule,
-    ComponentModule,
-    SharedModule
-]).component("app.component", AppComponent).run(Runner).name;
+    // CommonModule,
+    // ComponentModule,
+    // SharedModule
+])
+.component("app.component", AppComponent).run(Runner).name;

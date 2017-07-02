@@ -1,3 +1,3 @@
-declare interface IRoomRoute extends ng.route.IRouteParamsService {
+declare interface IRoomRoute extends ng.ui.IStateParamsService {
     id: string;
 }

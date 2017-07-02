@@ -1,17 +1,14 @@
 import * as angular from "angular";
+
+import { SharedModule } from "../../shared.module";
 import { HttpService } from "./http.service";
 
-describe("Service", () => {
-    beforeEach(() => {
-        angular.module("app", [])
-            .service("httpService", ["$http", HttpService]);
-    });
-
+describe("Services", () => {
     describe("HttpService", () => {
         let $httpBackend: ng.IHttpBackendService;
         let service: HttpService;
 
-        beforeEach(angular.mock.module("app"));
+        beforeEach(angular.mock.module(SharedModule));
         beforeEach(inject(($injector) => {
             $httpBackend = $injector.get("$httpBackend");
             service = $injector.get("httpService");

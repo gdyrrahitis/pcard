@@ -6,14 +6,14 @@ var gulp = require("gulp"),
 
 gulp.task("test:dev", ["ts"], function (callback) {
     gulp.watch("app.ts", ["ts"]);
-    gulp.watch("src/**/*.ts", ["ts"]);
+    gulp.watch("src/app/**/*.ts", ["ts"]);
 
-    new karma(require("../../karma.conf.dev")).start();
+    new karma(require("../karma/karma.conf.dev")).start();
 });
 
 gulp.task("test:travis", ["ts"], function (callback) {
     if (process.env.TRAVIS) {
-        new karma(require("../../karma.conf.travis")).
+        new karma(require("../karma/karma.conf.travis")).
             on("error", function (error) {
                 gutil.log(error);
                 process.exit(1);
@@ -25,7 +25,7 @@ gulp.task("test:travis", ["ts"], function (callback) {
 });
 
 var mochaRun = function () {
-    return gulp.src("src/server/tests/**/*.js", { read: false })
+    return gulp.src("src/app/server/tests/**/*.js", { read: false })
         .pipe(mocha({ timeout: 10000, reporter: "list" }))
         .on("error", gutil.log);
 };
@@ -35,7 +35,7 @@ gulp.task("mocha", function () {
 });
 
 gulp.task("mocha:dev", ["ts"], function (callback) {
-    gulp.watch("src/server/**/*.ts", function () {
+    gulp.watch("src/app/server/**/*.ts", function () {
         sequence("ts", "mocha");
     });
     mochaRun();

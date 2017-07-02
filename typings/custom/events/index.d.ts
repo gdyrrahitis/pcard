@@ -97,3 +97,5 @@ declare interface RoomDeckCardAssociateCallback {
 declare interface RoomDeckCardDisassociateCallback {
     ($data: RoomDeckCardDisassociateCallbackArgs): void
 }
+
+// TODO: Add more events

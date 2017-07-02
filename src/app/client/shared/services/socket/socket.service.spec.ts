@@ -1,31 +1,29 @@
 import * as angular from "angular";
+
+import { SharedModule } from "../../shared.module";
 import { SocketService } from "./socket.service";
-var socketMock = require("socket-io-mock");
+var mock = require("socket-io-mock");
 
 describe("Services", () => {
-    let mock;
-
-    beforeEach(() => {
-        mock = new socketMock();
-        mock.socketClient.id = "123";
-
-        angular.module("app", ["ngSanitize", "ngRoute", "ngStorage"])
-            .value("socket", mock.socketClient)
-            .factory("socketService", ["$rootScope", "socket", ($rootScope, socket) => {
-                return new SocketService($rootScope, socket);
-            }]);
-    });
-
-    xdescribe("Socket", () => {
+    describe("Socket", () => {
+        let socketMock;
         let $scope;
         let service: SocketService;
-        beforeEach(angular.mock.module("app"));
+        let socketId: string = "1234";
+        
+        beforeEach(angular.mock.module(SharedModule));
         beforeEach(() => {
-            spyOn(mock.socketClient, "on").and.callThrough();
-            spyOn(mock.socketClient, "emit").and.callThrough();
+            socketMock = new mock();
+            socketMock.id = socketId;
+            spyOn(socketMock, "on").and.callThrough();
+            spyOn(socketMock, "emit").and.callThrough();
         });
-        beforeEach(angular.mock.inject(function ($rootScope, _socketService_) {
-            $scope = <IHomeControllerScope>$rootScope.$new();
+        beforeEach(angular.mock.module(($provide) => {
+            $provide.decorator("socket", ["$delegate", ($delegate) => {
+                return socketMock;
+            }]);
+        }));
+        beforeEach(angular.mock.inject(function (_socketService_) {
             service = _socketService_;
         }));
 
@@ -34,68 +32,66 @@ describe("Services", () => {
             expect(service).toBeDefined();
         });
 
-        it("should return socket id", () => {
-            // arrange
-            let expected = "123";
-
-            // act
-            let id = service.socketId;
-
-            // assert
-            expect(id).not.toBeUndefined();
-            expect(id).toBe(expected);
+        describe("socketId", () => {
+            it("should return socket id", () => {
+                let id = service.socketId;
+                expect(id).not.toBeUndefined();
+                expect(id).toBe(socketId);
+            });
         });
 
-        it("should call the on method on socket", () => {
-            // arrange
-            let eventName = "custom event";
-            let callback = () => { };
+        describe("on", () => {
+            it("should call the on method on socket", () => {
+                // arrange
+                let eventName = "custom event";
+                let callback = () => { };
 
-            // act
-            service.on(eventName, callback);
+                // act
+                service.on(eventName, callback);
 
-            // assert
-            expect(mock.socketClient.on).toHaveBeenCalled();
+                // assert
+                expect(socketMock.on).toHaveBeenCalled();
+            });
         });
 
-        it("should call the emit method on socket", () => {
-            // arrange
-            let eventName = "custom event";
+        describe("emit", () => {
+            it("should call the emit method on socket", () => {
+                // arrange
+                let eventName = "custom event";
 
-            // act
-            service.emit(eventName);
+                // act
+                service.emit(eventName);
 
-            // assert
-            expect(mock.socketClient.emit).toHaveBeenCalled();
-            expect(mock.socketClient.emit.calls.count()).toBe(1);
-        });
+                // assert
+                expect(socketMock.emit).toHaveBeenCalled();
+                expect(socketMock.emit.calls.count()).toBe(1);
+            });
 
-        it("should call the emit method on socket with additional data", () => {
-            // arrange
-            let eventName = "custom event";
-            let data = { custom: "data" };
+            it("should call the emit method on socket with additional data", () => {
+                // arrange
+                let eventName = "custom event";
+                let data = { custom: "data" };
 
-            // act
-            service.emit(eventName, data);
+                // act
+                service.emit(eventName, data);
 
-            // assert
-            expect(mock.socketClient.emit).toHaveBeenCalled();
-            expect(mock.socketClient.emit.calls.count()).toBe(1);
-        });
+                // assert
+                expect(socketMock.emit).toHaveBeenCalled();
+                expect(socketMock.emit.calls.count()).toBe(1);
+            });
 
-        it("should call the emit method on socket with additional data and callback function", () => {
-            // arrange
-            let eventName = "custom event";
-            let data = { custom: "data" };
-            let spy = jasmine.createSpy("callback");
+            it("should call the emit method on socket with additional data and callback function", () => {
+                // arrange
+                let eventName = "custom event";
+                let data = { custom: "data" };
 
-            // act
-            service.emit(eventName, data, spy);
+                // act
+                service.emit(eventName, data, () => {});
 
-            // assert
-            expect(mock.socketClient.emit).toHaveBeenCalled();
-            expect(mock.socketClient.emit.calls.count()).toBe(1);
-            expect(spy).toHaveBeenCalled();
+                // assert
+                expect(socketMock.emit).toHaveBeenCalled();
+                expect(socketMock.emit.calls.count()).toBe(1);
+            });
         });
     });
 });

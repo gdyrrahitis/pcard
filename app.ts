@@ -3,8 +3,8 @@ import * as http from "http";
 import * as path from "path";
 import * as express from "express";
 import * as bodyParser from "body-parser";
-import { Socket } from "./src/server/socket.io/socket";
-import { routes } from "./src/server/routes/room.routes";
+import { Socket } from "./src/app/server/socket.io/socket";
+import { routes } from "./src/app/server/routes/room.routes";
 
 const config: ServerAppConfig.ServerConfiguration = require("./src/server/server.config.json");
 const port: number = process.env.PORT || 8000;
