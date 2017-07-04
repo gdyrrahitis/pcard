@@ -1,21 +1,30 @@
-import { ModalJoinResultEvent } from "../../../domain/events/index";
-export class ModalComponent {
-    static $inject = ["$scope"];
-    constructor(private $scope: ng.IScope, private $uibModalInstance: angular.ui.bootstrap.IModalServiceInstance) {
-        $scope.go = this.go;
-        $scope.cancel = this.cancel;
+import * as angular from "angular";
 
-        this.$scope.$uibModalInstance.result.then((value) => {
-            let modalJoinResultEvent = new ModalJoinResultEvent(value);
-            $scope.$emit(ModalJoinResultEvent.eventName, modalJoinResultEvent.result);
-        });
-    }
+export const ModalComponent: ng.IComponentOptions = {
+    bindings: {
+        resolve: "<",
+        close: "&",
+        dismiss: "&"
+    },
+    templateUrl: "./modal.html",
+    controller: class ModalComponent implements IModalComponent {
+        public resolve: { roomId: string };
+        private roomId: string;
+        private close: (result: { roomId: string }) => void;
+        private dismiss: (action: string) => void;
 
-    public go = () => {
-        this.$uibModalInstance.close(this.$scope.roomId);
-    }
+        public $onInit() {
+            if (this.resolve) {
+                this.roomId = this.resolve.roomId;
+            }
+        }
 
-    public cancel = () => {
-        this.$uibModalInstance.dismiss("cancel");
+        public ok() {
+            this.close({ roomId: this.roomId });
+        }
+
+        public cancel() {
+            this.dismiss("cancel");
+        }
     }
-}
+};

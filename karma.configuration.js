@@ -38,8 +38,9 @@ var karmaConfig = {
     //prependPrefix: "/base/",
     cacheIdFromPath: function (filePath) {
       var cacheId;
-      if (/([a-zA-Z]+.html)/.test(filePath)) {
-        var path = /([a-zA-Z]+.html)/.exec(filePath)[0];
+      var regex = /((?:(?:[a-zA-Z]+)|((?:[a-zA-Z]+)(?:\-[a-zA-Z]+))).html)/;
+      if (regex.test(filePath)) {
+        var path = regex.exec(filePath)[0];
         return "./" + path;
       }
       return filePath;

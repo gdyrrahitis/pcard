@@ -1,0 +1,4 @@
+<div ng-show="$ctrl.totalRooms && $ctrl.rooms">
+    <h4><span class="text-success rooms" ng-bind="$ctrl.rooms|number"></span>&nbsp;active&nbsp;<span class="rooms-plural" ng-bind="'room'|plural:'rooms':$ctrl.rooms"></span></h4>
+    <uib-progressbar class="progress-striped active" max="$ctrl.totalRooms" value="$ctrl.rooms" type="success"><i>{{$ctrl.rooms}} / {{$ctrl.totalRooms}}</i></uib-progressbar>
+</div>

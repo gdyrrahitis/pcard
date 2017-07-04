@@ -1,0 +1,6 @@
+<div ng-show="$ctrl.users">
+    <h4>
+        <span class="text-success users" ng-bind="$ctrl.users|number"></span>&nbsp;active&nbsp;
+        <span ng-bind="'user'|plural:'users':$ctrl.users" class="users-plural"></span>
+    </h4>
+</div>
