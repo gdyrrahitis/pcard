@@ -1,46 +1,39 @@
-<div id="{{controllerId}}">
-    <div class="page-header">
-        <h1>Agile poker planning <i class="cards"></i> <small>Fun with plan</small></h1>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="row">
-                <div class="col-md-5">
-                    <form name="userForm" novalidate>
-                        <h4>Enter your name and start planning!</h4>
-                        <div class="form-group" ng-class="{ 'has-error has-feedback': (userForm.username.$error.required || userForm.username.$error.pattern) && !userForm.username.$pristine }">
-                            <div class="input-group input-group-lg">
-                                <div class="input-group-addon"><i class="fa fa-user-circle-o" aria-hidden="true"></i></div>
-                                <input type="text" class="form-control input-lg" name="username" ng-model="username" pattern="^[a-zA-Z0-9]+([_ -]?[a-zA-Z0-9])*$"
-                                    placeholder="Name" required />
-                                <span ng-show="(userForm.username.$error.required || userForm.username.$error.pattern) && !userForm.username.$pristine" class="glyphicon glyphicon-remove form-control-feedback"
-                                    aria-hidden="true"></span>
-                            </div>
-                            <span ng-show="userForm.username.$error.required && !userForm.username.$pristine" class="help-block">Name is required</span>
-                            <span ng-show="userForm.username.$error.pattern && !userForm.username.$pristine" class="help-block">Please provide a valid name</span>
+<div class="page-header">
+    <h1>Agile poker planning <i class="cards"></i> <small>Fun with plan</small></h1>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-5">
+                <form name="userForm" novalidate>
+                    <h4>Enter your name and start planning!</h4>
+                    <div class="form-group" ng-class="{ 'has-error has-feedback': (userForm.username.$error.required || userForm.username.$error.pattern) && !userForm.username.$pristine }">
+                        <div class="input-group input-group-lg">
+                            <div class="input-group-addon"><i class="fa fa-user-circle-o" aria-hidden="true"></i></div>
+                            <input type="text" class="form-control input-lg" name="username" ng-model="$ctrl.username" pattern="^[a-zA-Z0-9]+([_ -]?[a-zA-Z0-9])*$"
+                                placeholder="Name" required />
+                            <span ng-show="(userForm.username.$error.required || userForm.username.$error.pattern) && !userForm.username.$pristine" class="glyphicon glyphicon-remove form-control-feedback"
+                                aria-hidden="true"></span>
                         </div>
-                        <div class="btn-group btn-group-lg" role="group">
-                            <button type="button" class="btn btn-default" ng-click="createRoom()" ng-disabled="userForm.username.$error.required"><i class="fa fa-plus-circle"></i>&nbsp;Create room</button>
-                            <button type="button" class="btn btn-default" ng-click="join()" ng-disabled="userForm.username.$error.required"><i class="fa fa-users"></i>&nbsp;Join room</button>
-                        </div>
-                    </form>
-                </div>
-                <div class="col-md-5 pull-right">
-                    <div ng-show="users">
-                        <h4><span class="text-success" ng-bind="users|number"></span>&nbsp;active {{'user'|plural:'users':users}}</h4>
+                        <span ng-show="userForm.username.$error.required && !userForm.username.$pristine" class="help-block">Name is required</span>
+                        <span ng-show="userForm.username.$error.pattern && !userForm.username.$pristine" class="help-block">Please provide a valid name</span>
                     </div>
-                    <div ng-show="totalRooms && rooms">
-                        <h4><span class="text-success" ng-bind="rooms|number"></span>&nbsp;active {{'room'|plural:'rooms':rooms}}</h4>
-                        <uib-progressbar class="progress-striped active" max="totalRooms" value="rooms" type="success"><i>{{rooms}} / {{totalRooms}}</i></uib-progressbar>
+                    <div class="btn-group btn-group-lg" role="group">
+                        <button type="button" class="btn btn-default" ng-click="$ctrl.createRoom()" ng-disabled="userForm.username.$error.required"><i class="fa fa-plus-circle"></i>&nbsp;Create room</button>
+                        <button type="button" class="btn btn-default" ng-click="$ctrl.join()" ng-disabled="userForm.username.$error.required"><i class="fa fa-users"></i>&nbsp;Join room</button>
                     </div>
-                </div>
+                </form>
+            </div>
+            <div class="col-md-5 pull-right">
+                <pcard-users-info users="$ctrl.users"></pcard-users-info>
+                <pcard-rooms-info rooms="$ctrl.rooms" totalRooms="$ctrl.totalRooms"></pcard-rooms-info>
             </div>
         </div>
     </div>
-    <div class="row" ng-if="alerts && alerts.length > 0">
-        <hr />
-        <div class="col-md-12">
-            <div uib-alert ng-repeat="alert in alerts" class="alert-danger" close="closeAlert($index)" dismiss-on-timeout="2000">{{alert.message}}</div>
-        </div>
+</div>
+<div class="row" ng-if="$ctrl.alerts && $ctrl.alerts.length > 0">
+    <hr />
+    <div class="col-md-12">
+        <div uib-alert ng-repeat="alert in alerts" class="alert-danger" close="$ctrl.closeAlert($index)" dismiss-on-timeout="2000">{{$ctrl.alert.message}}</div>
     </div>
 </div>

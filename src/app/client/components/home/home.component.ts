@@ -1,3 +1,16 @@
+export const HomeComponent: ng.IComponentOptions = {
+    templateUrl: "./home.html",
+    controller: class HomeComponent {
+        static $inject = [""];
+        constructor() {
+
+        }
+
+        public $onInit() {
+            
+        }
+    }
+};
 // import { SocketService, NotificationService, ModalService, HttpService } from "../../services/index";
 // import {
 //     ModalJoinResultEvent, RoomsFullEvent, RoomNotFoundEvent,
