@@ -50,8 +50,8 @@ export const AppModule = angular.module("app", [
     require("angular-ui-bootstrap"),
     require("angular-sanitize"),
     require("ngstorage"),
-    // CommonModule,
-    // ComponentModule,
-    // SharedModule
+    CommonModule,
+    ComponentModule,
+    SharedModule
 ])
-.component("app.component", AppComponent).run(Runner).name;
+.component("pcardApp", AppComponent).run(Runner).name;

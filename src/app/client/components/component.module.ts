@@ -3,7 +3,7 @@ import * as angular from "angular";
 import { HomeModule, ModalModule, RoomModule } from "./index";
 
 export const ComponentModule = angular.module("pcard.component", [
-    // HomeModule,
-    // ModalModule,
+    HomeModule,
+    ModalModule,
     // RoomModule
 ]).name;

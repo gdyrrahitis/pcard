@@ -19,8 +19,8 @@
                         <span ng-show="userForm.username.$error.pattern && !userForm.username.$pristine" class="help-block">Please provide a valid name</span>
                     </div>
                     <div class="btn-group btn-group-lg" role="group">
-                        <button type="button" class="btn btn-default" ng-click="$ctrl.createRoom()" ng-disabled="userForm.username.$error.required"><i class="fa fa-plus-circle"></i>&nbsp;Create room</button>
-                        <button type="button" class="btn btn-default" ng-click="$ctrl.join()" ng-disabled="userForm.username.$error.required"><i class="fa fa-users"></i>&nbsp;Join room</button>
+                        <button type="button" class="btn btn-default" ng-click="$ctrl.create()" ng-disabled="userForm.username.$error.required || userForm.username.$error.pattern"><i class="fa fa-plus-circle"></i>&nbsp;Create room</button>
+                        <button type="button" class="btn btn-default" ng-click="$ctrl.modal()" ng-disabled="userForm.username.$error.required || userForm.username.$error.pattern"><i class="fa fa-users"></i>&nbsp;Join room</button>
                     </div>
                 </form>
             </div>
