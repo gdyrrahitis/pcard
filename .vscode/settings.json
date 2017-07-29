@@ -14,7 +14,7 @@
         "**/.svn": true,
         "**/.hg": true,
         "**/.DS_Store": true,
-        "dist": true,
+        "dist": false,
         "coverage": true,
         "node_modules": true,
         "package-lock.json": true,
