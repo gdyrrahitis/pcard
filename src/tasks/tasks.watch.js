@@ -9,15 +9,15 @@ var gulp = require("gulp"),
     bundle = bundleTasks.bundle;
 
 gulp.task("watch", function () {
-    gulp.watch("src/client/**/*.scss", ["sass"], reload);
-    gulp.watch("src/client/**/*.html", reload);
+    gulp.watch("src/app/client/**/*.scss", ["sass"], reload);
+    gulp.watch("src/app/client/**/*.html", reload);
     gulp.watch("index.html", reload);
     gulp.watch("app.ts", ["ts"]);
-    gulp.watch("src/server/**/*.ts", ["ts"]);
-    gulp.watch("src/domain/**/*.ts", ["ts"]);
-    gulp.watch("src/shared/**/*.ts", ["ts"]);
+    gulp.watch("src/app/server/**/*.ts", ["ts"]);
+    gulp.watch("src/app/domain/**/*.ts", ["ts"]);
+    gulp.watch("src/app/shared/**/*.ts", ["ts"]);
 
-    var watcher = watchify(browserify("./src/client/main.ts", watchify.args));
+    var watcher = watchify(browserify("src/app/client/app.module.ts", watchify.args));
     bundleWithBrowserSync(watcher);
     watcher.on("update", function () {
         bundleWithBrowserSync(watcher);

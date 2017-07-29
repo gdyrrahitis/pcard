@@ -8,14 +8,14 @@ var gulp = require("gulp"),
     buffer = require("vinyl-buffer"),
     uglify = require("gulp-uglify");
 
-var entry = browserify("./src/client/main.ts");
+var entry = browserify("src/app/client/app.module.ts");
 
 function bundle(bundler) {
     return bundler
         .plugin(tsify)
         .transform(babelify, { presets: ["es2015"], extensions: ['.tsx', '.ts'] })
         .bundle()
-        .pipe(source("src/client/main.js"));
+        .pipe(source("src/app/client/app.module.js"));
 }
 
 function bundleWithBrowserSync(bundler) {
@@ -32,7 +32,7 @@ gulp.task("bundle", function () {
 });
 
 gulp.task("bundle:prod", function () {
-    bundle(browserify("./src/client/main.prod.ts"))
+    bundle(browserify("src/app/client/app.module.ts"))
         .pipe(buffer())
         .pipe(uglify())
         .on("error", function (e) {

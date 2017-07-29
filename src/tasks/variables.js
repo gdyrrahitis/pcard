@@ -1,7 +1,7 @@
 var basePaths = {
     src: {
         nodeModules: "node_modules",
-        srcRoot: "src"
+        srcRoot: "src/app/client"
     },
     dest: {
         root: "dist",
@@ -17,7 +17,7 @@ var basePaths = {
 var libPaths = {
     src: {
         allCssInSrc: "dist/css/**/*.css",
-        allSassInSrc: "src/client/**/*.scss",
+        allSassInSrc: "src/app/client/**/*.scss",
         customFontAwesome: `${basePaths.src.srcRoot}/styles/custom-font-awesome.scss`,
         bootstrap: `${basePaths.src.srcRoot}/styles/bootstrap.scss`,
         bootstrapSass: `${basePaths.src.nodeModules}/bootstrap-sass/assets/stylesheets`,
@@ -27,7 +27,7 @@ var libPaths = {
         fontAwesomeFonts: `${basePaths.src.nodeModules}/font-awesome/fonts/*.*`
     },
     dest: {
-        js: `${basePaths.dest.root}/src/client/main.js`,
+        js: `${basePaths.dest.root}/src/app.module.js`,
         css: `${basePaths.dest.root}/css/libs`,
         allCss: `${basePaths.dest.root}/css/libs/**/*.css`,
         stylesCss: `${basePaths.dest.root}/css/libs/styles.css`,
