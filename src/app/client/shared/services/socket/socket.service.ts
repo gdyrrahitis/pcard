@@ -11,7 +11,7 @@ export class SocketService {
     }
 
     private applyOnRootScope = (callback, args) =>
-        this.$rootScope.$apply(this.actOnCallback(callback, args));
+        this.$rootScope.$evalAsync(this.actOnCallback(callback, args));
 
     private actOnCallback = (callback, args) =>
         this.actOnCallbackIfItIsDefined(callback, args);
@@ -25,5 +25,5 @@ export class SocketService {
     }
 
     private applyOnRootScopeOnDefinedCallback = (callback, args) =>
-        this.$rootScope.$apply(this.actOnCallbackIfItIsDefined(callback, args));
+        this.$rootScope.$evalAsync(this.actOnCallbackIfItIsDefined(callback, args));
 }
