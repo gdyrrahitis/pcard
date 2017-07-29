@@ -6,7 +6,7 @@ import * as bodyParser from "body-parser";
 import { Socket } from "./src/app/server/socket.io/socket";
 import { routes } from "./src/app/server/routes/room.routes";
 
-const config: ServerAppConfig.ServerConfiguration = require("./src/server/server.config.json");
+const config: ServerAppConfig.ServerConfiguration = require("./src/app/server/server.config.json");
 const port: number = process.env.PORT || 8000;
 const env: string = process.env.NODE_ENV || "development";
 const app: express.Application = express();
