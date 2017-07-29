@@ -1,5 +1,5 @@
 @import "variables";
-@import '../../../node_modules/font-awesome/scss/font-awesome.scss';
+@import '../../../../node_modules/font-awesome/scss/font-awesome.scss';
 
 .#{$fa-css-prefix}-zero:before { content: $fa-var-zero; }
 .#{$fa-css-prefix}-half:before { content: $fa-var-half; }
