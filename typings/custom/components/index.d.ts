@@ -8,7 +8,6 @@ declare interface IFooterComponent {
 
 // TODO: IHelpComponent
 // TODO: IHeaderComponent
-// TODO: IMenuComponent
 declare interface IMenuComponent {
     navigateToHome(): void;
     navigateToHelp(): void;
@@ -16,7 +15,16 @@ declare interface IMenuComponent {
 
 
 // TODO: ISidebarComponent
-// TODO: IHomeComponent
+declare interface IHomeComponent {
+    $onInit(): void;
+    username: string;
+    roomId: string;
+    totalRooms: number;
+    alerts: { message: string }[];
+    create(): void;
+    join(roomId: string): void;
+}
+
 declare interface IRoomsInfoComponent {
     rooms: number,
     totalRooms: number
