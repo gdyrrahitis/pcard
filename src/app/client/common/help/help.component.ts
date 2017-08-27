@@ -1,3 +1,7 @@
+const template = require("./help.html");
 export const HelpComponent: ng.IComponentOptions = {
-    templateUrl: "./help.html"
+    template,
+    controller: class HelpController {
+        constructor() {}
+    }
 };

@@ -1,6 +1,6 @@
 import * as angular from "angular";
 
-import { FooterModule, HeaderModule } from "./index";
+import { FooterModule, HeaderModule, HelpModule } from "./index";
 
 export const CommonModule = angular.module("pcard.common", [
     HeaderModule,

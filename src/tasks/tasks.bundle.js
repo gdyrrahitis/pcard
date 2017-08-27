@@ -6,6 +6,7 @@ var gulp = require("gulp"),
     babelify = require("babelify"),
     source = require("vinyl-source-stream"),
     buffer = require("vinyl-buffer"),
+    stringify = require('stringify')
     uglify = require("gulp-uglify");
 
 var entry = browserify("src/app/client/app.module.ts");
@@ -14,6 +15,7 @@ function bundle(bundler) {
     return bundler
         .plugin(tsify)
         .transform(babelify, { presets: ["es2015"], extensions: ['.tsx', '.ts'] })
+        .transform(stringify, { appliesTo: { includeExtensions: [".html"] }, minify: true })
         .bundle()
         .pipe(source("src/app/client/app.module.js"));
 }

@@ -1,3 +1,9 @@
+export const RoomComponent: ng.IComponentOptions = {
+    templateUrl: "./room.html",
+    controller: class RoomComponent {
+        
+    }
+};
 // import { SocketService } from "../../services/socket.service/socket.service";
 // import { BaseComponent } from "../base.component/base.component";
 // import { UserRole } from "../../../domain/index";

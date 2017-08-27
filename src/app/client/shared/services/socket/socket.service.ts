@@ -1,4 +1,5 @@
 export class SocketService {
+    static $inject = ["$rootScope", "socket"];
     constructor(private $rootScope: ng.IScope, private socket: SocketIOClient.Socket) { }
 
     public get socketId() {

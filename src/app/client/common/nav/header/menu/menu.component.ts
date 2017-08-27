@@ -1,5 +1,6 @@
+const template = require("./menu.html");
 export const MenuComponent: ng.IComponentOptions = {
-    templateUrl: "./menu.html",
+    template: template,
     controller: class MenuComponent {
 
         static $inject = ["$location"];

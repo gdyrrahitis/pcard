@@ -1,3 +1,4 @@
+const templateUrl = require('./header.html');
 export const HeaderComponent: ng.IComponentOptions = {
-    templateUrl: "./header.html"
+    template: templateUrl
 };

@@ -6,6 +6,7 @@ import {
     RoomCreateEvent, RoomJoinEvent
 } from "../../../domain/events/index";
 
+const template = require("./home.html");
 class Messages {
     static roomsFullMessage: string = "All rooms are being used. Try again later!";
     static remoteErrorMessage: string = "Oh snap! An error occured, please try again later";
@@ -15,7 +16,7 @@ class Messages {
     static dismissedDialog: string = "User dismissed dialog";
 }
 export const HomeComponent: ng.IComponentOptions = {
-    templateUrl: "./home.html",
+    template: template,
     controller: class HomeComponent implements IHomeComponent {
         private _totalRooms: number;
         private _rooms: number;

@@ -1,12 +1,13 @@
 import * as angular from "angular";
 
+const template = require("./modal.html");
 export const ModalComponent: ng.IComponentOptions = {
     bindings: {
         resolve: "<",
         close: "&",
         dismiss: "&"
     },
-    templateUrl: "./modal.html",
+    template: template,
     controller: class ModalComponent implements IModalComponent {
         public resolve: { roomId: string };
         private roomId: string;

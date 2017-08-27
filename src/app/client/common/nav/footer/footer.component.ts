@@ -1,5 +1,6 @@
+const templateUrl = require("./footer.html");
 export const FooterComponent: ng.IComponentOptions = {
-    templateUrl: "./footer.html",
+    template: templateUrl,
     controller: class FooterComponent {
         public githubUrl: string = "https://ghbtns.com/github-btn.html?user=gdyrrahitis&type=follow&count=true&size=large";
         public twitterUrl: string = "https://twitter.com/giorgosdyrra";

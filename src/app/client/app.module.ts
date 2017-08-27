@@ -1,9 +1,12 @@
 import * as angular from "angular";
 import * as toast from "toastr";
 import * as io from "socket.io-client";
+import "ngstorage";
+import "angular-sanitize";
+import "angular-ui-router";
 
 import { UserBannedEvent, UserDisconnectedEvent, UserBanStart } from "../domain/events/index";
-import { CommonModule } from "./common/index";
+import { CommonModule, HelpModule } from "./common/index";
 import { ComponentModule } from "./components/index";
 import { NotificationService, SocketService, SharedModule } from "./shared/index";
 import { AppComponent } from "./app.component";
@@ -20,38 +23,48 @@ class Messages {
         error: "Error"
     };
 }
-export class Runner {
-    private options: ToastrOptions = { progressBar: true };
 
-    static $inject = ["$rootScope", "$location", "socketService", "notificationService"];
-    constructor(private $rootScope: ng.IScope,
-        private $location: ng.ILocationService,
-        private socketService: SocketService,
-        private notificationService: NotificationService) {
+const runner = ($rootScope: ng.IScope,
+    $location: ng.ILocationService,
+    socketService: SocketService,
+    notificationService: NotificationService) => {
+    const options: ToastrOptions = { progressBar: true };
+    socketService.on(UserBannedEvent.eventName, onUserBanned);
+    socketService.on(UserDisconnectedEvent.eventName, onUserDisconnected);
 
-        socketService.on(UserBannedEvent.eventName, this.onUserBanned);
-        socketService.on(UserDisconnectedEvent.eventName, this.onUserDisconnected);
+    function onUserBanned() {
+        $rootScope.$broadcast(UserBanStart.eventName);
+        //TODO: state $location.path(home);
+
+        notificationService.info(Messages.userIsBannedByModerator, Messages.title.ban, options);
     }
 
-    private onUserBanned = () => {
-        this.$rootScope.$broadcast(UserBanStart.eventName);
-        this.$location.path(home);
-
-        this.notificationService.info(Messages.userIsBannedByModerator, Messages.title.ban, this.options);
-    }
-
-    private onUserDisconnected = (roomId: string) => {
-        roomId ? this.notificationService.warning(`${Messages.userDisconnectedFromRoom} ${roomId}`, Messages.title.disconnect, this.options)
-            : this.notificationService.error(Messages.roomIsNotDefined, Messages.title.error, this.options);
+    function onUserDisconnected(roomId: string) {
+        roomId ? notificationService.warning(`${Messages.userDisconnectedFromRoom} ${roomId}`, Messages.title.disconnect, options)
+            : notificationService.error(Messages.roomIsNotDefined, Messages.title.error, options);
     }
 }
+runner.$inject = ["$rootScope", "$location", "socketService", "notificationService"];
 
-export const AppModule = angular.module("app", [
-    require("angular-ui-bootstrap"),
-    require("angular-sanitize"),
-    require("ngstorage"),
+const routerConfig = ($locationProvider: ng.ILocationProvider) => {
+    $locationProvider.html5Mode({
+        enabled: true,
+        requireBase: false
+    }).hashPrefix("!");
+};
+routerConfig.$inject = ["$locationProvider"];
+
+export const AppModule = angular.module("pcard", [
+    "ui.bootstrap",
+    "ngSanitize",
+    "ngStorage",
+    "ui.router",
     CommonModule,
     ComponentModule,
-    SharedModule
+    SharedModule,
+    HelpModule
 ])
-.component("pcardApp", AppComponent).run(Runner).name;
+    .component("pcardApp", AppComponent)
+    .config(routerConfig)
+    .run(runner)
+    .name;

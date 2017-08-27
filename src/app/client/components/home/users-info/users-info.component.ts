@@ -1,5 +1,7 @@
+const template = require("./users-info.html");
+
 export const UsersInfoComponent: ng.IComponentOptions = {
-    templateUrl: "./users-info.html",
+    template: template,
     bindings: {
         users: "<"
     }

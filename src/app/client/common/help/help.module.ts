@@ -6,14 +6,14 @@ import { HelpComponent } from "./help.component";
 function route($stateProvider: ng.ui.IStateProvider, $urlRouterProvider: ng.ui.IUrlRouterProvider) {
     $stateProvider.state("help", {
         url: "/help",
-        component: "help"
+        component: "pcardHelp"
     });
-    $urlRouterProvider.otherwise("/");
+    $urlRouterProvider.otherwise("/home");
 }
 route.$inject = ["$stateProvider", "$urlRouterProvider"];
 
 export const HelpModule = angular
     .module("pcard.help", ["ui.router"])
-    .component("help", HelpComponent)
+    .component("pcardHelp", HelpComponent)
     .config(route)
     .name;
