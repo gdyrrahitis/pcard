@@ -52,6 +52,7 @@ var karmaConfig = {
     debug: true,
     plugin: ["babelify"],
     transform: [
+      "stringify",
       istanbul({
         instrumenter: require("isparta"),
         instrumenterConfig: { babel: { presets: ["es2015"], retainLines: true } },

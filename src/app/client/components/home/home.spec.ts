@@ -17,7 +17,7 @@ describe("Home", () => {
     let $uibModal: ng.ui.bootstrap.IModalService;
     let notificationService: INotificationService;
     let $compile: ng.ICompileService;
-    let $location: ng.ILocationService;
+    let $state: ng.ui.IStateService;
 
     beforeEach(() => {
         socket = function ($rootScope: ng.IScope) {
@@ -50,7 +50,7 @@ describe("Home", () => {
         }]);
     }));
     beforeEach(inject((_$componentController_: ng.IComponentControllerService, _notificationService_,
-        _httpService_, _$rootScope_, _socketService_, _socket_, _$uibModal_, _$compile_, _$location_) => {
+        _httpService_, _$rootScope_, _socketService_, _socket_, _$uibModal_, _$compile_, _$state_) => {
         createComponent = (name, locals, bindings) => _$componentController_(name, locals, bindings);
         httpService = _httpService_;
         $rootScope = _$rootScope_;
@@ -59,12 +59,12 @@ describe("Home", () => {
         $uibModal = _$uibModal_;
         notificationService = _notificationService_;
         $compile = _$compile_;
-        $location = _$location_;
+        $state = _$state_;
         scope = $rootScope.$new();
     }));
 
     describe("Component", () => {
-        xdescribe("constructor", () => {
+        describe("constructor", () => {
             it("should set total rooms on initialization", (done) => {
                 // arrange
                 let promise = Promise.resolve({
@@ -212,7 +212,7 @@ describe("Home", () => {
             });
         });
 
-        xdescribe("createRoom", () => {
+        describe("createRoom", () => {
             it("should emit 'room-create' when createRoom is called and username is valid", () => {
                 // arrange
                 spyOn(socketService, "emit");
@@ -241,7 +241,7 @@ describe("Home", () => {
             });
         });
 
-        xdescribe("join", () => {
+        describe("join", () => {
             it("should emit 'room-join' when join is called and roomId and username are valid", () => {
                 // arrange
                 spyOn(socketService, "emit");
@@ -285,7 +285,7 @@ describe("Home", () => {
             });
         });
 
-        xdescribe("modal", () => {
+        describe("modal", () => {
             it("should open modal", () => {
                 // arrange
                 spyOn($uibModal, "open").and.callThrough();
@@ -340,7 +340,7 @@ describe("Home", () => {
                 scope = $rootScope.$new();
             });
 
-            xit("should not display total users when zero", () => {
+            it("should not display total users when zero", () => {
                 // arrange
                 let element = angular.element("<pcard-home></pcard-home>");
                 let template = $compile(element)(scope);
@@ -353,7 +353,7 @@ describe("Home", () => {
                 expect(users.hasClass("ng-hide")).toBeTruthy();
             });
 
-            xit("should display total users after socket.io emits the connected users", () => {
+            it("should display total users after socket.io emits the connected users", () => {
                 // arrange
                 let element = angular.element("<pcard-home></pcard-home>");
                 let template = $compile(element)(scope);
@@ -367,7 +367,7 @@ describe("Home", () => {
                 expect(users.text()).toBe("10");
             });
 
-            xit("should not display rooms when total rooms is zero", (done) => {
+            it("should not display rooms when total rooms is zero", (done) => {
                 // arrange
                 let promise = Promise.resolve({ data: { limit: 0 } });
                 spyOn(httpService, "get").and.returnValue(promise);
@@ -388,7 +388,7 @@ describe("Home", () => {
                 });
             });
 
-            xit("should display rooms", (done) => {
+            it("should display rooms", (done) => {
                 // arrange
                 let promise = Promise.resolve({ data: { limit: 100 } });
                 spyOn(httpService, "get").and.returnValue(promise);
@@ -409,7 +409,7 @@ describe("Home", () => {
                 });
             });
 
-            xit("should have create room and join room buttons disabled", () => {
+            it("should have create room and join room buttons disabled", () => {
                 // arrange
                 let element = angular.element("<pcard-home></pcard-home>");
                 let template = $compile(element)(scope);
@@ -422,7 +422,7 @@ describe("Home", () => {
                 expect(buttons.prop("disabled")).toBeTruthy();
             });
 
-            xit("should not enable buttons when name is invalid and show 'Please provide a valid name' message", () => {
+            it("should not enable buttons when name is invalid and show 'Please provide a valid name' message", () => {
                 // arrange
                 let element = angular.element("<pcard-home></pcard-home>");
                 let template = $compile(element)(scope);
@@ -444,7 +444,7 @@ describe("Home", () => {
                 expect(buttons.prop("disabled")).toBeTruthy();
             });
 
-            xit("should not enable buttons when name is entered and then removed and show 'Name is required' message", () => {
+            it("should not enable buttons when name is entered and then removed and show 'Name is required' message", () => {
                 // arrange
                 let element = angular.element("<pcard-home></pcard-home>");
                 let template = $compile(element)(scope);
@@ -468,7 +468,7 @@ describe("Home", () => {
                 expect(buttons.prop("disabled")).toBeTruthy();
             });
 
-            xit("should enable buttons when name is added", () => {
+            it("should enable buttons when name is added", () => {
                 // arrange
                 let element = angular.element("<pcard-home></pcard-home>");
                 let template = $compile(element)(scope);
@@ -487,11 +487,11 @@ describe("Home", () => {
                 expect(buttons.prop("disabled")).toBeFalsy();
             });
 
-            xit("should go to rooms when create room is clicked", (done) => {
+            it("should go to rooms when create room is clicked", (done) => {
                 socket.on(RoomCreateEvent.eventName, (data, callback: Function) => {
                     // assert
                     callback({ access: true, roomId: "1234" });
-                    expect($location.path()).toBe("/room/1234");
+                    expect($state.current.name).toBe("/room/1234");
                     done();
                 });
 
@@ -508,7 +508,7 @@ describe("Home", () => {
                 button.triggerHandler("click");
             });
 
-            xit("should open modal when join is clicked", () => {
+            it("should open modal when join is clicked", () => {
                 // arrange
                 let element = angular.element(document.body).append("<pcard-home></pcard-home>");
                 let template = $compile(element)(scope);
@@ -527,7 +527,7 @@ describe("Home", () => {
                 expect(body.hasClass("modal-open")).toBeTruthy();
             });
 
-            xit("should dismiss modal when cancel is clicked and still be at home page", () => {
+            it("should dismiss modal when cancel is clicked and still be at home page", () => {
                 // arrange
                 let element = angular.element(document.body).append("<pcard-home></pcard-home>");
                 let template = $compile(element)(scope);
@@ -549,11 +549,11 @@ describe("Home", () => {
                 expect(body.hasClass("modal-open")).toBeFalsy();
             });
 
-            xit("should navigate to certain room when handle is passed", (done) => {
+            it("should navigate to certain room when handle is passed", (done) => {
                 socket.on(RoomJoinEvent.eventName, (data, callback: Function) => {
                     // assert
                     callback({ access: true, roomId: "1234" });
-                    expect($location.path()).toBe("/room/1234");
+                    expect($state.current.name).toBe("/room/1234");
                     done();
                 });
 
@@ -576,14 +576,14 @@ describe("Home", () => {
                 ok.triggerHandler("click");
                 scope.$digest();
                 let body = angular.element(template[0]).parent("html").find("body");
-console.log(body[0])
+
                 // assert
                 expect(body.hasClass("modal-open")).toBeFalsy();
             });
         });
     });
 
-    xdescribe("Module", () => {
+    describe("Module", () => {
         it("should resolve rooms info component", () => {
             let component = createComponent("pcardRoomsInfo", null, {});
             expect(component).toBeDefined();

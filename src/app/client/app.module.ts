@@ -11,7 +11,7 @@ import { ComponentModule } from "./components/index";
 import { NotificationService, SocketService, SharedModule } from "./shared/index";
 import { AppComponent } from "./app.component";
 
-const home: string = "/";
+const home: string = "home";
 class Messages {
     static readonly userIsBannedByModerator: string = "User is banned from room by moderator";
     static readonly roomIsNotDefined: string = "Room id is not defined, unexpected error occured";
@@ -25,7 +25,7 @@ class Messages {
 }
 
 const runner = ($rootScope: ng.IScope,
-    $location: ng.ILocationService,
+    $state: ng.ui.IStateService,
     socketService: SocketService,
     notificationService: NotificationService) => {
     const options: ToastrOptions = { progressBar: true };
@@ -34,7 +34,7 @@ const runner = ($rootScope: ng.IScope,
 
     function onUserBanned() {
         $rootScope.$broadcast(UserBanStart.eventName);
-        //TODO: state $location.path(home);
+        $state.go(home);
 
         notificationService.info(Messages.userIsBannedByModerator, Messages.title.ban, options);
     }
@@ -44,7 +44,7 @@ const runner = ($rootScope: ng.IScope,
             : notificationService.error(Messages.roomIsNotDefined, Messages.title.error, options);
     }
 }
-runner.$inject = ["$rootScope", "$location", "socketService", "notificationService"];
+runner.$inject = ["$rootScope", "$state", "socketService", "notificationService"];
 
 const routerConfig = ($locationProvider: ng.ILocationProvider) => {
     $locationProvider.html5Mode({

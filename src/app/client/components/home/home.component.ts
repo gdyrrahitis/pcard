@@ -38,10 +38,10 @@ export const HomeComponent: ng.IComponentOptions = {
             return this._totalRooms;
         };
 
-        static $inject = ["httpService", "socketService", "$localStorage", "notificationService", "$location", "$uibModal", "$document"];
+        static $inject = ["httpService", "socketService", "$localStorage", "notificationService", "$state", "$uibModal", "$document"];
         constructor(private http: IHttpService, private socketService: ISocketService,
             private $localStorage, private notificationService: INotificationService,
-            private $location: ng.ILocationService, private $uibModal: ng.ui.bootstrap.IModalService,
+            private $state: ng.ui.IStateService, private $uibModal: ng.ui.bootstrap.IModalService,
             private $document: ng.IDocumentService) {
             this.socketService.on(RoomsFullEvent.eventName, this.roomsFull);
             this.socketService.on(RoomNotFoundEvent.eventName, this.roomNotFound);
@@ -86,7 +86,7 @@ export const HomeComponent: ng.IComponentOptions = {
 
         private navigateToLocationBasedOnResponse(response: any, location: string) {
             if (response.access) {
-                this.$location.path(location);
+                this.$state.go(location);
             }
         }
 

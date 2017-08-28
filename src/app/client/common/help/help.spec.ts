@@ -10,18 +10,16 @@ describe("Help", () => {
     let createComponent: ComponentControllerArgs;
     let $state: ng.ui.IStateService;
     let $rootScope: ng.IRootScopeService;
-    let $location: ng.ILocationService;
     let state: string = "help";
 
     beforeEach(angular.mock.module(HelpModule));
     beforeEach(angular.mock.module(HelpModule, ($stateProvider: ng.ui.IStateProvider) => {
-        $stateProvider.state("home", { url: "/" });
+        $stateProvider.state("home", { url: "/home" });
     }));
     beforeEach(inject((_$componentController_: ng.IComponentControllerService, _$state_: ng.ui.IStateService,
-        _$rootScope_: ng.IRootScopeService, _$location_: ng.ILocationService) => {
+        _$rootScope_: ng.IRootScopeService) => {
         $state = _$state_;
         $rootScope = _$rootScope_;
-        $location = _$location_;
         createComponent = (name: string, locals: Locals, bindings: {}) => _$componentController_(name, locals, bindings);
     }));
 
@@ -32,7 +30,7 @@ describe("Help", () => {
             $rootScope.$digest();
 
             // assert
-            expect($state.current.component).toBe("help", "Component is not set");
+            expect($state.current.component).toBe("pcardHelp", "Component is not set");
             expect($state.current.name).toBe(state, "State is not set");
             expect($state.current.url).toBe("/help");
         });
@@ -43,13 +41,13 @@ describe("Help", () => {
             $rootScope.$digest();
 
             // assert
-            expect($state.current.url).toBe("/");
+            expect($state.current.url).toBe("/home");
         });
     });
 
     describe("Module", () => {
         it("should have a help component", () => {
-            let helpComponent = createComponent("help", null, {});
+            let helpComponent = createComponent("pcardHelp", null, {});
             expect(helpComponent).toBeDefined();
         });
     });
