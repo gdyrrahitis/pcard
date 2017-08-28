@@ -18,7 +18,8 @@
         "coverage": true,
         "node_modules": true,
         "package-lock.json": true,
-        "LICENSE": true
+        "LICENSE": true,
+        "4.0.0-dev": true
     },
     "typescript.check.workspaceVersion": false,
     "vsicons.presets.angular": false

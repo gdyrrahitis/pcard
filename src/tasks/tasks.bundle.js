@@ -6,10 +6,15 @@ var gulp = require("gulp"),
     babelify = require("babelify"),
     source = require("vinyl-source-stream"),
     buffer = require("vinyl-buffer"),
-    stringify = require('stringify')
-    uglify = require("gulp-uglify");
+    stringify = require('stringify'),
+    sourcemaps = require("gulp-sourcemaps"),
+    noop = require("gulp-noop"),
+    uglify = require("gulp-uglify"),
+    args = require("yargs").argv;
 
 var entry = browserify("src/app/client/app.module.ts");
+var prod = args.prod;
+gutil.log(gutil.colors.green("Bunding for " + (prod ? "PROD" : "DEV")));
 
 function bundle(bundler) {
     return bundler
@@ -34,13 +39,16 @@ gulp.task("bundle", function () {
 });
 
 gulp.task("bundle:prod", function () {
-    bundle(browserify("src/app/client/app.module.ts"))
+    bundle(entry)
         .pipe(buffer())
-        .pipe(uglify())
+        .pipe(!prod ? sourcemaps.init() : noop())
+        .pipe(prod ? uglify() : noop())
         .on("error", function (e) {
             gutil.log(gutil.colors.bgRed(e));
         })
-        .pipe(gulp.dest("dist/"));
+        .pipe(!prod ? sourcemaps.write() : noop())
+        .pipe(gulp.dest("dist/"))
+        .pipe(!prod ? browserSync.stream() : noop());
 });
 
 module.exports.bundle = bundle;
