@@ -7,12 +7,8 @@ var project = ts.createProject("./tsconfig.json");
 gulp.task("ts", function () {
     return project
         .src()
-        .pipe(tslint({
-            formatter: "stylish"
-        }))
-        .pipe(tslint.report({
-            summarizeFailureOutput: true
-        }))
+        .pipe(tslint({ formatter: "stylish" }))
+        .pipe(tslint.report({ summarizeFailureOutput: true }))
         .pipe(project())
         .js
         .pipe(gulp.dest(function (file) {

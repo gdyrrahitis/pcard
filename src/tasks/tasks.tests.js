@@ -3,51 +3,54 @@ var gulp = require("gulp"),
     mocha = require("gulp-mocha"),
     sequence = require("run-sequence"),
     path = require("path"),
+    protractor = require("protractor"),
     karma = require("karma").Server,
     args = require("yargs").argv;
 
-var travis = args.travis;
-
-gulp.task("test:dev", ["ts"], function (done) {
-    gulp.watch("app.ts", ["ts"]);
-    gulp.watch("src/app/**/*.ts", ["ts"]);
-    new karma({
-        configFile: path.resolve(__dirname, "../../") + "/karma.conf.js",
+var travis = args.travis,
+    configFile = path.resolve(__dirname, "../../") + "/karma.conf.js",
+    devConfig = {
+        configFile: configFile,
         singleRun: false,
         autoWatch: true,
         logLevel: "INFO",
         browsers: ["ChromeHeadless"],
-    }, function () {
-        done();
-    }).on("error", function (error) {
-        gutil.log(error);
-        process.exit(1);
-    }).start();
+    },
+    travisConfig = {
+        configFile: configFile,
+        browsers: ['Chrome_travis_ci'],
+        singleRun: true,
+        autoWatch: false,
+        logLevel: "INFO",
+        customLaunchers: {
+            Chrome_travis_ci: {
+                base: 'Chrome',
+                flags: ['--no-sandbox']
+            }
+        }
+    };
+
+gulp.task("test", ["ts"], function (done) {
+    gutil.log(gutil.colors.green("Testing on " + (travis ? "TRAVIS" : "DEV")));
+    if (!travis) {
+        // env === DEV --> watch tests
+        gulp.watch("app.ts", ["ts"]);
+        gulp.watch("src/app/**/*.ts", ["ts"]);
+    }
+
+    setupAndStartKarmaWithConfig(travis ? travisConfig : devConfig, done);
 });
 
-gulp.task("test:travis", ["ts"], function (callback) {
-    if (process.env.TRAVIS) {
-        new karma({
-            configFile: path.resolve(__dirname, "../../") + "/karma.conf.js",
-            browsers: ['Chrome_travis_ci'],
-            singleRun: true,
-            autoWatch: false,
-            logLevel: "INFO",
-            customLaunchers: {
-                Chrome_travis_ci: {
-                    base: 'Chrome',
-                    flags: ['--no-sandbox']
-                }
-            }
-        }).on("error", function (error) {
-            gutil.log(error);
-            process.exit(1);
-        }).start();
-    }
-    else {
-        gutil.log(gutil.colors.bgRed("Fatal error. CI tests will run only in TRAVIS environment"));
-    }
-});
+function setupAndStartKarmaWithConfig(config, callback) {
+    new karma(config, function () {
+        callback();
+    }).on("error", errorHandler).start();
+}
+
+function errorHandler(error) {
+    gutil.log(error);
+    process.exit(1);
+}
 
 var mochaRun = function () {
     return gulp.src("src/app/server/tests/**/*.js", { read: false })
@@ -59,19 +62,15 @@ gulp.task("mocha", function () {
     return mochaRun();
 });
 
-gulp.task("mocha:dev", ["ts"], function (callback) {
-    gulp.watch("src/app/server/**/*.ts", function () {
-        sequence("ts", "mocha");
-    });
-    mochaRun();
-});
+gulp.task("test:mocha", ["ts"], function (done) {
+    gutil.log(gutil.colors.green("Testing on " + (travis ? "TRAVIS" : "DEV")));
+    if (!travis) {
+        // env === DEV --> watch tests
+        gulp.watch("src/app/server/**/*.ts", function () {
+            sequence("ts", "mocha");
+        });
+    }
 
-gulp.task("mocha:travis", ["ts"], function (callback) {
-    if (process.env.TRAVIS) {
-        return mochaRun();
-    }
-    else {
-        gutil.log(gutil.colors.bgRed("Fatal error. CI tests will run only in TRAVIS environment"));
-    }
+    mochaRun();
 });
 

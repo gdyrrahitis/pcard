@@ -4,36 +4,44 @@ var gulp = require("gulp"),
     sequence = require("run-sequence"),
     open = require("gulp-open"),
     browserSync = require("./browser.sync.js"),
-    variables = require("./variables");
+    path = require("path"),
+    gutil = require("gulp-util"),
+    args = require("yargs").argv;
+
+var prod = args.prod,
+    app = "app.js",
+    coverage = path.resolve(__dirname, "../../") + "/coverage/html/index.html";
 
 gulp.task("server", function () {
-    express.run([variables.basePaths.server.path]);
+    express.run([app]);
 });
 
 gulp.task("gulp-coverage", function () {
-    gulp.src(variables.basePaths.coverage.path).pipe(open());
+    gulp.src(coverage).pipe(open());
 });
 
-gulp.task("nodemon", ["build"], function (cb) {
+gulp.task("nodemon", ["build"], function (done) {
     var started = false;
 
     return nodemon({
-        script: variables.basePaths.server.path,
+        script: app,
         env: {
             "NODE_ENV": "development"
         }
     }).on("start", function () {
         if (!started) {
-            cb();
+            done();
             started = true;
         }
     });
 });
 
-gulp.task("app:dev", function (done) {
-    sequence("build:w", ["server"], done);
+gulp.task("app", function (done) {
+    gutil.log(gutil.colors.green("Building on " + (prod ? "PROD" : "DEV")));
+    
+    if (prod) {
+        sequence("build", done);
+    } else {
+        sequence("build:w", ["server"], done);
+    }
 });
-
-gulp.task("app:backend:dev", ["nodemon"]);
-
-gulp.task("app:prod", ["build:prod"]);

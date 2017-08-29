@@ -1,3 +1,4 @@
+// TODO: Use the gulp-load-plugins
 var gulp = require("gulp"),
     gutil = require("gulp-util"),
     browserSync = require("./browser.sync.js"),
@@ -10,36 +11,24 @@ var gulp = require("gulp"),
     sourcemaps = require("gulp-sourcemaps"),
     noop = require("gulp-noop"),
     uglify = require("gulp-uglify"),
-    args = require("yargs").argv;
+    args = require("yargs").argv,
+    main = require("./variables.js").main;
 
-var entry = browserify("src/app/client/app.module.ts");
+var mainWithJsExt = main.replace(".ts", ".js");
+var entry = browserify(main);
 var prod = args.prod;
-gutil.log(gutil.colors.green("Bunding for " + (prod ? "PROD" : "DEV")));
 
-function bundle(bundler) {
+function browserifyConfig(bundler) {
     return bundler
         .plugin(tsify)
         .transform(babelify, { presets: ["es2015"], extensions: ['.tsx', '.ts'] })
-        .transform(stringify, { appliesTo: { includeExtensions: [".html"] }, minify: true })
+        .transform(stringify, { appliesTo: { includeExtensions: [".html"] } })
         .bundle()
-        .pipe(source("src/app/client/app.module.js"));
+        .pipe(source(mainWithJsExt));
 }
 
-function bundleWithBrowserSync(bundler) {
-    return bundle(bundler)
-        .on("error", function (e) {
-            gutil.log(gutil.colors.bgRed(e));
-        })
-        .pipe(gulp.dest("dist/"))
-        .pipe(browserSync.stream());
-}
-
-gulp.task("bundle", function () {
-    bundleWithBrowserSync(entry);
-});
-
-gulp.task("bundle:prod", function () {
-    bundle(entry)
+function bundle() {
+    return browserifyConfig(entry)
         .pipe(buffer())
         .pipe(!prod ? sourcemaps.init() : noop())
         .pipe(prod ? uglify() : noop())
@@ -49,7 +38,11 @@ gulp.task("bundle:prod", function () {
         .pipe(!prod ? sourcemaps.write() : noop())
         .pipe(gulp.dest("dist/"))
         .pipe(!prod ? browserSync.stream() : noop());
+}
+
+gulp.task("bundle", function () {
+    gutil.log(gutil.colors.green("Bunding on " + (prod ? "PROD" : "DEV")));
+    return bundle();
 });
 
 module.exports.bundle = bundle;
-module.exports.bundleWithBrowserSync = bundleWithBrowserSync;

@@ -8,91 +8,58 @@ var gulp = require("gulp"),
     gutil = require("gulp-util"),
     browserSync = require("./browser.sync.js"),
     reload = browserSync.reload,
-    variables = require("./variables");
+    noop = require("gulp-noop"),
+    args = require("yargs").argv,
+    variables = require("./variables"),
+    dist = variables.dist,
+    nodeModules = variables.nodeModules;
 
-gulp.task("css:bundle", function () {
-    gulp.src(variables.libPaths.dest.allCss)
+var prod = args.prod,
+    dest = dist + "/css/libs",
+    root = "src/app/client/";
+
+gulp.task("css", function () {
+    gutil.log(gutil.colors.green("CSS bundling on " + (prod ? "PROD" : "DEV")));
+
+    var stylesDest = "./dist/css/libs/styles/";
+    gulp.src("dist/css/libs/**/*.css")
         .pipe(concat("site.css"))
-        .pipe(gulp.dest("./dist/css/libs/styles/"))
-        .pipe(sourcemaps.init())
-        .pipe(uglify())
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest("./dist/css/libs/styles/"));
+        .pipe(gulp.dest(stylesDest))
+        .pipe(!prod ? sourcemaps.init() : noop())
+        .pipe(prod ? uglify() : noop())
+        .pipe(!prod ? sourcemaps.write(".") : noop())
+        .pipe(gulp.dest(stylesDest));
 });
 
+gulp.task("sass", function () {
+    gutil.log(gutil.colors.green("Sass compile on " + (prod ? "PROD" : "DEV")));
 
-gulp.task("css:bundle:prod", function () {
-    gulp.src(variables.libPaths.dest.allCss)
-        .pipe(concat("site.css"))
-        .pipe(gulp.dest("./dist/css/libs/styles/"))
-        .pipe(uglify())
-        .pipe(gulp.dest("./dist/css/libs/styles/"));
-});
-
-gulp.task("css", ["css:bundle"]);
-gulp.task("css:prod", ["css:bundle:prod"]);
-
-// SASS tasks
-gulp.task("sass", ["fonts"], function () {
-    var custom = gulp.src(variables.libPaths.src.allSassInSrc)
+    var custom = gulp.src(root + "**/*.scss")
+        .pipe(!prod ? sourcemaps.init() : noop())
         .pipe(sass())
-        .pipe(gulp.dest(variables.libPaths.dest.css))
-    // .pipe(reload({
-    //     stream: true
-    // }));
+        .pipe(!prod ? sourcemaps.write(".") : noop())
+        .pipe(gulp.dest(dest))
+        .pipe(!prod ? reload({ stream: true }) : noop());
 
-    var customFontAwesome = gulp.src(variables.libPaths.src.customFontAwesome)
-        .pipe(sass())
-        .pipe(gulp.dest(variables.libPaths.dest.css))
-    // .pipe(reload({
-    //     stream: true
-    // }));
+    var customFontAwesome = copyToDestFrom(root + "styles/custom-font-awesome.scss")
+        .pipe(!prod ? reload({ stream: true }) : noop());
 
-    var bootstrap = gulp.src(variables.libPaths.src.bootstrap)
-        .pipe(sass({
-            outputStyle: "nested",
-            precison: 3,
-            errLogToConsole: true,
-            includePaths: [variables.libPaths.src.bootstrapSass]
-        }))
-        .pipe(gulp.dest(variables.libPaths.dest.css));
+    var bootstrap = copyToDestFrom(root + "styles/bootstrap.scss", {
+        outputStyle: "nested",
+        precison: 3,
+        sourceComments: false,
+        errLogToConsole: true,
+        includePaths: [nodeModules + "/bootstrap-sass/assets/stylesheets"]
+    });
 
-    var fontAwesome = gulp.src(variables.libPaths.src.fontAwesome)
-        .pipe(sass())
-        .pipe(gulp.dest(variables.libPaths.dest.css));
-
-    var toastr = gulp.src(variables.libPaths.src.toastrSass)
-        .pipe(sass())
-        .pipe(gulp.dest(variables.libPaths.dest.css));
+    var fontAwesome = copyToDestFrom(nodeModules + "/font-awesome/scss/font-awesome.scss")
+    var toastr = copyToDestFrom(nodeModules + "/toastr/toastr.scss");
 
     return merge(custom, customFontAwesome, bootstrap, fontAwesome, toastr);
 });
 
-gulp.task("sass:prod", ["fonts"], function () {
-    var custom = gulp.src(variables.libPaths.src.allSassInSrc)
-        .pipe(sass())
-        .pipe(gulp.dest(variables.libPaths.dest.css));
-
-    var customFontAwesome = gulp.src(variables.libPaths.src.customFontAwesome)
-        .pipe(sass())
-        .pipe(gulp.dest(variables.libPaths.dest.css));
-
-    var bootstrap = gulp.src(variables.libPaths.src.bootstrap)
-        .pipe(sass({
-            outputStyle: "nested",
-            precison: 3,
-            errLogToConsole: true,
-            includePaths: [variables.libPaths.src.bootstrapSass]
-        }))
-        .pipe(gulp.dest(variables.libPaths.dest.css));
-
-    var fontAwesome = gulp.src(variables.libPaths.src.fontAwesome)
-        .pipe(sass())
-        .pipe(gulp.dest(variables.libPaths.dest.css));
-
-    var toastr = gulp.src(variables.libPaths.src.toastrSass)
-        .pipe(sass())
-        .pipe(gulp.dest(variables.libPaths.dest.css));
-
-    return merge(custom, customFontAwesome, bootstrap, fontAwesome, toastr);
-});
+function copyToDestFrom(src, sassOptions) {
+    return gulp.src(src)
+        .pipe(sassOptions ? sass(sassOptions) : sass())
+        .pipe(gulp.dest(dest));
+}
