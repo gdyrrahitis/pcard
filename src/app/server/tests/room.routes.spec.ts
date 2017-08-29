@@ -1,5 +1,3 @@
-process.env.NODE_ENV = "test";
-
 import * as express from "express";
 import * as request from "supertest";
 import { routes } from "../routes/room.routes";
