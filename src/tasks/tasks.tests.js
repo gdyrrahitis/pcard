@@ -3,7 +3,6 @@ var gulp = require("gulp"),
     mocha = require("gulp-mocha"),
     sequence = require("run-sequence"),
     path = require("path"),
-    protractor = require("protractor"),
     karma = require("karma").Server,
     args = require("yargs").argv;
 
