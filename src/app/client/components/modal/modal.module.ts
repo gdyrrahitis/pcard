@@ -1,5 +1,4 @@
 import * as angular from "angular";
-import "angular-ui-bootstrap";
 
 import { ModalComponent } from "./modal.component";
 

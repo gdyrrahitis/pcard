@@ -6,6 +6,7 @@ declare type Locals = { $scope?: ng.IScope, [key: string]: any };
 declare type ComponentControllerArgs = <T, TBinding>(componentName: string,
     locals: { $scope?: ng.IScope, [key: string]: any },
     bindings?: TBinding, ident?: string) => T;
+    
 describe("Help", () => {
     let createComponent: ComponentControllerArgs;
     let $state: ng.ui.IStateService;
@@ -13,7 +14,12 @@ describe("Help", () => {
     let state: string = "help";
 
     beforeEach(angular.mock.module(HelpModule));
-    beforeEach(angular.mock.module(HelpModule, ($stateProvider: ng.ui.IStateProvider) => {
+    beforeEach(angular.mock.module(HelpModule, ($stateProvider: ng.ui.IStateProvider, $locationProvider: ng.ILocationProvider) => {
+        $locationProvider.html5Mode({
+            enabled: true,
+            requireBase: false
+        }).hashPrefix("!");
+
         $stateProvider.state("home", { url: "/home" });
     }));
     beforeEach(inject((_$componentController_: ng.IComponentControllerService, _$state_: ng.ui.IStateService,
@@ -32,7 +38,7 @@ describe("Help", () => {
             // assert
             expect($state.current.component).toBe("pcardHelp", "Component is not set");
             expect($state.current.name).toBe(state, "State is not set");
-            expect($state.current.url).toBe("/help");
+            expect($state.href($state.current.name)).toBe("/help");
         });
 
         it("should redirect to home if route is wrong", () => {
@@ -41,7 +47,7 @@ describe("Help", () => {
             $rootScope.$digest();
 
             // assert
-            expect($state.current.url).toBe("/home");
+            expect($state.href($state.current.name)).toBe("/home");
         });
     });
 

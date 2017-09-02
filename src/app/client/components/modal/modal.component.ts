@@ -12,7 +12,7 @@ export const ModalComponent: ng.IComponentOptions = {
         public resolve: { roomId: string };
         private roomId: string;
         private close: (result: { roomId: string }) => void;
-        private dismiss: (action: string) => void;
+        private dismiss: (action: any) => void;
 
         public $onInit() {
             if (this.resolve) {
@@ -25,7 +25,7 @@ export const ModalComponent: ng.IComponentOptions = {
         }
 
         public cancel() {
-            this.dismiss("cancel");
+            this.dismiss({ dismiss: "cancel" });
         }
     }
 };

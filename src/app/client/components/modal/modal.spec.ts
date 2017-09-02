@@ -45,7 +45,7 @@ describe("Modal", () => {
                 component.cancel();
 
                 // assert
-                expect((<any>component).dismiss).toHaveBeenCalledWith("cancel");
+                expect((<any>component).dismiss).toHaveBeenCalledWith({ dismiss: "cancel" });
             });
         });
 

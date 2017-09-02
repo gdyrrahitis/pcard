@@ -78,15 +78,15 @@ export const HomeComponent: ng.IComponentOptions = {
                 let roomCreateEvent = new RoomCreateEvent({ name: this.username });
                 this.socketService.emit(RoomCreateEvent.eventName,
                     roomCreateEvent.data,
-                    (response) => this.navigateToLocationBasedOnResponse(response, `/room/${response.roomId}`));
+                    (response) => this.navigateToLocationBasedOnResponse(response, "room", { id: response.roomId }));
             } else {
                 this.alerts.push({ message: Messages.provideUsernameMessage });
             }
         }
 
-        private navigateToLocationBasedOnResponse(response: any, location: string) {
+        private navigateToLocationBasedOnResponse(response: any, location: string, params: { id: string }) {
             if (response.access) {
-                this.$state.go(location);
+                this.$state.go(location, params);
             }
         }
 
@@ -97,7 +97,7 @@ export const HomeComponent: ng.IComponentOptions = {
                     let roomJoinEvent = new RoomJoinEvent({ name: this.username, roomId: roomId });
                     this.socketService.emit(RoomJoinEvent.eventName,
                         roomJoinEvent.data,
-                        (response) => this.navigateToLocationBasedOnResponse(response, `/room/${roomId}`));
+                        (response) => this.navigateToLocationBasedOnResponse(response, "room", { id: response.roomId }));
                 } else {
                     this.alerts.push({ message: Messages.provideUsernameMessage });
                 }
@@ -111,16 +111,16 @@ export const HomeComponent: ng.IComponentOptions = {
         }
 
         public modal = () => {
-            //let parentElement = angular.element(this.$document[0].querySelector(".page-header")).parent();
             this.$uibModal.open({
                 component: "pcardModal",
-                //appendTo: parentElement
-            }).result.then((value: any) => {
-                            console.log("closing")
-                this.join(value);
-            }, (reason: any) => {
-                this.notificationService.info(Messages.dismissedDialog, "Dismiss", { progressBar: true });
-            });
+                resolve: {
+                    roomId: () => ""
+                }
+            }).result.then(
+                (value: any) => this.join(value),
+                (reason: any) => this.notificationService
+                    .info(Messages.dismissedDialog, "Dismiss", { progressBar: true })
+                );
         }
     }
 };

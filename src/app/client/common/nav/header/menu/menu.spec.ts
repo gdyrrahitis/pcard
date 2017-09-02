@@ -13,7 +13,13 @@ describe("Menu", () => {
 
     beforeEach(angular.mock.module(MenuModule));
     beforeEach(angular.mock.module("./menu.html"));
-    beforeEach(angular.mock.module(MenuModule, ($stateProvider: ng.ui.IStateProvider, $urlRouterProvider: ng.ui.IUrlRouterProvider) => {
+    beforeEach(angular.mock.module(MenuModule, ($stateProvider: ng.ui.IStateProvider, 
+            $urlRouterProvider: ng.ui.IUrlRouterProvider, $locationProvider: ng.ILocationProvider) => {
+        $locationProvider.html5Mode({
+            enabled: true,
+            requireBase: false
+        }).hashPrefix("!");
+
         $stateProvider.state("home", { url: "/home" })
             .state("help", { url: "/help" });
         $urlRouterProvider.when("/", "/home").otherwise("/home");
@@ -45,7 +51,7 @@ describe("Menu", () => {
 
                 // assert
                 expect($state.current.name).toBe("home");
-                expect($state.current.url).toBe("/home");
+                expect($state.href($state.current.name)).toBe("/home");
             });
         });
 
@@ -64,7 +70,7 @@ describe("Menu", () => {
 
                 // assert
                 expect($state.current.name).toBe("help");
-                expect($state.current.url).toBe("/help");
+                expect($state.href($state.current.name)).toBe("/help");
             });
         });
     });
