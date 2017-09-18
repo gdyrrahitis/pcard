@@ -3,6 +3,12 @@ import * as angular from "angular";
 import { SharedModule } from "../shared.module";
 import { TrustedFilter } from "./trusted.filter";
 
+declare module "angular" {
+    export interface IRootScopeService {
+        url: string;
+    }
+}
+
 describe("Filters", () => {
     describe("TrustedFilter", () => {
         let url: string = "https://ghbtns.com/github-btn.html?user=gdyrrahitis&type=follow&count=true&size=large";

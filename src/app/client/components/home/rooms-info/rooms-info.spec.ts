@@ -2,6 +2,13 @@ import * as angular from "angular";
 
 import { RoomsInfoModule } from "./rooms-info.module";
 
+declare module "angular" {
+    export interface IRootScopeService {
+        rooms: number;
+        totalRooms: number;
+    }
+}
+
 describe("RoomsInfo", () => {
     let createComponent: (name: string, locals: any, bindings: any) => IRoomsInfoComponent;
     let $compile: ng.ICompileService;

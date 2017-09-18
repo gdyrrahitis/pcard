@@ -6,15 +6,21 @@ declare interface IFooterComponent {
     creativeCommonsUrl: string;
 }
 
-// TODO: IHelpComponent
-// TODO: IHeaderComponent
 declare interface IMenuComponent {
     navigateToHome(): void;
     navigateToHelp(): void;
 }
 
+declare interface ISidebarComponent {
+    buttons: Button[];
+    startPlanning(): void;
+    resetPlanning(): void;
+    stopPlanning(): void;
+    planningLock(): void;
+    planningUnlock(): void;
+    planningShow(): void;
+}
 
-// TODO: ISidebarComponent
 declare interface IHomeComponent {
     $onInit(): void;
     username: string;

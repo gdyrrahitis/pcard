@@ -7,7 +7,7 @@ var gulp = require("gulp"),
     bundle = require("./tasks.bundle").bundle,
     main = require("./variables.js").main;
 
-var entry = browserify(main, watchify.args);
+//var entry = browserify(main, watchify.args);
 gulp.task("watch", function () {
     gulp.watch("src/app/client/**/*.scss", ["sass"], reload);
     gulp.watch("src/app/client/**/*.html", reload);
@@ -17,13 +17,13 @@ gulp.task("watch", function () {
     gulp.watch("src/app/domain/**/*.ts", ["ts"]);
     gulp.watch("src/app/shared/**/*.ts", ["ts"]);
 
-    var watcher = watchify(entry);
-    bundle(watcher);
-    watcher.on("update", function () {
-        bundle(watcher);
-    });
+    // var watcher = watchify(entry);
+    // bundle(watcher);
+    // watcher.on("update", function () {
+    //     bundle(watcher);
+    // });
 
-    watcher.on("log", gutil.log);
+    // watcher.on("log", gutil.log);
 
     browserSync.init({
         port: 4000,

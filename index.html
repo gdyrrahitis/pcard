@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!-- Twitter follow button -->
     <script async>
         window.twttr = (function (d, s, id) {
             var js, fjs = d.getElementsByTagName(s)[0],
@@ -25,12 +26,11 @@
             return t;
         }(document, "script", "twitter-wjs"));
     </script>
-    <link href="dist/css/libs/styles/site.css" rel="stylesheet" type="text/css">
-    <script src="dist/src/app/client/app.module.js"></script>
 </head>
 
 <body ng-app="pcard" ng-strict-di>
     <pcard-app></pcard-app>
+    <script src="dist/main.bundle.js"></script>
 </body>
 
 </html>

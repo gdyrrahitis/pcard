@@ -2,6 +2,12 @@ import * as angular from "angular";
 
 import { UsersInfoModule } from "./users-info.module";
 
+declare module "angular" {
+    export interface IRootScopeService {
+        users: number;
+    }
+}
+
 describe("UsersInfo", () => {
     let createComponent: (name: string, locals: any, bindings: any) => IUsersInfoComponent;
     let $compile: ng.ICompileService;

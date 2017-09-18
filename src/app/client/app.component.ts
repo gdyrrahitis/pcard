@@ -1,3 +1,5 @@
+import "./styles/bootstrap.scss";
+
 export const AppComponent: ng.IComponentOptions = {
     template: `
     <div class="container">

@@ -14,6 +14,10 @@ var gulp = require("gulp"),
     args = require("yargs").argv,
     main = require("./variables.js").main;
 
+var webpackConfig = require("../../webpack.config.js");
+var webpackStream = require('webpack-stream');
+var webpack2 = require('webpack');
+
 var mainWithJsExt = main.replace(".ts", ".js");
 var entry = browserify(main);
 var prod = args.prod;
@@ -22,7 +26,9 @@ function browserifyConfig(bundler) {
     return bundler
         .plugin(tsify)
         .transform(babelify, { presets: ["es2015"], extensions: ['.tsx', '.ts'] })
-        .transform(stringify, { appliesTo: { includeExtensions: [".html"] } })
+        .transform(stringify, {
+            appliesTo: { includeExtensions: ['.html'] }
+        })
         .bundle()
         .pipe(source(mainWithJsExt));
 }
@@ -42,7 +48,9 @@ function bundle() {
 
 gulp.task("bundle", function () {
     gutil.log(gutil.colors.green("Bunding on " + (prod ? "PROD" : "DEV")));
-    return bundle();
+    return gulp.src(main)
+        .pipe(webpackStream(webpackConfig), webpack2)
+        .pipe(gulp.dest("dist/"));
 });
 
 module.exports.bundle = bundle;
