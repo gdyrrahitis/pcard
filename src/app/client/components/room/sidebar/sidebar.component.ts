@@ -1,7 +1,10 @@
+import "./sidebar.scss";
+
 import * as angular from "angular";
 
+const template = require("./sidebar.html");
 export const SidebarComponent: ng.IComponentOptions = {
-    templateUrl: "./sidebar.html",
+    template,
     controller: class SidebarComponent implements ng.IController, ISidebarComponent {
         public readonly buttons: Button[] = [
             { id: "planning-start", show: true, active: true },
@@ -11,16 +14,17 @@ export const SidebarComponent: ng.IComponentOptions = {
             { id: "planning-unlock", show: false, active: false },
             { id: "planning-show", show: false, active: false }
         ];
+        private isPaused: boolean = false;
 
         constructor() { }
 
         public startPlanning(): void {
             const planningStart = this.getPlanningStart();
             planningStart.show = false;
+            this.isPaused = false;
 
             this.buttons
                 .filter(b => b.id !== "planning-start")
-                .filter(b => b.id !== "planning-lock")
                 .filter(b => b.id !== "planning-unlock")
                 .filter(b => b.id !== "planning-show")
                 .forEach(b => b.show = true);
@@ -36,10 +40,15 @@ export const SidebarComponent: ng.IComponentOptions = {
         }
 
         public resetPlanning(): void {
-            // TODO: Should add business logic
             if (this.getPlanningStart().show) {
                 return;
             }
+
+            const planningStart = this.getPlanningStart();
+            planningStart.show = true;
+            this.isPaused = false;
+
+            this.buttons.filter(b => b.id !== "planning-start").forEach(b => b.show = false);
         }
 
         public stopPlanning(): void {
@@ -52,10 +61,9 @@ export const SidebarComponent: ng.IComponentOptions = {
                 .filter(b => b.id !== "planning-reset")
                 .forEach(b => b.show = false);
 
-            const planningStart = this.getPlanningStart();
             const planningReset = this.getFromButtons("planning-reset");
-            planningStart.show = true;
             planningReset.show = true;
+            this.isPaused = true;
         }
 
         public planningLock(): void {
@@ -86,9 +94,17 @@ export const SidebarComponent: ng.IComponentOptions = {
             planningUnlock.show = false;
 
             const planningShow = this.getFromButtons("planning-show");
+            planningShow.show = false;
             planningShow.active = false;
         }
 
-        public planningShow(): void {}
+        public planningShow(): void {
+            if(this.getFromButtons("planning-lock").show) {
+                return;
+            }
+
+            this.buttons.forEach(b => b.show = false);
+            this.getFromButtons("planning-reset").show = true;
+        }
     }
 };

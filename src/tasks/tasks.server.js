@@ -3,7 +3,6 @@ var gulp = require("gulp"),
     nodemon = require("gulp-nodemon"),
     sequence = require("run-sequence"),
     open = require("gulp-open"),
-    browserSync = require("./browser.sync.js"),
     path = require("path"),
     gutil = require("gulp-util"),
     args = require("yargs").argv;
@@ -42,6 +41,6 @@ gulp.task("app", function (done) {
     if (prod) {
         sequence("build", done);
     } else {
-        sequence("build:w", ["server"], done);
+        sequence(["server", "build:w"], done);
     }
 });

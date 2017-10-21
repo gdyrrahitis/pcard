@@ -1,4 +1,7 @@
+import "./styles/variables.scss";
 import "./styles/bootstrap.scss";
+import "./styles/custom-font-awesome.scss";
+import "./styles/main.scss";
 
 export const AppComponent: ng.IComponentOptions = {
     template: `

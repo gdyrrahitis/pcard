@@ -1,40 +1,30 @@
 var gulp = require("gulp"),
     gutil = require("gulp-util"),
-    browserSync = require("./browser.sync.js"),
-    reload = browserSync.reload,
-    browserify = require("browserify"),
-    watchify = require("watchify"),
     bundle = require("./tasks.bundle").bundle,
-    main = require("./variables.js").main;
+    main = require("./variables.js").main,
+    webpack = require('webpack'),
+    WebpackDevServer = require('webpack-dev-server'),
+    webpackConfig = require('../../webpack.config.js');
 
-//var entry = browserify(main, watchify.args);
-gulp.task("watch", function () {
-    gulp.watch("src/app/client/**/*.scss", ["sass"], reload);
-    gulp.watch("src/app/client/**/*.html", reload);
-    gulp.watch("index.html", reload);
-    gulp.watch("app.ts", ["ts"]);
-    gulp.watch("src/app/server/**/*.ts", ["ts"]);
-    gulp.watch("src/app/domain/**/*.ts", ["ts"]);
-    gulp.watch("src/app/shared/**/*.ts", ["ts"]);
+gulp.task("watch", ["webpack-dev-server"], function () {
+    gulp.watch("src/app/client/**/*", ["ts","bundle"]);
+});
 
-    // var watcher = watchify(entry);
-    // bundle(watcher);
-    // watcher.on("update", function () {
-    //     bundle(watcher);
-    // });
+gulp.task("webpack-dev-server", function (callback) {
+    // modify some webpack config options
+    var myConfig = Object.create(webpackConfig);
+    // myConfig.devtool = "eval";
+    // myConfig.debug = true;
 
-    // watcher.on("log", gutil.log);
-
-    browserSync.init({
-        port: 4000,
-        ui: {
-            port: 4011
-        },
-        reloadOnRestart: true,
-        proxy: "localhost:8000",
-        socket: {
-            namespace: '/someothername'
-        },
-        ghostMode: false,
+    // Start a webpack-dev-server
+    new WebpackDevServer(webpack(myConfig), {
+        publicPath: "/" + myConfig.output.publicPath,
+        stats: {
+            colors: true
+        }
+    }).listen(8000, "localhost", function (err) {
+        if (err) throw new gutil.PluginError("webpack-dev-server", err);
+        gutil.log("[webpack-dev-server]", "http://localhost:8000/webpack-dev-server/index.html");
+        // proxy.run();
     });
 });

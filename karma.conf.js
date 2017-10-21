@@ -1,5 +1,8 @@
-require('babel-register');
-var istanbul = require("browserify-istanbul");
+require("babel-register");
+var path = require("path");
+var istanbul = require("browserify-istanbul"),
+  webpackConfig = require("./webpack.config");
+var entry = path.resolve(webpackConfig.context || "", webpackConfig.entry);
 
 module.exports = function (config) {
   config.set({
@@ -8,7 +11,7 @@ module.exports = function (config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ["jasmine", "browserify"],
+    frameworks: ["jasmine", "karma-typescript"],
 
     // list of files / patterns to load in the browser
     files: [
@@ -20,16 +23,15 @@ module.exports = function (config) {
       "node_modules/toastr/toastr.js",
       "node_modules/angular-ui-bootstrap/dist/ui-bootstrap.js",
       { pattern: "src/app/client/app.config.json", watched: true, included: false, served: true },
-      "src/app/client/**/*.js",
-      "src/app/domain/**/*.js",
-      "src/app/shared/**/*.js",
-      "src/**/*.html"
+      "src/**/*.html",
+      "src/app/client/**/*.spec.js",
+      "dist/main.bundle.js"
     ],
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      "src/**/*.js": ["browserify"],
+      "src/app/client/**/*.spec.js": ["webpack"],
       "dist/**/*.js": ["coverage"],
       "src/**/*.html": ["ng-html2js"]
     },
@@ -50,41 +52,27 @@ module.exports = function (config) {
       }
     },
 
-    browserify: {
-      debug: true,
-      plugin: ["babelify"],
-      transform: [
-        "stringify",
-        istanbul({
-          instrumenter: require("isparta"),
-          instrumenterConfig: { babel: { presets: ["es2015"], retainLines: true } },
-          ignore: [
-            "**/node_modules/**",
-            "**/dist/**",
-            "**/tasks/**",
-            "**/typings/**",
-            "**/index.ts",
-            "**/index.js",
-            "**/*.spec.ts",
-            "**/*.spec.js"
-          ]
-        })
-      ]
-    },
-
     plugins: [
       require("karma-jasmine"),
       require("karma-chrome-launcher"),
-      require("karma-browserify"),
       require("karma-mocha-reporter"),
       require("karma-coverage"),
-      require("karma-ng-html2js-preprocessor")
+      require("karma-ng-html2js-preprocessor"),
+      require("karma-webpack"),
+      require("karma-typescript")
     ],
+
+    webpack: webpackConfig,
+
+    webpackMiddleware: {
+      // webpack-dev-middleware configuration
+      stats: "errors-only"
+    },
 
     // test results reporter to use
     // possible values: "dots", "progress"
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ["mocha", "coverage"],
+    reporters: ["mocha"/*, "coverage"*/],
 
     // web server port
     port: 9000,

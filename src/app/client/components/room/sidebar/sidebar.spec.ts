@@ -49,7 +49,7 @@ describe("Sidebar", () => {
                     expect(buttons.find(b => b.id === "planning-start").show).toBe(false, "planning-start");
                     expect(buttons.find(b => b.id === "planning-reset").show).toBe(true, "planning-reset");
                     expect(buttons.find(b => b.id === "planning-stop").show).toBe(true, "planning-stop");
-                    expect(buttons.find(b => b.id === "planning-lock").show).toBe(false, "planning-lock");
+                    expect(buttons.find(b => b.id === "planning-lock").show).toBe(true, "planning-lock");
                     expect(buttons.find(b => b.id === "planning-unlock").show).toBe(false, "planning-unlock");
                     expect(buttons.find(b => b.id === "planning-show").show).toBe(false, "planning-show");
                     expect(buttons.find(b => b.id === "planning-show").active).toBe(false, "planning-show");
@@ -70,7 +70,7 @@ describe("Sidebar", () => {
                     expect(buttons.filter(b => b.show === true).length).toBe(1);
                 });
 
-                it("should not affect buttons state when resetPlanning is called", () => {
+                it("should reset buttons to initial state when planning-reset is called", () => {
                     // arrange
                     let component = createComponent("pcardSidebar");
                     component.startPlanning();
@@ -80,9 +80,9 @@ describe("Sidebar", () => {
                     let buttons: Button[] = component.buttons;
 
                     // assert
-                    expect(buttons.find(b => b.id === "planning-start").show).toBe(false, "planning-start");
-                    expect(buttons.find(b => b.id === "planning-reset").show).toBe(true, "planning-reset");
-                    expect(buttons.find(b => b.id === "planning-stop").show).toBe(true, "planning-stop");
+                    expect(buttons.find(b => b.id === "planning-start").show).toBe(true, "planning-start");
+                    expect(buttons.find(b => b.id === "planning-reset").show).toBe(false, "planning-reset");
+                    expect(buttons.find(b => b.id === "planning-stop").show).toBe(false, "planning-stop");
                     expect(buttons.find(b => b.id === "planning-lock").show).toBe(false, "planning-lock");
                     expect(buttons.find(b => b.id === "planning-unlock").show).toBe(false, "planning-unlock");
                     expect(buttons.find(b => b.id === "planning-show").show).toBe(false, "planning-show");
@@ -188,7 +188,7 @@ describe("Sidebar", () => {
                     expect(buttons.find(b => b.id === "planning-show").show).toBe(false, "planning-show");
                 });
 
-                it("should change show for planning-unlock to false, for lock to true and active/show for planning-show to true", () => {
+                it("should change show for planning-unlock to false, for lock to true and active/show for planning-show to false", () => {
                     // arrange
                     let component = createComponent("pcardSidebar");
                     component.startPlanning();
@@ -201,7 +201,7 @@ describe("Sidebar", () => {
                     // assert
                     expect(buttons.find(b => b.id === "planning-lock").show).toBe(true, "planning-lock");
                     expect(buttons.find(b => b.id === "planning-unlock").show).toBe(false, "planning-unlock");
-                    expect(buttons.find(b => b.id === "planning-show").show).toBe(true, "planning-show");
+                    expect(buttons.find(b => b.id === "planning-show").show).toBe(false, "planning-show");
                     expect(buttons.find(b => b.id === "planning-show").active).toBe(false, "planning-show");
                 });
             });
@@ -239,7 +239,22 @@ describe("Sidebar", () => {
                 });
 
                 it("should set planning-reset to true while all the others have show property set to false", () => {
-                    
+                    // arrange
+                    let component = createComponent("pcardSidebar");
+                    component.startPlanning();
+                    component.planningLock();
+
+                    // act
+                    component.planningShow();
+                    let buttons: Button[] = component.buttons;
+
+                    // assert
+                    expect(buttons.find(b => b.id === "planning-start").show).toBe(false, "planning-start");
+                    expect(buttons.find(b => b.id === "planning-reset").show).toBe(true, "planning-reset");
+                    expect(buttons.find(b => b.id === "planning-stop").show).toBe(false, "planning-stop");
+                    expect(buttons.find(b => b.id === "planning-lock").show).toBe(false, "planning-lock");
+                    expect(buttons.find(b => b.id === "planning-unlock").show).toBe(false, "planning-unlock");
+                    expect(buttons.find(b => b.id === "planning-show").show).toBe(false, "planning-show");
                 });
             });
         });

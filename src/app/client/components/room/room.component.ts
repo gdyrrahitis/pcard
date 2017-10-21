@@ -1,5 +1,8 @@
+import * as angular from "angular";
+
+const template = require("./room.html");
 export const RoomComponent: ng.IComponentOptions = {
-    templateUrl: "./room.html",
+    template,
     controller: class RoomComponent {
         
     }

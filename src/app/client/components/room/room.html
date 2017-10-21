@@ -1,10 +1,13 @@
-<div id="{{controllerId}}">
-    <h1>Room #{{room}}</h1>
+<div id="{{$ctrl.controllerId}}">
+    <h1>Room #{{$ctrl.room}}</h1>
     <p class="lead">
-        Connected user: {{currentUser.name}}
+        Connected user: {{$ctrl.currentUser.name}}
     </p>
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-3">
+            <pcard-sidebar></pcard-sidebar>
+        </div>
+        <div class="col-md-9">
             <h4>Mountain Goat estimation</h4>
             <div class="row">
                 <div class="col-md-12">
@@ -50,7 +53,11 @@
                             <tbody>
                                 <tr ng-repeat="user in attendees track by $index">
                                     <td>{{user.name}}</td>
-                                    <td ng-if="currentUser.role.name === 'moderator'"><button type="button" class="btn btn-sm btn-danger" ng-click="banUser(user)"><i class="fa fa-ban"></i></button></td>
+                                    <td ng-if="currentUser.role.name === 'moderator'">
+                                        <button type="button" class="btn btn-sm btn-danger" ng-click="banUser(user)">
+                                            <i class="fa fa-ban"></i>
+                                        </button>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>

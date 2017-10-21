@@ -14,6 +14,11 @@ import {
     runner, routerConfig
 } from "./index";
 
+declare var module: any;
+if(module.hot) {
+    module.hot.accept();
+}
+
 export const AppModule = angular.module("pcard", [
     "ui.bootstrap",
     "ngSanitize",

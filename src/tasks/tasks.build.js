@@ -2,7 +2,7 @@ var gulp = require("gulp"),
     sequence = require("run-sequence");
 
 gulp.task("build", function (callback) {
-    sequence("clean", "ts", ["sass", "fonts"], "bundle", "css", callback);
+    sequence("clean", "ts", "bundle", callback);
 });
 
 gulp.task("build:w", function (callback) {

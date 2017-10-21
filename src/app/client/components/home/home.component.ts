@@ -1,3 +1,5 @@
+import "./home.scss";
+
 import * as angular from "angular";
 
 import {
@@ -16,7 +18,7 @@ class Messages {
     static dismissedDialog: string = "User dismissed dialog";
 }
 export const HomeComponent: ng.IComponentOptions = {
-    template: template,
+    template,
     controller: class HomeComponent implements IHomeComponent {
         private _totalRooms: number;
         private _rooms: number;
@@ -73,6 +75,7 @@ export const HomeComponent: ng.IComponentOptions = {
         }
 
         public create = () => {
+            debugger;
             if (this.username) {
                 this.$localStorage.username = this.username;
                 let roomCreateEvent = new RoomCreateEvent({ name: this.username });

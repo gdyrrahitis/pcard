@@ -1,22 +1,18 @@
-<div id="sidebar-wrapper">
-    <ul class="sidebar-nav">
-        <li>
-            <a class="planning-start" href="#"><i class="fa fa-play"></i>&nbsp;Start planning</a>
-        </li>
-        <li ng-if="false">
-            <a class="planning-reset" href="#"><i class="fa fa-circle"></i>&nbsp;Reset planning</a>
-        </li>
-        <li ng-if="false">
-            <a class="planning-stop" href="#"><i class="fa fa-stop"></i>&nbsp;Stop planning</a>
-        </li>
-        <li ng-if="false">
-            <a class="planning-lock" href="#"><i class="fa fa-lock"></i>&nbsp;Lock</a>
-        </li>
-        <li ng-if="false">
-            <a class="planning-unlock" href="#"><i class="fa fa-unlock"></i>&nbsp;Unlock</a>
-        </li>
-        <li ng-if="false">
-            <a class="planning-show" href="#"><i class="fa fa-users"></i>&nbsp;Show cards</a>
-        </li>
-    </ul>
+<div class="btn-group-vertical" role="group" aria-label="sidebar">
+    <button ng-show="!$ctrl.isPaused" ng-disabled="!$ctrl.getFromButtons('planning-start').show" class="planning-start btn btn-default" type="button" ng-click="$ctrl.startPlanning()">
+        <i class="fa fa-play pull-left"></i>&nbsp;Start planning
+    </button>
+    <button ng-show="$ctrl.isPaused" ng-disabled="!$ctrl.getFromButtons('planning-resume').show" class="planning-resume btn btn-default" type="button" ng-click="$ctrl.resumePlanning()">
+            <i class="fa fa-play pull-left"></i>&nbsp;Resume planning
+        </button>
+    <button ng-disabled="!$ctrl.getFromButtons('planning-reset').show" class="planning-reset btn btn-default" type="button" ng-click="$ctrl.resetPlanning()">
+        <i class="fa fa-repeat pull-left"></i>&nbsp;Reset planning</button>
+    <button ng-disabled="!$ctrl.getFromButtons('planning-stop').show" class="planning-stop btn btn-default" type="button" ng-click="$ctrl.stopPlanning()">
+        <i class="fa fa-pause pull-left"></i>&nbsp;Pause planning</button>
+    <button ng-disabled="!$ctrl.getFromButtons('planning-lock').show" class="planning-lock btn btn-default" type="button" ng-click="$ctrl.planningLock()">
+        <i class="fa fa-lock pull-left"></i>&nbsp;Lock deck</button>
+    <button ng-disabled="!$ctrl.getFromButtons('planning-unlock').show" class="planning-unlock btn btn-default" type="button" ng-click="$ctrl.planningUnlock()">
+        <i class="fa fa-unlock pull-left"></i>&nbsp;Unlock deck</button>
+    <button ng-disabled="!$ctrl.getFromButtons('planning-show').show" class="planning-show btn btn-default" type="button" ng-click="$ctrl.planningShow()">
+        <i class="fa fa-users pull-left"></i>&nbsp;Show cards</button>
 </div>
