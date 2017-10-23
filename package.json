@@ -151,6 +151,7 @@
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.9.0",
     "webpack-dev-server": "^2.9.2",
+    "webpack-merge": "^4.1.0",
     "webpack-stream": "^4.0.0",
     "xml2js": "^0.4.17",
     "yargs": "^8.0.2"

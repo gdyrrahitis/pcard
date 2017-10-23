@@ -13,18 +13,15 @@ gulp.task("watch", ["webpack-dev-server"], function () {
 gulp.task("webpack-dev-server", function (callback) {
     // modify some webpack config options
     var myConfig = Object.create(webpackConfig);
-    // myConfig.devtool = "eval";
-    // myConfig.debug = true;
 
     // Start a webpack-dev-server
     new WebpackDevServer(webpack(myConfig), {
-        publicPath: "/" + myConfig.output.publicPath,
+        publicPath: myConfig.output.publicPath,
         stats: {
             colors: true
         }
     }).listen(8000, "localhost", function (err) {
         if (err) throw new gutil.PluginError("webpack-dev-server", err);
         gutil.log("[webpack-dev-server]", "http://localhost:8000/webpack-dev-server/index.html");
-        // proxy.run();
     });
 });

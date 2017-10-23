@@ -1,8 +1,8 @@
 require("babel-register");
-var path = require("path");
-var istanbul = require("browserify-istanbul"),
-  webpackConfig = require("./webpack.config");
-var entry = path.resolve(webpackConfig.context || "", webpackConfig.entry);
+var path = require("path"),
+  istanbul = require("browserify-istanbul"),
+  webpackConfig = require("./webpack.tests.js"),
+  entry = path.resolve(webpackConfig.context || "", webpackConfig.entry);
 
 module.exports = function (config) {
   config.set({
@@ -24,16 +24,30 @@ module.exports = function (config) {
       "node_modules/angular-ui-bootstrap/dist/ui-bootstrap.js",
       { pattern: "src/app/client/app.config.json", watched: true, included: false, served: true },
       "src/**/*.html",
-      "src/app/client/**/*.spec.js",
-      "dist/main.bundle.js"
+      "src/app/client/**/*.spec.js"
     ],
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
+      "src/app/client/app.module.ts": ["webpack"],
       "src/app/client/**/*.spec.js": ["webpack"],
+      "src/app/client/**/*.js": ["babel"],
       "dist/**/*.js": ["coverage"],
       "src/**/*.html": ["ng-html2js"]
+    },
+
+    babelPreprocessor: {
+      options: {
+        presets: ['es2015'],
+        sourceMap: 'inline'
+      },
+      // filename: function (file) {
+      //   return file.originalPath.replace(/\.js$/, '.es5.js');
+      // },
+      // sourceFileName: function (file) {
+      //   return file.originalPath;
+      // }
     },
 
     ngHtml2JsPreprocessor: {
@@ -59,20 +73,20 @@ module.exports = function (config) {
       require("karma-coverage"),
       require("karma-ng-html2js-preprocessor"),
       require("karma-webpack"),
-      require("karma-typescript")
+      require("karma-typescript"),
+      require("karma-babel-preprocessor")
     ],
 
     webpack: webpackConfig,
 
     webpackMiddleware: {
       // webpack-dev-middleware configuration
-      stats: "errors-only"
     },
 
     // test results reporter to use
     // possible values: "dots", "progress"
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ["mocha"/*, "coverage"*/],
+    reporters: ["progress"/*, "coverage"*/],
 
     // web server port
     port: 9000,
@@ -81,7 +95,7 @@ module.exports = function (config) {
     colors: true,
 
     singleRun: true,
-
+    
     autoWatch: false,
 
     // Concurrency level
