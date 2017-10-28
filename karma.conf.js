@@ -24,15 +24,17 @@ module.exports = function (config) {
       "node_modules/angular-ui-bootstrap/dist/ui-bootstrap.js",
       { pattern: "src/app/client/app.config.json", watched: true, included: false, served: true },
       "src/**/*.html",
-      "src/app/client/**/*.spec.js"
+      "src/app/client/**/*.spec.ts"
     ],
+
+    include: ["src/app/client/**/*"],
+    exclude: ["**/*.d.ts"],
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
       "src/app/client/app.module.ts": ["webpack"],
-      "src/app/client/**/*.spec.js": ["webpack"],
-      "src/app/client/**/*.js": ["babel"],
+      "src/app/client/**/*.spec.ts": ["webpack"],
       "dist/**/*.js": ["coverage"],
       "src/**/*.html": ["ng-html2js"]
     },
@@ -42,12 +44,36 @@ module.exports = function (config) {
         presets: ['es2015'],
         sourceMap: 'inline'
       },
-      // filename: function (file) {
-      //   return file.originalPath.replace(/\.js$/, '.es5.js');
-      // },
-      // sourceFileName: function (file) {
-      //   return file.originalPath;
-      // }
+      filename: function (file) {
+        return file.originalPath.replace(/\.js$/, '.es5.js');
+      },
+      sourceFileName: function (file) {
+        return file.originalPath;
+      }
+    },
+
+    karmaTypescriptConfig: {
+      tsconfig: './tsconfig.json',
+      bundlerOptions: {
+        entrypoints: /\.spec\.ts$/,
+        transforms: [
+          require('karma-typescript-es6-transform')({
+            presets: ['es2015', 'stage-0'],
+            extensions: ['.ts', '.js'],
+            plugins: [
+              ["transform-runtime", {
+                regenerator: true,
+                polyfill: true
+              }]
+            ]
+          })
+        ]
+      },
+      reports: {
+        "text-summary": null,
+        "json": "./coverage/coverage-final.json",
+        "html": "./coverage/html"
+      }
     },
 
     ngHtml2JsPreprocessor: {
@@ -86,7 +112,7 @@ module.exports = function (config) {
     // test results reporter to use
     // possible values: "dots", "progress"
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ["progress"/*, "coverage"*/],
+    reporters: ["mocha"/*, "coverage"*/],
 
     // web server port
     port: 9000,
@@ -95,7 +121,7 @@ module.exports = function (config) {
     colors: true,
 
     singleRun: true,
-    
+
     autoWatch: false,
 
     // Concurrency level
